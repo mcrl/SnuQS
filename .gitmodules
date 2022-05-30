@@ -1,0 +1,12 @@
+[submodule "dep/liburing"]
+	path = dep/liburing
+	url = https://github.com/axboe/liburing
+[submodule "dep/boost_module"]
+	path = dep/boost_module
+	url = https://github.com/boostorg/boost
+[submodule "dep/antlr4"]
+	path = dep/antlr4
+	url = https://github.com/antlr/antlr4
+[submodule "dep/boost"]
+	path = dep/boost
+	url = https://github.com/boostorg/boost.git
