@@ -2,4 +2,6 @@ src/*.o
 .eggs
 tags
 build
+dist/*
 */__pycache__
+snuqs.egg-info/*

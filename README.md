@@ -11,4 +11,4 @@
 - Code refactoring
 
 
-For manual, refer to http://aces.snu.ac.kr/software/snuqs/.
+For manual, refer to http://thunder.snu.ac.kr/software/snuqs/.

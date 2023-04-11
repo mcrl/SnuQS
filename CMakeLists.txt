@@ -14,4 +14,4 @@ find_package(CUDAToolkit 11.7 REQUIRED)
 add_subdirectory(src)
 add_subdirectory(test)
 
-add_subdirectory(snuqs)
+add_subdirectory(python)

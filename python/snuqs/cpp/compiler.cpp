@@ -5,15 +5,15 @@
 namespace py = pybind11;
 
 
-void test1() {
+static void test1() {
   printf("test1\n");
 }
 
-void test2() {
+static void test2() {
   printf("test2\n");
 }
 
-PYBIND11_MODULE(_snuqs, m) {
+PYBIND11_MODULE(compiler, m) {
   m.doc() = "snuqs pybind11 implementation"; 
 
   m.def("test1", &test1, "");

@@ -59,18 +59,22 @@ class build_ext(build_ext_orig):
             # temporary CMake files including "CMakeCache.txt" in top level dir.
             os.chdir(str(cwd))
 
+print(find_packages(where='python'))
 setup(
     name='snuqs',
     version='1.1',
     description='snuqs python interface',
     author='Daeyoung Park',
     author_email='daeyoung@aces.snu.ac.kr',
-    packages=find_packages(),
+    packages=find_packages(where='python'),
+    package_dir={
+        'snuqs': 'python/snuqs',
+        },
     install_requires=install_requires,
     setup_requires=setup_requires,
     dependency_links=dependency_links,
     ext_modules=[CMakeExtension('snuqs')],
     cmdclass={
-    'build_ext': build_ext,
-    }
-)
+        'build_ext': build_ext,
+        }
+    )

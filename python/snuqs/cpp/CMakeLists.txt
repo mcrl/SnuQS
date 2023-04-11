@@ -5,18 +5,20 @@ string(STRIP "${PYBIND_INCLUDE_DIRS}" PYBIND_INCLUDE_DIRS)
 
 execute_process(COMMAND python3-config --extension-suffix OUTPUT_VARIABLE LIBRARY_SUFFIX)
 string(STRIP "${LIBRARY_SUFFIX}" LIBRARY_SUFFIX)
-add_library(_snuqs 
+add_library(impl 
   SHARED 
-  _snuqs.cpp)
+  compiler.cpp
+  _snuqs.cpp
+  )
 
-target_include_directories(_snuqs PUBLIC
+target_include_directories(impl PUBLIC
   "${CMAKE_SOURCE_DIR}/src"
   "${PYBIND_INCLUDE_DIRS}"
   )
 
-set_target_properties(_snuqs PROPERTIES PREFIX "")
-set_target_properties(_snuqs PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
-target_link_libraries(_snuqs 
+set_target_properties(impl PROPERTIES PREFIX "")
+set_target_properties(impl PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
+target_link_libraries(impl 
   snuqs
   )
 

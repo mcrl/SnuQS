@@ -1,9 +1,0 @@
-README.md
-setup.py
-snuqs/__init__.py
-snuqs/snuqs.py
-snuqs.egg-info/PKG-INFO
-snuqs.egg-info/SOURCES.txt
-snuqs.egg-info/dependency_links.txt
-snuqs.egg-info/top_level.txt
-snuqs/CPP/__init__.py
