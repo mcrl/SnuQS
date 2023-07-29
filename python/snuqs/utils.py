@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger('snume')
+logger = logging.getLogger('SnuQS')
 sh = logging.StreamHandler()
 formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d:%(funcName)s] %(message)s')
 sh.setFormatter(formatter)
