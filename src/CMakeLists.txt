@@ -10,26 +10,26 @@ add_library(_snuqs
   SHARED 
   module.cpp
 
-  executor/qop.cpp
-  executor/qreg.cpp
-  executor/creg.cpp
-  executor/executor.cpp
-  executor/simulator_omp.cpp 
-  executor/simulator_cuda.cu 
-  executor/simulator_multi_cuda.cu 
-  executor/simulator_omp_io.cpp 
-  executor/#simulator_multi_gpu.cu 
+  #executor/qop.cpp
+  #executor/qreg.cpp
+  #executor/creg.cpp
+  #executor/executor.cpp
+  #executor/simulator_omp.cpp 
+  #executor/simulator_cuda.cu 
+  #executor/simulator_multi_cuda.cu 
+  #executor/simulator_omp_io.cpp 
+  #executor/#simulator_multi_gpu.cu 
 
-  executor/rt/rt_handle.cpp
-  executor/rt/rt_stream.cpp
-  executor/rt/rt_queue.cpp
-  executor/rt/rt_worker_pool.cpp
-  executor/rt/rt_task.cpp
-  executor/rt/rt_kernel.cpp
-  executor/rt/rt_host.cpp
-  executor/rt/rt_device.cpp
-  executor/rt/rt_storage.cpp
-  executor/rt/rt_soft_raid0.cpp
+  #executor/rt/rt_handle.cpp
+  #executor/rt/rt_stream.cpp
+  #executor/rt/rt_queue.cpp
+  #executor/rt/rt_worker_pool.cpp
+  #executor/rt/rt_task.cpp
+  #executor/rt/rt_kernel.cpp
+  #executor/rt/rt_host.cpp
+  #executor/rt/rt_device.cpp
+  #executor/rt/rt_storage.cpp
+  #executor/rt/rt_soft_raid0.cpp
   )
 
 target_include_directories(_snuqs PUBLIC
@@ -40,6 +40,15 @@ set_target_properties(_snuqs PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_snuqs PROPERTIES PREFIX "")
 set_target_properties(_snuqs PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
 
-#target_link_libraries(_snuqs executor)
+target_link_libraries(_snuqs 
+    PUBLIC
+    _executor 
+    dag
+    rt
+    CUDA::cudart
+    )
 
-#add_subdirectory(executor)
+add_subdirectory(executor)
+add_subdirectory(dag)
+add_subdirectory(rt)
+

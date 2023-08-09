@@ -1,2 +1,0 @@
-from .snuqs_statevector_simulator import SnuQSStatevectorSimulator
-StatevectorSimulator = SnuQSStatevectorSimulator
