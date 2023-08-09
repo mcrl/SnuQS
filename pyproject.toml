@@ -1,0 +1,38 @@
+[build-system]
+requires = [
+    "setuptools",
+    "pybind11",
+    "cmake-build-extension",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = 'snuqs'
+version = "1.1.1"
+authors = [
+{ name = "Daeyoung Park", email = "dypshong@gmail.com" },
+]
+description = "SnuQS - a scalable quantum circuit simulator"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pybind11>=2.10.1",
+    "qiskit>=0.42.1",
+    "cirq>=1.1",
+    "antlr4-python3-runtime==4.12.0",
+    "numpy>=1.23.5",
+]
+
+
+[project.urls]
+"Homepage" = "https://github.com/mcrl/snuqs"
+
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["snuqs"]
+
+[tool.setuptools.package-data]
+"*" = ["*.inc"]
