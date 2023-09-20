@@ -4,6 +4,10 @@
 
 ## Installation
 
+```
+pip install .
+```
+
 
 ## Under Deveopment,
 - GPU-Direct support

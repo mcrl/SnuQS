@@ -1,14 +1,14 @@
-[build-system]
-requires = [
-    "setuptools",
-    "pybind11",
-    "cmake-build-extension",
-]
-build-backend = "setuptools.build_meta"
+#[build-system]
+#requires = [
+    #"setuptools",
+    #"pybind11",
+    #"cmake-build-extension",
+#]
+#build-backend = "setuptools.build_meta"
 
 [project]
 name = 'snuqs'
-version = "1.1.1"
+version = "2.0.0"
 authors = [
 { name = "Daeyoung Park", email = "dypshong@gmail.com" },
 ]
@@ -23,16 +23,16 @@ dependencies = [
     "numpy>=1.23.5",
 ]
 
-
 [project.urls]
 "Homepage" = "https://github.com/mcrl/snuqs"
-
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["snuqs"]
+where = ["."]
+include = ["snuqs*"]
+namespaces = true
 
 [tool.setuptools.package-data]
 "*" = ["*.inc"]
