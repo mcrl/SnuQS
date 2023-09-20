@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <omp.h>
 
-#include "rt/rt.h"
+#include "runtime/rt.h"
 
 using namespace std::complex_literals;
 namespace snuqs {

@@ -3,7 +3,7 @@
 
 #include "simulator_interface.h"
 
-#include "rt/rt.h"
+#include "runtime/rt.h"
 
 namespace snuqs {
 

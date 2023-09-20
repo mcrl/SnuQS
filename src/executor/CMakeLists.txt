@@ -1,5 +1,5 @@
-add_library(_executor
-    SHARED 
+add_library(executor
+    STATIC
     qop.cpp
     qreg.cpp
     creg.cpp
@@ -16,9 +16,9 @@ string(REGEX REPLACE "-I" "" PYBIND_INCLUDE_DIRS "${PYBIND_INCLUDE_DIRS}")
 string(REGEX REPLACE " +" ";" PYBIND_INCLUDE_DIRS "${PYBIND_INCLUDE_DIRS}")
 string(STRIP "${PYBIND_INCLUDE_DIRS}" PYBIND_INCLUDE_DIRS)
 
-target_include_directories(_executor PUBLIC
+target_include_directories(executor PUBLIC
     "${PYBIND_INCLUDE_DIRS}"
     ".."
     )
 
-set_target_properties(_executor PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(executor PROPERTIES POSITION_INDEPENDENT_CODE ON)

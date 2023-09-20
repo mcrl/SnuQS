@@ -19,7 +19,7 @@ class SnuQSStatevectorSimulator(BaseStatevectorSimulator):
 
     def __init__(self):
         super().__init__()
-        self.executor = snuqs.cpp.Executor()
+        self.executor = snuqs.impl.Executor()
 
     def _exec(self, job):
         if 'method' in job.kwargs:

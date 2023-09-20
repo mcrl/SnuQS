@@ -7,7 +7,7 @@ PYBIND11_MODULE(_snuqs, _m)
 {
   _m.doc() = "SnuQS Pybind11 module.";
 
-  auto m = _m.def_submodule("cpp", "SnuQS cpp module.");
+  auto m = _m.def_submodule("impl", "SnuQS implementation module.");
   m.doc() = "snuqs executor implementation"; 
 
   py::class_<snuqs::Executor>(m, "Executor")
