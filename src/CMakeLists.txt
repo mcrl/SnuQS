@@ -11,7 +11,7 @@ add_library(_snuqs
     module.cpp
     )
 
-target_include_directories(_snuqs PUBLIC
+include_directories(
     "${PYBIND_INCLUDE_DIRS}"
     "."
     )
@@ -28,8 +28,11 @@ target_link_libraries(_snuqs
     quantum-circuit
     tensor-network
     dag
+    qdd
 
     optimizer
+    #misc
+
     CUDA::cudart
     )
 
@@ -39,4 +42,5 @@ add_subdirectory(runtime)
 add_subdirectory(quantum-circuit)
 add_subdirectory(tensor-network)
 add_subdirectory(dag)
+add_subdirectory(qdd)
 add_subdirectory(optimizer)
