@@ -27,10 +27,16 @@ target_link_libraries(_snuqs
 
     quantum-circuit
     tensor-network
-    dag
-    qdd
+    quantum-decision-diagram
+    directed-acyclic-graph
+
+
+    statevector-simulator
+    tensor-network-simulator
+    quantum-decision-diagram-simulator
 
     optimizer
+
     #misc
 
     CUDA::cudart
@@ -41,6 +47,11 @@ add_subdirectory(runtime)
 
 add_subdirectory(quantum-circuit)
 add_subdirectory(tensor-network)
-add_subdirectory(dag)
-add_subdirectory(qdd)
+add_subdirectory(directed-acyclic-graph)
+add_subdirectory(quantum-decision-diagram)
+
+add_subdirectory(statevector-simulator)
+add_subdirectory(tensor-network-simulator)
+add_subdirectory(quantum-decision-diagram-simulator)
+
 add_subdirectory(optimizer)
