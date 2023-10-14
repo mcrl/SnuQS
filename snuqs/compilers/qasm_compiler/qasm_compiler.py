@@ -41,7 +41,6 @@ class QASMCompiler:
         tmp_file = f"/tmp/{self.OUT_FILE_NAME}"
         tmp_file = pp.run(fname, out=tmp_file)
 
-
         input_stream = FileStream(tmp_file)
         lexer = QASMLexer(input_stream)
         stream = CommonTokenStream(lexer)
@@ -49,7 +48,6 @@ class QASMCompiler:
         tree = parser.mainprogram()
 
         # FIXME: Parsing error
-
         walker = ParseTreeWalker()
 
         ctx = QASMContext()
@@ -60,15 +58,8 @@ class QASMCompiler:
         for stage in stages:
             walker.walk(stage, tree)
 
-
-
         gen = CircuitGenerator(ctx)
         walker.walk(gen, tree)
 
         os.remove(tmp_file)
-
-        circ = gen.get_circuit()
-        qreg = gen.qreg
-        creg = gen.creg
-
-        return circ, qreg, creg
+        return gen.circ

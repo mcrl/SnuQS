@@ -27,9 +27,7 @@ class CircuitGenerator(QASMListener):
             else: #  typ == SymbolType.GATE:
                 pass
 
-        self.qreg = Qreg(self.nqubits)
-        self.creg = Creg(self.nbits)
-        self.circ = QuantumCircuit("circ")
+        self.circ = QuantumCircuit("circ", Qreg(self.nqubits), Creg(self.nbits))
 
         self.is_conditional = False
         self.cond_creg = None
@@ -54,9 +52,6 @@ class CircuitGenerator(QASMListener):
             return Measure(typ, qubits, bits)
         else:
             return Gate(typ, qubits, params=params)
-
-    def get_circuit(self):
-        return self.circ
 
     def exp_to_value(self, exp, par_map=None):
         if exp.REAL():

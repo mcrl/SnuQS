@@ -6,7 +6,7 @@ string(STRIP "${PYBIND_INCLUDE_DIRS}" PYBIND_INCLUDE_DIRS)
 execute_process(COMMAND python3-config --extension-suffix OUTPUT_VARIABLE LIBRARY_SUFFIX)
 string(STRIP "${LIBRARY_SUFFIX}" LIBRARY_SUFFIX)
 
-add_library(_snuqs
+add_library(_snuqs_impl
     SHARED 
     module.cpp
     )
@@ -16,13 +16,13 @@ include_directories(
     "."
     )
 
-set_target_properties(_snuqs PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(_snuqs PROPERTIES PREFIX "")
-set_target_properties(_snuqs PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
+set_target_properties(_snuqs_impl PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(_snuqs_impl PROPERTIES PREFIX "")
+set_target_properties(_snuqs_impl PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
 
-target_link_libraries(_snuqs 
+target_link_libraries(_snuqs_impl 
     PUBLIC
-    executor 
+    launcher 
     runtime
 
     quantum-circuit
@@ -42,7 +42,7 @@ target_link_libraries(_snuqs
     CUDA::cudart
     )
 
-add_subdirectory(executor)
+add_subdirectory(launcher)
 add_subdirectory(runtime)
 
 add_subdirectory(quantum-circuit)

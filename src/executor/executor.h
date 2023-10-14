@@ -22,6 +22,7 @@ class Executor {
     ~Executor();
 
     void run(pybind11::object circ, pybind11::object qreg, pybind11::object creg, pybind11::object method);
+    void simulate();
 
   private:
     std::vector<Qop*> circ_;

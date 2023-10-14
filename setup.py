@@ -61,10 +61,7 @@ setup(
     description='SnuQS',
     author='Daeyoung Park',
     author_email='dypshong@gmail.com',
-    packages=["snuqs"],
-    package_dir={
-        'snuqs': 'snuqs',
-        },
+    packages=find_packages(),
     package_data={
         "snuqs": ["*.inc"],
     },

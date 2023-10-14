@@ -1,10 +1,9 @@
+from snuqs import QuantumCircuit 
 class Result:
-    def __init__(self, qreg, creg):
-        self.qreg = qreg
-        self.creg = creg
+    circ: QuantumCircuit
 
     def __repr__(self):
         return "Result"
 
     def get_statevector(self):
-        return self.qreg.numpy()
+        return self.circ.qreg.numpy()

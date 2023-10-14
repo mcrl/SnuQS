@@ -1,16 +1,16 @@
 #include <pybind11/pybind11.h>
-#include "executor/executor.h"
+#include "launcher/launcher.h"
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(_snuqs, _m)
+PYBIND11_MODULE(_snuqs_impl, _m)
 {
   _m.doc() = "SnuQS Pybind11 module.";
 
   auto m = _m.def_submodule("impl", "SnuQS implementation module.");
-  m.doc() = "snuqs executor implementation"; 
+  m.doc() = "SnuQs implementation"; 
 
-  py::class_<snuqs::Executor>(m, "Executor")
+  py::class_<snuqs::Launcher>(m, "Launcher")
     .def(py::init<>())
-    .def("run", &snuqs::Executor::run, "run");
+    .def("run", &snuqs::Launcher::run, "run");
 }

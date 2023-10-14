@@ -1,6 +1,8 @@
-from .circuit import *
-from .job import *
+from .quantum_circuit import *
 from .result import *
-from .simulators import *
+from .simulator import *
 from .exception import *
-from _snuqs import impl
+from .virtual_device import *
+from .request import *
+
+from _snuqs_impl import impl

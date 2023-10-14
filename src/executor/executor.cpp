@@ -126,4 +126,7 @@ void Executor::run(py::object circ, py::object qreg, py::object creg, py::object
   }
 }
 
+void Executor::simulate() {
+}
+
 } // namespace snuqs

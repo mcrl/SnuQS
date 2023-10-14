@@ -11,12 +11,12 @@ def run_snuqs(qc):
     from snuqs.compilers import QASMCompiler
 
     qasm_compiler = QASMCompiler()
-    simulator = StatevectorSimulator()
-    circ, qreg, creg = qasm_compiler.compile(QASMCompiler.to_qasm(qc))
+    simulator = StatevectorSimulator(method="cuda")
+    circ = qasm_compiler.compile(QASMCompiler.to_qasm(qc))
 
     s = time.time()
-    job = simulator.run(qc, circ, qreg, creg, method="cuda")
-    result = job.result()
+    req = simulator.run(qc, circ)
+    result = req.result()
     print("[SnuQS] Execution time: ", time.time() - s)
     return result.get_statevector()
 

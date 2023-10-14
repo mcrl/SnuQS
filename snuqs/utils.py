@@ -6,4 +6,3 @@ formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d:%(funcName)
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 logger.setLevel(logging.INFO)
-
