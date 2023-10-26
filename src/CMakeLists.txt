@@ -8,7 +8,7 @@ string(STRIP "${LIBRARY_SUFFIX}" LIBRARY_SUFFIX)
 
 add_library(_snuqs_impl
     SHARED 
-    module.cpp
+    module.cc
     )
 
 include_directories(

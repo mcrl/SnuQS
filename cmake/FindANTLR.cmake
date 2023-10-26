@@ -1,8 +1,0 @@
-if(NOT ANTLR_FOUND)
-  set(ANTLR_LIBRARIES "${CMAKE_SOURCE_DIR}/../third-party/antlr4-cpp-runtime/build/runtime/libantlr4-runtime.so" CACHE STRING "")
-  set(ANTLR_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/../third-party/antlr4-cpp-runtime/runtime/src/" CACHE STRING "")
-  set(ANTLR_FOUND TRUE CACHE BOOL "")
-  if (NOT ANTLR_FOUND AND ANTLR_FIND_REQUIRED)
-    message(FATAL_ERROR "Cannot find ANTLR4")
-  endif (NOT ANTLR_FOUND AND ANTLR_FIND_REQUIRED)
-endif(NOT ANTLR_FOUND)

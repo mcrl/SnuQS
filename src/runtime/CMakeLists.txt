@@ -1,15 +1,15 @@
 add_library(runtime
     STATIC 
-    rt_handle.cpp
-    rt_stream.cpp
-    rt_queue.cpp
-    rt_worker_pool.cpp
-    rt_task.cpp
-    rt_kernel.cpp
-    rt_host.cpp
-    rt_device.cpp
-    rt_storage.cpp
-    rt_soft_raid0.cpp
+    rt_handle.cc
+    rt_stream.cc
+    rt_queue.cc
+    rt_worker_pool.cc
+    rt_task.cc
+    rt_kernel.cc
+    rt_host.cc
+    rt_device.cc
+    rt_storage.cc
+    rt_soft_raid0.cc
     )
 
 target_link_libraries(runtime CUDA::cudart)

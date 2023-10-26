@@ -1,4 +1,5 @@
 from snuqs import QuantumCircuit 
+
 class Result:
     circ: QuantumCircuit
 

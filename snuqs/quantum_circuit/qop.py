@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class QopType(Enum):
     Init = 0
     Fini = 1
@@ -9,6 +10,7 @@ class QopType(Enum):
     Barrier = 5
     UGate = 6
     CXGate = 7
+
 
 class Qop:
     def __init__(self, typ: QopType, qubits: int):
@@ -20,13 +22,16 @@ class Qop:
         q = self.qubits
         return f"{t} {q}"
 
+
 class Barrier(Qop):
     def __init__(self, typ: QopType, qubits: int):
         super().__init__(typ, qubits)
 
+
 class Reset(Qop):
     def __init__(self, typ: QopType, qubits: int):
         super().__init__(typ, qubits)
+
 
 class Measure(Qop):
     def __init__(self, typ: QopType, qubits: int, bits: int):
@@ -38,6 +43,7 @@ class Measure(Qop):
         q = self.qubits
         c = f"-> {self.bits}" if self.bits else ""
         return f"{t} {q} {c}"
+
 
 class Cond(Qop):
     def __init__(self, typ: QopType, base: int, limit: int, val: int, op: int):
@@ -59,13 +65,16 @@ class Cond(Qop):
     def __repr__(self):
         return f"IF [{self.base}:{self.limit}] == {self.val} {self.op}"
 
+
 class Init(Qop):
     def __init__(self, typ, qubits):
         super().__init__(typ, qubits)
 
+
 class Fini(Qop):
     def __init__(self, typ, qubits):
         super().__init__(typ, qubits)
+
 
 class Gate(Qop):
     def __init__(self, typ, qubits, params=[]):

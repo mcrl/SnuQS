@@ -6,10 +6,11 @@
 namespace snuqs {
 
 class QuantumRegister {
-    public:
-    QuantumRegister(qidx num_qubits);
+public:
+  QuantumRegister(qidx num_qubits);
 
-    qidx num_qubits_;
+private:
+  qidx num_qubits_;
 };
 
 } // namespace snuqs

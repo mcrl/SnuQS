@@ -1,10 +1,12 @@
-#include "quantum-circuit.h"
+#include "quantum-circuit/quantum-circuit.h"
 
 namespace snuqs {
 
-QuantumCircuit::QuantumCircuit(){};
+QuantumCircuit::QuantumCircuit(qidx num_qubits, qidx num_bits)
+    : qreg_(num_qubits), creg_(num_bits) {}
 
-void QuantumCircuit::Reorder(std::vector<int> perm) {
-}
+QuantumRegister &QuantumCircuit::qreg() { return qreg_; }
+ClassicalRegister &QuantumCircuit::creg() { return creg_; }
+std::vector<QuantumOperation> &QuantumCircuit::qops() { return qops_; }
 
 } // namespace snuqs

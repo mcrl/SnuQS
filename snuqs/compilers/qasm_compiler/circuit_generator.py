@@ -3,7 +3,7 @@ from .generated.QASMParser import QASMParser
 from .qasm_exception import QASMCGException
 from .qasm_context import SymbolType, ParamType, QASMContext
 from .qasm_utils import *
-from snuqs.circuit import QuantumCircuit, Gate, QopType, Cond, Qreg, Creg, Measure, Barrier, Reset
+from snuqs.quantum_circuit import QuantumCircuit, Gate, QopType, Cond, Qreg, Creg, Measure, Barrier, Reset
 import sys
 import math
 
