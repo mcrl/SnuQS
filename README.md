@@ -8,6 +8,7 @@
     * We recommend to use Python 3.11 not Python 3.12.
 - cmake >= 3.26.4
 - cuda >= 11.7
+- (optional) openjdk >= 1.7.0
 
 ## Installation
 
