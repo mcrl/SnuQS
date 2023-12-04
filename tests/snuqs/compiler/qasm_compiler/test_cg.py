@@ -4,47 +4,33 @@ from snuqs.compiler.qasm_compiler import QasmCompiler
 
 
 class QasmCGTest(unittest.TestCase):
-    def test_cg_uop(self):
-        with open("qasm/compiler/cg_uop.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_u(self):
+        file_name = "qasm/cg/valid_u.qasm"
+        QasmCompiler().compile(file_name)
 
-    def test_cg_cx(self):
-        with open("qasm/compiler/cg_cx.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_cx(self):
+        file_name = "qasm/cg/valid_cx.qasm"
+        QasmCompiler().compile(file_name)
 
-    def test_cg_measure(self):
-        with open("qasm/compiler/cg_measure.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_measure(self):
+        file_name = "qasm/cg/valid_measure.qasm"
+        QasmCompiler().compile(file_name)
 
-    def test_cg_reset(self):
-        with open("qasm/compiler/cg_reset.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_reset(self):
+        file_name = "qasm/cg/valid_reset.qasm"
+        QasmCompiler().compile(file_name)
 
-    def test_cg_barrier(self):
-        with open("qasm/compiler/cg_barrier.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_barrier(self):
+        file_name = "qasm/cg/valid_barrier.qasm"
+        QasmCompiler().compile(file_name)
 
-    def test_cg_if(self):
-        with open("qasm/compiler/cg_if.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_if(self):
+        file_name = "qasm/cg/valid_if.qasm"
+        QasmCompiler().compile(file_name)
 
-    def test_cg_custom(self):
-        with open("qasm/compiler/cg_custom.qasm") as f:
-            qasm = f.read()
-        comp = QasmCompiler()
-        comp.compile(qasm)
+    def test_valid_custom(self):
+        file_name = "qasm/cg/valid_custom.qasm"
+        QasmCompiler().compile(file_name)
 
 
 if __name__ == '__main__':

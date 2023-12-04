@@ -61,7 +61,10 @@ class QasmPreprocessor:
                 idx += 1
         return qasm
 
-    def preprocess(self, qasm: str, idx: int = 1):
+    def preprocess(self, file_name: str, idx: int = 1):
+        with open(file_name) as f:
+            qasm = f.read()
+
         input_stream = InputStream(qasm)
         lexer = QASMLexer(input_stream)
         stream = CommonTokenStream(lexer)

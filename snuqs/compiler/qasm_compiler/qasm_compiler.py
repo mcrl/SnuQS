@@ -15,21 +15,21 @@ class QasmCompiler:
     Only OpenQASM 2.0 is supported for now.
     """
 
-    def compile(self, qasm: str):
+    def compile(self, file_name: str):
         """
-        compile *qasm* string.
+        compile OpenQASM file *file_name*.
         ----------------
-        qasm: OpenQASM string
+        file_name: OpenQASM file name
         """
         try:
+            circuit = Circuit(file_name)
             pp = QasmPreprocessor()
-            qasm_preprocessed = pp.preprocess(qasm)
+            qasm_preprocessed = pp.preprocess(file_name)
 
             parser = QasmParser()
             tree = parser.parse(qasm_preprocessed)
 
             symtab = QasmSymbolTable()
-            circuit = Circuit("circuit")
             stages = [
                 QasmSemanticChecker(symtab),
                 QasmOpaqueGateChecker(symtab),

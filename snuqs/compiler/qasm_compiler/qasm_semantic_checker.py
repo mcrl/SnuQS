@@ -243,10 +243,17 @@ class QasmSemanticChecker(QasmStage):
                 raise ValueError(
                     f"number of expressions does not match: {num_exprs_given} required but {num_exprs_given} given")
 
-            for exp in ctx.explist().exp():
-                if exp.ID():
+            exprs = ctx.explist().exp()
+            while len(exprs) > 0:
+                exp = exprs.pop()
+                if exp.exp():
+                    if type(exp.exp()) is list:
+                        exprs = exprs + exp.exp()
+                    else:
+                        exprs.append(exp.exp())
+                elif exp.ID():
                     symbol = exp.ID().getText()
-                    if not self.scope.contains(symbol, QasmScope.Type.PARAM):
+                    if not self.symtab.contains(symbol, QasmSymbolTable.Type.CREG):
                         raise LookupError(
                             f"parameter '{symbol}' has not been defined.")
 

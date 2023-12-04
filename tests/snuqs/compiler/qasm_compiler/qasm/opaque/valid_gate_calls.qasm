@@ -3,11 +3,6 @@ include "qelib1.inc";
 qreg q[5];
 creg c[5];
 
-gate gg a, b, c {
-
-}
-
-
 id q[0];
 x q[0];
 y q[0];
@@ -42,7 +37,7 @@ cu1(pi) q[0], q[1];
 rxx(pi) q[0], q[1];
 rzz(pi) q[0], q[1];
 cu3(pi, 2*pi, 3*pi) q[0], q[1];
-cu(pi, 2*pi, 3*pi, c) q[0], q[1];
+cu(pi, 2*pi, 3*pi, 2*pi*c/sin(3)) q[0], q[1];
 ccx q[0], q[1], q[2];
 cswap q[0], q[1], q[2];
 rccx q[0], q[1], q[2];
