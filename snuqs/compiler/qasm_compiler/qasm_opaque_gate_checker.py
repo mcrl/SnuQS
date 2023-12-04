@@ -54,8 +54,8 @@ class QasmOpaqueGateChecker(QasmStage):
     def __init__(self, symtab: QasmSymbolTable):
         self.symtab = symtab
 
-    # Enter a parse tree produced by QASMParser#opaqueDeclStatement.
-    def enterOpaqueDeclStatement(self, ctx: QASMParser.OpaqueDeclStatementContext):
+    # Enter a parse tree produced by QASMParser#opaqueStatement.
+    def enterOpaqueStatement(self, ctx: QASMParser.OpaqueStatementContext):
         symbol = ctx.ID().getText()
         if symbol not in OPAQUE_GATES:
             raise LookupError(f"illegal opaque gate {symbol}")

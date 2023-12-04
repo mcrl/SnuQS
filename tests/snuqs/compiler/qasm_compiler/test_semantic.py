@@ -4,129 +4,235 @@ from snuqs.compiler.qasm_compiler import QasmCompiler
 
 
 class QasmSemanticTest(unittest.TestCase):
-    def test_invalid_zero_dim_qreg(self):
-        file_name = "qasm/semantic/invalid_zero_dim_qreg.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qreg_zero_dim(self):
+        file_name = "qasm/semantic/invalid_qreg_zero_dim.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_zero_dim_creg(self):
-        file_name = "qasm/semantic/invalid_zero_dim_creg.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qreg_already_defined(self):
+        file_name = "qasm/semantic/invalid_qreg_already_defined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_dup_qreg_name(self):
-        file_name = "qasm/semantic/invalid_dup_qreg_name.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_creg_zero_dim(self):
+        file_name = "qasm/semantic/invalid_creg_zero_dim.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_dup_creg_name(self):
-        file_name = "qasm/semantic/invalid_dup_creg_name.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_creg_already_defined(self):
+        file_name = "qasm/semantic/invalid_creg_already_defined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_opaque_dup_idlist(self):
-        file_name = "qasm/semantic/invalid_opaque_dup_idlist.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_opaque_already_defined(self):
+        file_name = "qasm/semantic/invalid_opaque_already_defined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_opaque_dup_paramlist(self):
-        file_name = "qasm/semantic/invalid_opaque_dup_paramlist.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_opaque_dup_ids(self):
+        file_name = "qasm/semantic/invalid_opaque_dup_ids.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_gatedecl_dup_idlist(self):
-        file_name = "qasm/semantic/invalid_gatedecl_dup_idlist.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_opaque_dup_params(self):
+        file_name = "qasm/semantic/invalid_opaque_dup_params.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_gatedecl_dup_paramlist(self):
-        file_name = "qasm/semantic/invalid_gatedecl_dup_paramlist.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gate_already_defined(self):
+        file_name = "qasm/semantic/invalid_gate_already_defined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_if_undefined(self):
-        file_name = "qasm/semantic/invalid_if_undefined_creg.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gate_dup_ids(self):
+        file_name = "qasm/semantic/invalid_gate_dup_ids.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_barrier_invalid_qreg_ref(self):
-        file_name = "qasm/semantic/invalid_barrier_invalid_qreg_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gate_dup_params(self):
+        file_name = "qasm/semantic/invalid_gate_dup_params.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_barrier_invalid_qreg_indexing(self):
-        file_name = "qasm/semantic/invalid_barrier_invalid_qreg_indexing.qasm"
-        self.assertRaises(IndexError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_u_id_undefined(self):
+        file_name = "qasm/semantic/invalid_gop_u_id_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_uop_invalid_target_ref(self):
-        file_name = "qasm/semantic/invalid_uop_invalid_target_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_u_param_undefined(self):
+        file_name = "qasm/semantic/invalid_gop_u_param_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_uop_invalid_num_exprs(self):
-        file_name = "qasm/semantic/invalid_uop_invalid_num_exprs.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_u_num_params(self):
+        file_name = "qasm/semantic/invalid_gop_u_num_params.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_uop_invalid_expr(self):
-        file_name = "qasm/semantic/invalid_uop_invalid_expr.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_cx_id_undefined(self):
+        file_name = "qasm/semantic/invalid_gop_cx_id_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_cxop_invalid_target_ref(self):
-        file_name = "qasm/semantic/invalid_cxop_invalid_target_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_cx_dup_ids(self):
+        file_name = "qasm/semantic/invalid_gop_cx_dup_ids.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_cxop_dup_target(self):
-        file_name = "qasm/semantic/invalid_cxop_dup_target.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
-
-    def test_invalid_barrierop_invalid_target_ref(self):
+    def test_invalid_gop_barrier_id_undefined(self):
         file_name = "qasm/semantic/invalid_barrierop_invalid_target_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_barrierop_dup_target(self):
+    def test_invalid_gop_barrier_dup_ids(self):
         file_name = "qasm/semantic/invalid_barrierop_dup_target.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_customop_invalid_gate_ref(self):
-        file_name = "qasm/semantic/invalid_customop_invalid_gate_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_custom_gate_undefined(self):
+        file_name = "qasm/semantic/invalid_gop_custom_gate_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_customop_invalid_num_args(self):
-        file_name = "qasm/semantic/invalid_customop_invalid_num_args.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_custom_num_ids(self):
+        file_name = "qasm/semantic/invalid_gop_custom_num_ids.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_customop_dup_targets(self):
-        file_name = "qasm/semantic/invalid_customop_dup_targets.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_custom_dup_ids(self):
+        file_name = "qasm/semantic/invalid_gop_custom_dup_ids.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_customop_invalid_num_exprs(self):
-        file_name = "qasm/semantic/invalid_customop_invalid_num_exprs.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_gop_custom_num_params(self):
+        file_name = "qasm/semantic/invalid_gop_custom_num_params.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_u_invalid_num_exprs(self):
-        file_name = "qasm/semantic/invalid_qop_u_invalid_num_exprs.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_u_qreg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_u_qreg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_u_invalid_creg_ref(self):
-        file_name = "qasm/semantic/invalid_qop_u_invalid_creg_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_u_qreg_index(self):
+        file_name = "qasm/semantic/invalid_qop_u_qreg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_custom_invalid_gate_ref(self):
-        file_name = "qasm/semantic/invalid_qop_custom_invalid_gate_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_u_creg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_u_creg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_custom_invalid_qreg_ref(self):
-        file_name = "qasm/semantic/invalid_qop_custom_invalid_qreg_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
-    
-    def test_invalid_qop_custom_invalid_creg_ref(self):
-        file_name = "qasm/semantic/invalid_qop_custom_invalid_creg_ref.qasm"
-        self.assertRaises(LookupError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_u_num_params(self):
+        file_name = "qasm/semantic/invalid_qop_u_num_params.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_custom_dup_targets(self):
-        file_name = "qasm/semantic/invalid_qop_custom_dup_targets.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_cx_qreg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_cx_qreg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_custom_invalid_num_args(self):
-        file_name = "qasm/semantic/invalid_qop_custom_invalid_num_args.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_cx_qreg_index(self):
+        file_name = "qasm/semantic/invalid_qop_cx_qreg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_custom_invalid_num_exprs(self):
-        file_name = "qasm/semantic/invalid_qop_custom_invalid_num_exprs.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_cx_dup_qregs(self):
+        file_name = "qasm/semantic/invalid_qop_cx_dup_qregs.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
 
-    def test_invalid_qop_barrier_dup_targets(self):
-        file_name = "qasm/semantic/invalid_barrier_dup_targets.qasm"
-        self.assertRaises(ValueError, lambda: QasmCompiler().compile(file_name))
+    def test_invalid_qop_measure_qreg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_measure_qreg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_measure_qreg_index(self):
+        file_name = "qasm/semantic/invalid_qop_measure_qreg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_measure_creg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_measure_creg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_measure_creg_index(self):
+        file_name = "qasm/semantic/invalid_qop_measure_creg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_measure_dim_mismatch(self):
+        file_name = "qasm/semantic/invalid_qop_measure_dim_mismatch.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_reset_qreg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_reset_qreg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_reset_qreg_index(self):
+        file_name = "qasm/semantic/invalid_qop_reset_qreg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_qreg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_custom_qreg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_qreg_index(self):
+        file_name = "qasm/semantic/invalid_qop_custom_qreg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_creg_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_custom_creg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_gate_undefined(self):
+        file_name = "qasm/semantic/invalid_qop_custom_gate_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_num_qregs(self):
+        file_name = "qasm/semantic/invalid_qop_custom_num_qregs.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_dup_qregs(self):
+        file_name = "qasm/semantic/invalid_qop_custom_dup_qregs.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_qop_custom_num_params(self):
+        file_name = "qasm/semantic/invalid_qop_custom_num_params.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_if_creg_undefined(self):
+        file_name = "qasm/semantic/invalid_if_creg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_barrier_qreg_undefined(self):
+        file_name = "qasm/semantic/invalid_barrier_qreg_undefined.qasm"
+        self.assertRaises(
+            LookupError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_barrier_dup_qregs(self):
+        file_name = "qasm/semantic/invalid_barrier_dup_qregs.qasm"
+        self.assertRaises(
+            ValueError, lambda: QasmCompiler().compile(file_name))
+
+    def test_invalid_barrier_qreg_index(self):
+        file_name = "qasm/semantic/invalid_barrier_qreg_index.qasm"
+        self.assertRaises(
+            IndexError, lambda: QasmCompiler().compile(file_name))
 
 
 if __name__ == '__main__':

@@ -53,6 +53,15 @@ class QASMListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by QASMParser#regDeclStatement.
+    def enterRegDeclStatement(self, ctx:QASMParser.RegDeclStatementContext):
+        pass
+
+    # Exit a parse tree produced by QASMParser#regDeclStatement.
+    def exitRegDeclStatement(self, ctx:QASMParser.RegDeclStatementContext):
+        pass
+
+
     # Enter a parse tree produced by QASMParser#qregDeclStatement.
     def enterQregDeclStatement(self, ctx:QASMParser.QregDeclStatementContext):
         pass
@@ -71,21 +80,30 @@ class QASMListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by QASMParser#opaqueDeclStatement.
-    def enterOpaqueDeclStatement(self, ctx:QASMParser.OpaqueDeclStatementContext):
+    # Enter a parse tree produced by QASMParser#gateDeclStatement.
+    def enterGateDeclStatement(self, ctx:QASMParser.GateDeclStatementContext):
         pass
 
-    # Exit a parse tree produced by QASMParser#opaqueDeclStatement.
-    def exitOpaqueDeclStatement(self, ctx:QASMParser.OpaqueDeclStatementContext):
+    # Exit a parse tree produced by QASMParser#gateDeclStatement.
+    def exitGateDeclStatement(self, ctx:QASMParser.GateDeclStatementContext):
         pass
 
 
-    # Enter a parse tree produced by QASMParser#gatedeclStatement.
-    def enterGatedeclStatement(self, ctx:QASMParser.GatedeclStatementContext):
+    # Enter a parse tree produced by QASMParser#opaqueStatement.
+    def enterOpaqueStatement(self, ctx:QASMParser.OpaqueStatementContext):
         pass
 
-    # Exit a parse tree produced by QASMParser#gatedeclStatement.
-    def exitGatedeclStatement(self, ctx:QASMParser.GatedeclStatementContext):
+    # Exit a parse tree produced by QASMParser#opaqueStatement.
+    def exitOpaqueStatement(self, ctx:QASMParser.OpaqueStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by QASMParser#gateStatement.
+    def enterGateStatement(self, ctx:QASMParser.GateStatementContext):
+        pass
+
+    # Exit a parse tree produced by QASMParser#gateStatement.
+    def exitGateStatement(self, ctx:QASMParser.GateStatementContext):
         pass
 
 

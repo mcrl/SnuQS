@@ -21,10 +21,13 @@ statement
 ;
 
 declStatement
+: regDeclStatement
+| gateDeclStatement
+;
+
+regDeclStatement
 : qregDeclStatement
 | cregDeclStatement
-| opaqueDeclStatement
-| gatedeclStatement
 ;
 
 qregDeclStatement
@@ -35,13 +38,18 @@ cregDeclStatement
 : 'creg' ID '[' NNINTEGER ']' ';'
 ;
 
-opaqueDeclStatement
+gateDeclStatement
+: opaqueStatement
+| gateStatement
+;
+
+opaqueStatement
 : 'opaque' ID idlist ';'
 | 'opaque' ID '(' ')' idlist ';'
 | 'opaque' ID '(' paramlist ')' idlist ';'
 ;
 
-gatedeclStatement
+gateStatement
 : 'gate' ID idlist '{' '}'
 | 'gate' ID '(' ')' idlist '{' '}'
 | 'gate' ID '(' paramlist ')' idlist '{' '}'
