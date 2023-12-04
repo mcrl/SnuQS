@@ -6,6 +6,7 @@ from .qasm_circuit_generator import QasmCircuitGenerator
 from .qasm_parser import QasmParser
 from .qasm_walker import QasmWalker
 from .qasm_exception import QasmException
+from snuqs.circuit import Circuit
 
 
 class QasmCompiler:
@@ -28,16 +29,17 @@ class QasmCompiler:
             tree = parser.parse(qasm_preprocessed)
 
             symtab = QasmSymbolTable()
+            circuit = Circuit("circuit")
             stages = [
                 QasmSemanticChecker(symtab),
                 QasmOpaqueGateChecker(symtab),
-                QasmCircuitGenerator(symtab),
+                QasmCircuitGenerator(circuit, symtab),
             ]
 
             walker = QasmWalker()
             for stage in stages:
                 walker.walk(stage, tree)
-            return None
+            return circuit
 
         except QasmException as e:
             raise e

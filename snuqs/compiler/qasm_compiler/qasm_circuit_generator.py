@@ -10,8 +10,9 @@ from snuqs.circuit import Parameter, BinOp, NegOp, UnaryOp, Parenthesis, Identif
 
 
 class QasmCircuitGenerator(QasmStage):
-    def __init__(self, symtab: QasmSymbolTable):
+    def __init__(self, circuit: Circuit, symtab: QasmSymbolTable):
         self.symtab = symtab
+        self.circuit = circuit
 
     def binOp(self, op: str,
               expr0: QASMParser.ExpContext,
@@ -129,9 +130,11 @@ class QasmCircuitGenerator(QasmStage):
                 _qubit_map = {
                     _id.getText(): qreg for _id, qreg in zip(decl.idlist().ID(), qregs)
                 }
-                _param_map = {
-                    _id.getText(): param for _id, param in zip(decl.paramlist().ID(), params)
-                }
+                _param_map = {}
+                if decl.paramlist():
+                    _param_map = {
+                        _id.getText(): param for _id, param in zip(decl.paramlist().ID(), params)
+                    }
 
                 gops = []
                 for gop in decl.goplist().gop():
@@ -156,13 +159,16 @@ class QasmCircuitGenerator(QasmStage):
             qubit_map = {
                 _id.getText(): qreg for _id, qreg in zip(decl.idlist().ID(), qreg)
             }
-            param_map = {
-                _id.getText(): param for _id, param in zip(decl.paramlist().ID(), params)
-            }
+            param_map = {}
+            if decl.paramlist():
+                param_map = {
+                    _id.getText(): param for _id, param in zip(decl.paramlist().ID(), params)
+                }
 
             gops = []
-            for gop in decl.goplist().gop():
-                gops.append(self.createGop(gop, qubit_map, param_map))
+            if decl.goplist():
+                for gop in decl.goplist().gop():
+                    gops.append(self.createGop(gop, qubit_map, param_map))
 
             return Custom(symbol, gops, qreg, params=params)
 
@@ -188,8 +194,6 @@ class QasmCircuitGenerator(QasmStage):
 
     # Enter a parse tree produced by QASMParser#mainprogram.
     def enterMainprogram(self, ctx: QASMParser.MainprogramContext):
-        self.circuit = Circuit("circuit")
-
         self.qreg_map = {}
         self.creg_map = {}
         self.gate_map = {}
@@ -212,7 +216,6 @@ class QasmCircuitGenerator(QasmStage):
     # Exit a parse tree produced by QASMParser#mainprogram.
     def exitMainprogram(self, ctx: QASMParser.MainprogramContext):
         pass
-        print(self.circuit)
 
     # Enter a parse tree produced by QASMParser#qopStatement.
     def enterQopStatement(self, ctx: QASMParser.QopStatementContext):
