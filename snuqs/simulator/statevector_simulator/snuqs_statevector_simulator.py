@@ -1,4 +1,4 @@
-from snuqs.quantum_circuit import QuantumCircuit
+from snuqs.circuit import Circuit
 from snuqs.simulator.statevector_simulator import StatevectorSimulatorImpl
 
 class SnuQSStatevectorSimulator(StatevectorSimulatorImpl):
@@ -6,5 +6,5 @@ class SnuQSStatevectorSimulator(StatevectorSimulatorImpl):
         super().__init__()
         self.launcher = snuqs.impl.Launcher()
 
-    def run(self, circ: QuantumCircuit, **kwargs):
+    def run(self, circ: Circuit, **kwargs):
         self.launcher.run(circ)

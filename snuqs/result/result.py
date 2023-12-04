@@ -1,7 +1,11 @@
-from snuqs import QuantumCircuit 
+from snuqs.circuit import Circuit
 
+from dataclasses import dataclass
+
+
+@dataclass
 class Result:
-    circ: QuantumCircuit
+    circ: Circuit
 
     def __repr__(self):
         return "Result"

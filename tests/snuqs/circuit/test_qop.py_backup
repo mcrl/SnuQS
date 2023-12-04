@@ -1,0 +1,348 @@
+import unittest
+
+from snuqs.circuit import *
+import random
+import math
+
+
+class QopTest(unittest.TestCase):
+    def random_numbers(n, _min, _max):
+        s = set()
+        while len(s) < n:
+            s.add(random.randint(_min, _max))
+        return list(s)
+
+    def random_params(n):
+        s = set()
+        while len(s) < n:
+            s.add(random.random() * 4 * math.pi)
+        return list(s)
+
+    def test_qgate_type(self):
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type(-1), [1]))
+
+    def test_qgate_empty_qubits(self):
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.ID, []))
+
+    def test_qgate_same_qubits(self):
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CX, [0, 0]))
+
+    def test_ID_params(self):
+        q = Qreg("q", 5)
+        p = Qreg("p", 5)
+
+        ID(q)
+        ID([q])
+        ID([q[0]])
+        ID([q[0], q[1]])
+        ID([q, p])
+
+    def test_X_params(self):
+        Qgate(Qgate.Type.X, QopTest.random_numbers(1, 0, 16))
+
+    def test_Y_params(self):
+        Qgate(Qgate.Type.Y, QopTest.random_numbers(1, 0, 16))
+
+    def test_Z_params(self):
+        Qgate(Qgate.Type.Z, QopTest.random_numbers(1, 0, 16))
+
+    def test_H_params(self):
+        Qgate(Qgate.Type.H, QopTest.random_numbers(1, 0, 16))
+
+    def test_S_params(self):
+        Qgate(Qgate.Type.S, QopTest.random_numbers(1, 0, 16))
+
+    def test_SDG_params(self):
+        Qgate(Qgate.Type.SDG, QopTest.random_numbers(1, 0, 16))
+
+    def test_T_params(self):
+        Qgate(Qgate.Type.T, QopTest.random_numbers(1, 0, 16))
+
+    def test_TDG_params(self):
+        Qgate(Qgate.Type.TDG, QopTest.random_numbers(1, 0, 16))
+
+    def test_SX_params(self):
+        Qgate(Qgate.Type.SX, QopTest.random_numbers(1, 0, 16))
+
+    def test_SXDG_params(self):
+        Qgate(Qgate.Type.SXDG, QopTest.random_numbers(1, 0, 16))
+
+    def test_P_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.P, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.P, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.P, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1))
+
+    def test_RX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RX, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.RX, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.RX, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1))
+
+    def test_RY_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RY, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.RY, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.RY, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1))
+
+    def test_RZ_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RZ, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.RZ, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.RZ, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1))
+
+    def test_U0_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.U0, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.U0, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.U0, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1))
+
+    def test_U1_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.U1, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.U1, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.U1, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1))
+
+    def test_U2_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.U2, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.U2, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1)))
+        Qgate(Qgate.Type.U2, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(2))
+
+    def test_U3_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.U3, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.U3, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1)))
+        Qgate(Qgate.Type.U3, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(3))
+
+    def test_U_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.U, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.U, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(1)))
+        Qgate(Qgate.Type.U, QopTest.random_numbers(
+            1, 0, 16), params=QopTest.random_params(3))
+
+    def test_CX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CX, QopTest.random_numbers(1, 0, 16)))
+        Qgate(
+            Qgate.Type.CX, QopTest.random_numbers(2, 0, 16))
+
+    def test_CZ_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CZ, QopTest.random_numbers(1, 0, 16)))
+        Qgate(
+            Qgate.Type.CZ, QopTest.random_numbers(2, 0, 16))
+
+    def test_CY_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CY, QopTest.random_numbers(1, 0, 16)))
+        Qgate(Qgate.Type.CY, QopTest.random_numbers(2, 0, 16))
+
+    def test_SWAP_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.SWAP, QopTest.random_numbers(1, 0, 16)))
+        Qgate(Qgate.Type.SWAP, QopTest.random_numbers(2, 0, 16))
+
+    def test_CH_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CH, QopTest.random_numbers(1, 0, 16)))
+        Qgate(Qgate.Type.CH, QopTest.random_numbers(2, 0, 16))
+
+    def test_CSX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CSX, QopTest.random_numbers(1, 0, 16)))
+        Qgate(
+            Qgate.Type.CSX, QopTest.random_numbers(2, 0, 16))
+
+    def test_CRX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CRX, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CRX, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CRX, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.CRX, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_CRY_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CRY, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CRY, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CRY, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.CRY, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_CRZ_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CRZ, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CRZ, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CRZ, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.CRZ, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_CU1_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CU1, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CU1, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CU1, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.CU1, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_CP_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CP, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CP, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CP, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.CP, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_RXX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RXX, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RXX, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.RXX, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.RXX, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_RZZ_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RZZ, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RZZ, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.RZZ, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.RZZ, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(1))
+
+    def test_CU3_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CU3, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CU3, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CU3, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(2)))
+        Qgate(Qgate.Type.CU3, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(3))
+
+    def test_CU_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CU, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CU, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CU, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(3)))
+        Qgate(Qgate.Type.CU, QopTest.random_numbers(
+            2, 0, 16), params=QopTest.random_params(4))
+
+    def test_CCX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CCX, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CCX, QopTest.random_numbers(2, 0, 16)))
+        Qgate(Qgate.Type.CCX, QopTest.random_numbers(3, 0, 16))
+
+    def test_CSWAP_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.CSWAP, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(Qgate.Type.CSWAP,
+                                                    QopTest.random_numbers(2, 0, 16)))
+        Qgate(Qgate.Type.CSWAP, QopTest.random_numbers(3, 0, 16))
+
+    def test_RCCX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RCCX, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RCCX, QopTest.random_numbers(2, 0, 16)))
+        Qgate(Qgate.Type.RCCX, QopTest.random_numbers(3, 0, 16))
+
+    def test_RC3X_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RC3X, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.RC3X, QopTest.random_numbers(2, 0, 16)))
+        Qgate(Qgate.Type.RC3X, QopTest.random_numbers(3, 0, 16))
+
+    def test_C3X_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C3X, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C3X, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C3X, QopTest.random_numbers(3, 0, 16)))
+        Qgate(Qgate.Type.C3X, QopTest.random_numbers(4, 0, 16))
+
+    def test_C3SQRTX_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C3SQRTX, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C3SQRTX, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C3SQRTX, QopTest.random_numbers(3, 0, 16)))
+        Qgate(Qgate.Type.C3SQRTX, QopTest.random_numbers(4, 0, 16))
+
+    def test_C4X_params(self):
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C4X, QopTest.random_numbers(1, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C4X, QopTest.random_numbers(2, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C4X, QopTest.random_numbers(3, 0, 16)))
+        self.assertRaises(ValueError, lambda: Qgate(
+            Qgate.Type.C4X, QopTest.random_numbers(4, 0, 16)))
+        Qgate(Qgate.Type.C4X, QopTest.random_numbers(5, 0, 16))
+
+    def test_barrier_params(self):
+        self.assertRaises(ValueError, lambda: Barrier([]))
+        Barrier(QopTest.random_numbers(1, 0, 16))
+
+    def test_reset_params(self):
+        self.assertRaises(ValueError, lambda: Reset([]))
+        Reset(QopTest.random_numbers(1, 0, 16))
+
+    def test_measure_params(self):
+        self.assertRaises(ValueError, lambda: Measure([], []))
+        self.assertRaises(ValueError, lambda:
+                          Measure(QopTest.random_numbers(3, 0, 16),
+                                  QopTest.random_numbers(4, 0, 16)
+                                  )
+                          )
+        Measure(QopTest.random_numbers(2, 0, 16),
+                QopTest.random_numbers(2, 0, 16)
+                )
+
+    def test_cond_params(self):
+        self.assertRaises(ValueError, lambda:
+                          Cond(0, 5, 3, Qgate(Qgate.Type.CX, [0, 0])))
+        Cond(0, 5, 3, Qgate(Qgate.Type.CX, QopTest.random_numbers(2, 0, 16)))
+
+
+if __name__ == '__main__':
+    unittest.main()

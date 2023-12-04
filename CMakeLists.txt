@@ -27,3 +27,4 @@ endif(CUDAToolkit_FOUND)
 include_directories(BEFORE SYSTEM include)
 
 add_subdirectory(src)
+add_subdirectory(tests)

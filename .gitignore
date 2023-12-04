@@ -11,3 +11,5 @@ snuqs.egg-info/*
 */*.egg-info
 trash
 *.txt
+_snuqs*
+snuqs.cpython*

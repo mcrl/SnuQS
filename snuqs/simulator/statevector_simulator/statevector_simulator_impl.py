@@ -1,27 +1,27 @@
 import numpy as np
 from abc import *
-from snuqs.quantum_circuit import QuantumCircuit, QopType
+from snuqs.circuit import Circuit, Qop
 
 class StatevectorSimulatorImpl:
     @abstractmethod
-    def run(self, circ: QuantumCircuit, **kwargs):
+    def run(self, circ: Circuit, **kwargs):
         for op in circ.ops:
             self.run_op(op, circ.qreg, circ.creg)
 
     def run_op(self, op, qreg, creg):
-        if op.typ == QopType.Barrier:
+        if op.typ == Qop.Type.Barrier:
             # Do nothing
             pass
-        elif op.typ == QopType.Reset:
+        elif op.typ == Qop.Type.Reset:
             self.op_reset(qreg, op.qubits)
-        elif op.typ == QopType.Measure:
+        elif op.typ == Qop.Type.Measure:
             self.op_measure(qreg, creg, op.qubits, op.bits)
-        elif op.typ == QopType.Cond:
+        elif op.typ == Qop.Type.Cond:
             if op.eval(creg):
                 self.run_op(op.op, qreg, creg)
-        elif op.typ == QopType.UGate:
+        elif op.typ == Qop.Type.UGate:
             self.op_ugate(qreg, op.qubits, op.params)
-        elif op.typ == QopType.CXGate:
+        elif op.typ == Qop.Type.CXGate:
             self.op_cxgate(qreg, op.qubits)
 
     def op_reset(self, qreg, qubits):

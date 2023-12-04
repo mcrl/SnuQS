@@ -1,5 +1,6 @@
 #include "launcher/launcher.h"
 
+#include "assertion.h"
 #include <complex>
 #include <pybind11/pybind11.h>
 
@@ -7,11 +8,12 @@ namespace py = pybind11;
 
 namespace snuqs {
 
-Launcher::Launcher() {}
+Launcher::Launcher() { NOT_IMPLEMENTED(); }
 
-Launcher::~Launcher() {}
+Launcher::~Launcher() { NOT_IMPLEMENTED(); }
 
 static void *build_qop(py::handle op) {
+  NOT_IMPLEMENTED();
   return nullptr;
   /*
     py::object typ = op.attr("typ").cast<py::object>();
@@ -69,6 +71,7 @@ static void *build_qop(py::handle op) {
 }
 
 void Launcher::run(py::object circ) {
+  NOT_IMPLEMENTED();
 
   /*
 // Circ

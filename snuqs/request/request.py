@@ -1,7 +1,8 @@
-from snuqs import QuantumCircuit
 from enum import Enum
 from typing import Optional
 import threading
+
+from snuqs.circuit import Circuit
 
 class Request:
     class Status(Enum):
@@ -14,7 +15,7 @@ class Request:
 
 
     def __init__(self,
-                 circ: QuantumCircuit,
+                 circ: Circuit,
                  status: Status = Status.CREATED,
                  **kwargs):
         pass

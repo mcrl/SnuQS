@@ -1,0 +1,52 @@
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[5];
+creg c[5];
+
+gate gg a, b, c {
+
+}
+
+
+id q[0];
+x q[0];
+y q[0];
+z q[0];
+h q[0];
+s q[0];
+sdg q[0];
+t q[0];
+tdg q[0];
+sx q[0];
+sxdg q[0];
+p(pi) q[0];
+rx(pi) q[0];
+ry(pi) q[0];
+rz(pi) q[0];
+u0(pi) q[0];
+u1(pi) q[0];
+u2(pi, 2*pi) q[0];
+u3(pi, 2*pi, 3*pi) q[0];
+u(pi, 2*pi, 3*pi) q[0];
+cx q[0], q[1];
+cy q[0], q[1];
+cz q[0], q[1];
+swap q[0], q[1];
+ch q[0], q[1];
+csx q[0], q[1];
+crx(pi) q[0], q[1];
+cry(pi) q[0], q[1];
+crz(pi) q[0], q[1];
+cp(pi) q[0], q[1];
+cu1(pi) q[0], q[1];
+rxx(pi) q[0], q[1];
+rzz(pi) q[0], q[1];
+cu3(pi, 2*pi, 3*pi) q[0], q[1];
+cu(pi, 2*pi, 3*pi, c) q[0], q[1];
+ccx q[0], q[1], q[2];
+cswap q[0], q[1], q[2];
+rccx q[0], q[1], q[2];
+rc3x q[0], q[1], q[2], q[3];
+c3x q[0], q[1], q[2], q[3];
+c3sqrtx q[0], q[1], q[2], q[3];
+c4x q[0], q[1], q[2], q[3], q[4];

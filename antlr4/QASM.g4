@@ -15,8 +15,6 @@ program
 
 statement
 : declStatement
-| gatedeclStatement
-| opaqueStatement
 | qopStatement
 | ifStatement
 | barrierStatement
@@ -25,6 +23,8 @@ statement
 declStatement
 : qregDeclStatement
 | cregDeclStatement
+| opaqueDeclStatement
+| gatedeclStatement
 ;
 
 qregDeclStatement
@@ -35,27 +35,31 @@ cregDeclStatement
 : 'creg' ID '[' NNINTEGER ']' ';'
 ;
 
-gatedeclStatement
-: gatedecl goplist '}'
-| gatedecl '}'
+opaqueDeclStatement
+: 'opaque' ID idlist ';'
+| 'opaque' ID '(' ')' idlist ';'
+| 'opaque' ID '(' paramlist ')' idlist ';'
 ;
 
-gatedecl
-: 'gate' ID idlist '{'
-| 'gate' ID '(' ')' idlist '{'
-| 'gate' ID '(' paramlist ')' idlist '{'
+gatedeclStatement
+: 'gate' ID idlist '{' '}'
+| 'gate' ID '(' ')' idlist '{' '}'
+| 'gate' ID '(' paramlist ')' idlist '{' '}'
+| 'gate' ID idlist '{' goplist '}'
+| 'gate' ID '(' ')' idlist '{' goplist '}'
+| 'gate' ID '(' paramlist ')' idlist '{' goplist '}'
 ;
 
 goplist
 : gop
-| gop goplist
+| gop gop*
 ;
 
 gop 
 : gopUGate
 | gopCXGate
-| gopCustomGate
 | gopBarrier
+| gopCustomGate
 ;
 
 gopUGate
@@ -66,91 +70,48 @@ gopCXGate
 : 'CX' ID ',' ID ';'
 ;
 
+gopBarrier
+: 'barrier' idlist ';'
+;
+
 gopCustomGate
 : ID idlist ';'
 | ID '(' ')' idlist ';'
 | ID '(' explist ')' idlist ';'
 ;
 
-gopBarrier
-: 'barrier' idlist ';'
+idlist
+: ID
+| ID (',' ID)*
 ;
 
 paramlist
-: idlist
-;
-
-idlist
 : ID
-| ID ',' idlist
-;
-
-opaqueStatement
-: 'opaque' ID idlist ';'
-| 'opaque' ID '(' ')' idlist ';'
-| 'opaque' ID '(' idlist ')' idlist ';'
+| ID (',' ID)*
 ;
 
 qopStatement
 : qopUGate
 | qopCXGate
-| qopPredefinedGate
-| qopCustomGate
 | qopMeasure
 | qopReset
+| qopCustomGate
 ;
 
 qopUGate
-: 'U' '(' explist ')' argument ';'
+: 'U' '(' explist ')' qarg ';'
 ;
 
 qopCXGate
-: 'CX' argument ',' argument ';'
+: 'CX' qarg ',' qarg ';'
 ;
 
-qopPredefinedGate
-: 'u3' '(' exp ',' exp ',' exp ')' argument ';'
-| 'u2' '(' exp ',' exp ')' argument ';'
-| 'u1' '(' exp ')' argument ';'
-| 'cx' argument ',' argument ';'
-| 'id' argument ';'
-| 'u0' '(' exp ')' argument ';'
-| 'u' '(' exp ',' exp ',' exp ')' argument ';'
-| 'p' '(' exp ')' argument ';'
-| 'x' argument ';'
-| 'y' argument ';'
-| 'z' argument ';'
-| 'h' argument ';'
-| 's' argument ';'
-| 'sdg' argument ';'
-| 't' argument ';'
-| 'tdg' argument ';'
-| 'rx' '(' exp ')' argument ';'
-| 'ry' '(' exp ')' argument ';'
-| 'rz' '(' exp ')' argument ';'
-| 'sx' argument ';'
-| 'sxdg' argument ';'
-| 'cz' argument ',' argument ';'
-| 'cy' argument ',' argument ';'
-| 'swap' argument ',' argument ';'
-| 'ch' argument ',' argument ';'
-| 'ccx' argument ',' argument ',' argument ';'
-| 'cswap' argument ',' argument ',' argument ';'
-| 'crx' '(' exp ')' argument ',' argument ';'
-| 'cry' '(' exp ')' argument ',' argument ';'
-| 'crz' '(' exp ')' argument ',' argument ';'
-| 'cu1' '(' exp ')' argument ',' argument ';'
-| 'cp' '(' exp ')' argument ',' argument ';'
-| 'cu3' '(' exp ',' exp ',' exp ')' argument ',' argument ';'
-| 'csx' argument ',' argument ';'
-| 'cu' '(' exp ',' exp ',' exp ',' exp ')' argument ',' argument ';'
-| 'rxx' '(' exp ')' argument ',' argument ';'
-| 'rzz' '(' exp ')' argument ',' argument ';'
-| 'rccx' argument ',' argument ',' argument ';'
-| 'rc3x' argument ',' argument ',' argument ',' argument ';'
-| 'c3x' argument ',' argument ',' argument ',' argument ';'
-| 'c3sqrtx' argument ',' argument ',' argument ',' argument ';'
-| 'c4x' argument ',' argument ',' argument ',' argument ',' argument ';'
+qopMeasure
+: 'measure' qarg '->' carg ';'
+;
+
+qopReset
+: 'reset' qarg ';'
 ;
 
 qopCustomGate
@@ -159,13 +120,6 @@ qopCustomGate
 | ID '(' explist ')' arglist ';'
 ;
 
-qopMeasure
-: 'measure' argument '->' argument ';'
-;
-
-qopReset
-: 'reset' argument ';'
-;
 
 ifStatement
 : 'if' '(' ID '==' NNINTEGER ')' qopStatement
@@ -176,18 +130,24 @@ barrierStatement
 ;
 
 arglist
-: argument
-| argument ',' arglist
+: qarg
+| qarg (',' qarg)*
 ;
 
-argument
+qarg
 : ID
 | ID '[' NNINTEGER ']'
 ;
 
+carg
+: ID
+| ID '[' NNINTEGER ']'
+;
+
+
 explist
 : exp
-| exp ',' explist
+| exp (',' exp)*
 ;
 
 exp

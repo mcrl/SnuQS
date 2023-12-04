@@ -9,6 +9,14 @@
 - cmake >= 3.26.4
 - cuda >= 11.7
 
+For example, if you are using anaconda or miniconda,
+```
+conda create -n snuqs python=3.11
+conda activate snuqs
+conda install cmake
+...
+```
+
 
 ## Installation
 ```
