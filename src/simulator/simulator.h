@@ -3,10 +3,9 @@
 
 namespace snuqs {
 
-template<typename T>
 class Simulator {
 public:
-  virtual ~Simulator();
+  virtual ~Simulator() = default;
   virtual void run() = 0;
 };
 

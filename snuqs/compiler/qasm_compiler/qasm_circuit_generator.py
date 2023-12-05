@@ -152,7 +152,7 @@ class QasmCircuitGenerator(QasmStage):
         if symbol in self.opaque_map:
             decl = self.opaque_map[symbol]
             for subcls in Qgate.__subclasses__():
-                if subcls.__name__ == symbol.capitalize():
+                if subcls.__name__ == symbol.upper():
                     return subcls(qreg, params=params)
         else:
             decl = self.gate_map[symbol]

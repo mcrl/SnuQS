@@ -8,16 +8,16 @@ execute_process(COMMAND python3-config --extension-suffix
                 OUTPUT_VARIABLE LIBRARY_SUFFIX)
 string(STRIP "${LIBRARY_SUFFIX}" LIBRARY_SUFFIX)
 
-add_library(_snuqs_impl SHARED module.cc)
+add_library(_C SHARED module.cc)
 
 include_directories("${PYBIND_INCLUDE_DIRS}" "." "./include")
 
-set_target_properties(_snuqs_impl PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(_snuqs_impl PROPERTIES PREFIX "")
-set_target_properties(_snuqs_impl PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
+set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(_C PROPERTIES PREFIX "")
+set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
 
 target_link_libraries(
-  _snuqs_impl
+  _C
   PUBLIC launcher
          optimizer
          buffer

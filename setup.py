@@ -5,9 +5,11 @@ from glob import glob
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
+
 class CMakeExtension(Extension):
     def __init__(self, name):
         super().__init__(name, sources=[])
+
 
 class CMakeBuildExt(build_ext_orig):
     def run(self):
@@ -29,9 +31,10 @@ class CMakeBuildExt(build_ext_orig):
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
-                '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
-                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute()),
-                '-DCMAKE_BUILD_TYPE=' + config
+            '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' +
+            str(extdir.parent.absolute()),
+            '-DCMAKE_BUILD_TYPE=' + config
         ]
 
         # example of build args
@@ -45,6 +48,7 @@ class CMakeBuildExt(build_ext_orig):
         if not self.dry_run:
             self.spawn(['cmake', '--build', '.'] + build_args)
             os.chdir(str(cwd))
+
 
 setup_requires = [
 ]
@@ -70,9 +74,9 @@ setup(
     setup_requires=setup_requires,
     dependency_links=dependency_links,
     ext_modules=[
-        CMakeExtension('snuqs'),
+        CMakeExtension('snuqs.python'),
     ],
     cmdclass={
         'build_ext': CMakeBuildExt,
-        }
-    )
+    }
+)

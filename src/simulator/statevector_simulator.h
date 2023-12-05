@@ -2,15 +2,14 @@
 #define __STATEVECTOR_SIMULATOR_H__
 
 #include "quantum_circuit/quantum_circuit.h"
-#include "simulator/simulator.h"
+#include "simulator.h"
 
 namespace snuqs {
 
-template <typename T>
-class StatevectorSimulator : public Simulator<T> {
+class StatevectorSimulator : public Simulator {
 public:
   StatevectorSimulator();
-  virtual ~StatevectorSimulator() override;
+  ~StatevectorSimulator();
 
   virtual void run() override;
 };

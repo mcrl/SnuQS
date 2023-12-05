@@ -1,11 +1,12 @@
 import unittest
-from snuqs import QasmCompiler
+from snuqs import QasmCompiler, StatevectorSimulator
 
 
 class BenchmarkTest(unittest.TestCase):
     def test_qft(self):
         compiler = QasmCompiler()
-        circ = compiler('qasm/qft.qasm')
+        circ = compiler.compile('qasm/qft.qasm')
+        sim = StatevectorSimulator(device=StatevectorSimulator.CUDA)
         print(circ)
 
 

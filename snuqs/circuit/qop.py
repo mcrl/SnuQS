@@ -687,12 +687,12 @@ class RC3X(Qgate):
     """
     RC3X gate
     ----------------
-    num_target_qubits: 3
+    num_target_qubits: 4
     num_params: 0
     """
 
     def num_target_qubits(self):
-        return 3
+        return 4
 
     def num_params(self):
         return 0
