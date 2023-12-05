@@ -4,4 +4,7 @@ qreg q[4];
 creg c[4];
 
 h q;
-id q[0];
+x q[0];
+x q[1];
+x q[2];
+x q[3];

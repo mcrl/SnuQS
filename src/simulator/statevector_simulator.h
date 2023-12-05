@@ -1,7 +1,7 @@
 #ifndef __STATEVECTOR_SIMULATOR_H__
 #define __STATEVECTOR_SIMULATOR_H__
 
-#include "quantum_circuit/quantum_circuit.h"
+#include "circuit/circuit.h"
 #include "simulator.h"
 
 namespace snuqs {
@@ -11,7 +11,7 @@ public:
   StatevectorSimulator();
   ~StatevectorSimulator();
 
-  virtual void run() override;
+  virtual void run(Circuit &circ) override;
 };
 
 } // namespace snuqs

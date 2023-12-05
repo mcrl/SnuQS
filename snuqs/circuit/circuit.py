@@ -1,4 +1,3 @@
-from typing import List
 from .qreg import Qreg
 from .creg import Creg
 from .qop import Qop
@@ -7,13 +6,31 @@ from .qop import Qop
 class Circuit:
     def __init__(self, name: str):
         self.name = name
-        self.ops = []
+        self.qops = []
+        self.qregs = []
+        self.cregs = []
 
-    def append(self, op):
-        self.ops.append(op)
+    def append_qreg(self, qreg: Qreg):
+        self.qregs.append(qreg)
+
+    def append_creg(self, creg: Creg):
+        self.cregs.append(creg)
+
+    def append(self, op: Qop):
+        self.qops.append(op)
 
     def __repr__(self):
-        s = ""
-        for op in self.ops:
-            s += op.__repr__() + "\n"
+        s = f"Circuit<'{self.name}'>\n"
+
+        s += "qregs:\n"
+        for qreg in self.qregs:
+            s += f"    {qreg.name}[{qreg.dim}]\n"
+
+        s += "cregs:\n"
+        for creg in self.cregs:
+            s += f"    {creg.name}[{creg.dim}]\n"
+
+        s += "qops:\n"
+        for op in self.qops:
+            s += f"    {op.__repr__()}\n"
         return s

@@ -12,7 +12,8 @@ namespace snuqs {
 // Memory Buffer
 //
 MemoryBuffer::MemoryBuffer(size_t count) : count_(count) {
-  buf_ = reinterpret_cast<double *>(malloc(sizeof(double) * count));
+  buf_ = reinterpret_cast<std::complex<double> *>(
+      malloc(sizeof(std::complex<double>) * count));
   if (buf_ == nullptr) {
     throw std::bad_alloc();
   }
@@ -23,8 +24,10 @@ MemoryBuffer::~MemoryBuffer() {
     free(buf_);
 }
 
-double MemoryBuffer::__getitem__(size_t key) { return buf_[key]; }
+std::complex<double> MemoryBuffer::__getitem__(size_t key) { return buf_[key]; }
 
-void MemoryBuffer::__setitem__(size_t key, double val) { buf_[key] = val; }
+void MemoryBuffer::__setitem__(size_t key, std::complex<double> val) {
+  buf_[key] = val;
+}
 
 } // namespace snuqs

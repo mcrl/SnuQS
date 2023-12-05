@@ -18,20 +18,16 @@ set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
 
 target_link_libraries(
   _C
-  PUBLIC launcher
-         optimizer
+  PUBLIC optimizer
          buffer
          runtime
-         quantum_circuit
-         dag
+         circuit
          simulator
          CUDA::cudart)
 
-add_subdirectory(launcher)
 add_subdirectory(runtime)
 
-add_subdirectory(quantum_circuit)
-add_subdirectory(dag)
+add_subdirectory(circuit)
 
 add_subdirectory(simulator)
 add_subdirectory(optimizer)

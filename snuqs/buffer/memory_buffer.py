@@ -13,7 +13,7 @@ class MemoryBuffer(Buffer):
         else:
             return self.impl.__getitem__(key)
 
-    def __setitem__(self, key: Union[int, slice], val: float):
+    def __setitem__(self, key: Union[int, slice], val: complex):
         if isinstance(key, slice):
             raise NotImplementedError("slice is not supported")
         else:

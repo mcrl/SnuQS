@@ -201,10 +201,14 @@ class QasmCircuitGenerator(QasmStage):
         for symbol, (typ, ctx) in self.symtab.items():
             if typ == QasmSymbolTable.Type.QREG:
                 dim = int(ctx.NNINTEGER().getText())
-                self.qreg_map[symbol] = Qreg(symbol, dim)
+                qreg = Qreg(symbol, dim)
+                self.qreg_map[symbol] = qreg
+                self.circuit.append_qreg(qreg)
             elif typ == QasmSymbolTable.Type.CREG:
                 dim = int(ctx.NNINTEGER().getText())
-                self.creg_map[symbol] = Creg(symbol, dim)
+                creg = Creg(symbol, dim)
+                self.creg_map[symbol] = creg
+                self.circuit.append_creg(creg)
             elif typ == QasmSymbolTable.Type.GATE:
                 self.gate_map[symbol] = ctx
             elif typ == QasmSymbolTable.Type.OPAQUE:

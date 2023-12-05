@@ -6,11 +6,11 @@ import random
 
 class StorageBufferTest(unittest.TestCase):
     def test_buffer_get_set(self):
-        count = 2**30
-        buffer = StorageBuffer(count)
+        count = 2**32
+        buffer = StorageBuffer(count, 'devices.yaml')
 
         random.seed(-1)
-        rands = {random.randint(0, count-1): random.random() for _ in range(50)}
+        rands = {random.randint(0, count-1): random.random()+random.random()*1j for _ in range(50)}
         for k, v in rands.items():
             buffer[k] = v
 

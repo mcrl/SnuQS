@@ -1,16 +1,17 @@
 #ifndef __CREG_H__
 #define __CREG_H__
 
-#include "types.h"
+#include <cstddef>
 
 namespace snuqs {
 class Creg {
 public:
-  Creg(qidx num_bits);
+  Creg(size_t num_bits);
 
 private:
-  qidx num_bits_;
+  size_t num_bits_;
 };
+
 } // namespace snuqs
 
 #endif //__CREG_H__

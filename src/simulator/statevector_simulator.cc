@@ -1,15 +1,15 @@
 #include "simulator/statevector_simulator.h"
 #include "assertion.h"
-#include "quantum_circuit/creg.h"
-#include "quantum_circuit/qreg.h"
-#include "quantum_circuit/quantum_circuit.h"
+#include "circuit/circuit.h"
+#include "circuit/creg.h"
+#include "circuit/qreg.h"
 
 namespace snuqs {
 
-StatevectorSimulator::StatevectorSimulator() { NOT_IMPLEMENTED(); }
+StatevectorSimulator::StatevectorSimulator() {}
 
-StatevectorSimulator::~StatevectorSimulator() { NOT_IMPLEMENTED(); }
+StatevectorSimulator::~StatevectorSimulator() {}
 
-void StatevectorSimulator::run() { NOT_IMPLEMENTED(); }
+void StatevectorSimulator::run(Circuit &circ) { NOT_IMPLEMENTED(); }
 
 } // namespace snuqs

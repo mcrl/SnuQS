@@ -9,5 +9,5 @@ class Buffer(metaclass=ABCMeta):
         pass
 
     @ abstractmethod
-    def __setitem__(self, key: Union[int, slice], val: float):
+    def __setitem__(self, key: Union[int, slice], val: complex):
         pass
