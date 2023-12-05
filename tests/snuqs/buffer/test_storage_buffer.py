@@ -1,13 +1,13 @@
 import unittest
-from snuqs import MemoryBuffer
+from snuqs import StorageBuffer
 
 import random
 
 
-class MemoryBufferTest(unittest.TestCase):
+class StorageBufferTest(unittest.TestCase):
     def test_buffer_get_set(self):
-        count = 2**20
-        buffer = MemoryBuffer(count)
+        count = 2**30
+        buffer = StorageBuffer(count)
 
         random.seed(-1)
         rands = {random.randint(0, count-1): random.random() for _ in range(50)}

@@ -1,6 +1,7 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
 
+#include "buffer/mt_raid.h"
 #include <cstddef>
 
 namespace snuqs {
@@ -14,26 +15,28 @@ public:
 
 class MemoryBuffer : public Buffer {
 public:
-  MemoryBuffer(size_t size);
+  MemoryBuffer(size_t count);
   virtual ~MemoryBuffer() override;
   virtual double __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, double val) override;
 
 private:
-  size_t size_;
+  size_t count_;
   double *buf_;
 };
 
 class StorageBuffer : public Buffer {
 public:
-  StorageBuffer(size_t size);
+  StorageBuffer(size_t count);
   virtual ~StorageBuffer() override;
   virtual double __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, double val) override;
 
 private:
-  size_t size_;
+  size_t count_;
   double *buf_;
+  double *small_buf_;
+  MTRaid raid_;
 };
 
 } // namespace snuqs

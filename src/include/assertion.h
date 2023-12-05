@@ -2,9 +2,10 @@
 #define __ASSERTION_H__
 
 #include <cassert>
+#include <stdexcept>
 
 #define ERROR(msg) assert(false && (msg));
-#define NOT_IMPLEMENTED() ERROR("NOT IMPLEMENTED")
+#define NOT_IMPLEMENTED() (throw std::domain_error("Not implemented yet"))
 
 #define DO_NOTHING() 
 
