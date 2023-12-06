@@ -8,16 +8,18 @@
 
 namespace snuqs {
 
-
 //
 // Storage Buffer
 //
-StorageBuffer::StorageBuffer(size_t count, std::vector<std::string> devices) : count_(count), raid_(devices) {
-  small_buf_ = reinterpret_cast<std::complex<double> *>(aligned_alloc(512, 512));
+StorageBuffer::StorageBuffer(size_t count, std::vector<std::string> devices)
+    : count_(count), raid_(devices) {
+  small_buf_ =
+      reinterpret_cast<std::complex<double> *>(aligned_alloc(512, 512));
   if (small_buf_ == nullptr) {
     throw std::bad_alloc();
   }
-  raid_.alloc(reinterpret_cast<void **>(&buf_), sizeof(std::complex<double>) * count);
+  raid_.alloc(reinterpret_cast<void **>(&buf_),
+              sizeof(std::complex<double>) * count);
 }
 
 StorageBuffer::~StorageBuffer() { raid_.free(reinterpret_cast<void **>(buf_)); }
@@ -52,12 +54,12 @@ void StorageBuffer::__setitem__(size_t key, std::complex<double> val) {
   }
 }
 
-  void StorageBuffer::read(void *buf, size_t count, size_t offset) {
-      NOT_IMPLEMENTED();
-  }
+void StorageBuffer::read(void *buf, size_t count, size_t offset) {
+  NOT_IMPLEMENTED();
+}
 
-  void StorageBuffer::write(void *buf, size_t count, size_t offset) {
-      NOT_IMPLEMENTED();
-  }
+void StorageBuffer::write(void *buf, size_t count, size_t offset) {
+  NOT_IMPLEMENTED();
+}
 
 } // namespace snuqs

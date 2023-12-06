@@ -23,6 +23,7 @@ MemoryBuffer::~MemoryBuffer() {
   if (buf_ != nullptr)
     free(buf_);
 }
+void *MemoryBuffer::ptr() { return buf_; }
 
 std::complex<double> MemoryBuffer::__getitem__(size_t key) { return buf_[key]; }
 

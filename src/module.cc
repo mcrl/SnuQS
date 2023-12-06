@@ -29,5 +29,6 @@ PYBIND11_MODULE(_C, m) {
       .def("append", &snuqs::Circuit::append);
 
   py::class_<snuqs::StatevectorSimulator>(m, "StatevectorSimulator")
-      .def(py::init<>());
+      .def(py::init<>())
+      .def("test", &snuqs::StatevectorSimulator::test);
 }

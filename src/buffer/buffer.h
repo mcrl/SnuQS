@@ -2,8 +2,8 @@
 #define __BUFFER_H__
 
 #include "buffer/mt_raid.h"
-#include <cstddef>
 #include <complex>
+#include <cstddef>
 
 namespace snuqs {
 
@@ -20,6 +20,8 @@ public:
   virtual ~MemoryBuffer() override;
   virtual std::complex<double> __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, std::complex<double> val) override;
+
+  void *ptr();
 
 private:
   size_t count_;
@@ -42,6 +44,27 @@ private:
   std::complex<double> *small_buf_;
   MTRaid raid_;
 };
+
+namespace cuda {
+
+template <typename T> class CudaBuffer : public Buffer {
+public:
+  CudaBuffer(size_t count);
+  virtual ~CudaBuffer() override;
+  virtual std::complex<double> __getitem__(size_t key) override;
+  virtual void __setitem__(size_t key, std::complex<double> val) override;
+
+  void *ptr();
+
+  void read(void *buf, size_t count, size_t offset);
+  void write(void *buf, size_t count, size_t offset);
+
+private:
+  size_t count_;
+  std::complex<T> *buf_;
+};
+
+} // namespace cuda
 
 } // namespace snuqs
 

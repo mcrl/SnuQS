@@ -12,6 +12,7 @@ public:
   ~StatevectorSimulator();
 
   virtual void run(Circuit &circ) override;
+  void test();
 };
 
 } // namespace snuqs
