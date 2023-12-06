@@ -41,9 +41,9 @@ class Measure(Qop):
             )
 
         for q, c in zip(qbits, cbits):
-            if q.dim != c.dim:
+            if q.dim() != c.dim():
                 raise ValueError(
-                    f"Dimension of qbits and cbits mismatch: {q.dim} != {c.dim}"
+                    f"Dimension of qbits and cbits mismatch: {q.dim()} != {c.dim()}"
                 )
 
         self.cbits = cbits

@@ -49,6 +49,7 @@ PYBIND11_MODULE(_C, m) {
   //
   py::class_<snuqs::Arg>(m, "Arg");
   py::class_<snuqs::Qarg, snuqs::Arg>(m, "Qarg")
+      .def(py::init<const snuqs::Qreg&>())
       .def(py::init<const snuqs::Qreg&, size_t>())
       .def("reg", &snuqs::Qarg::reg)
       .def("name", &snuqs::Qarg::index)
@@ -56,6 +57,7 @@ PYBIND11_MODULE(_C, m) {
       .def("value", &snuqs::Qarg::value)
       .def("__repr__", &snuqs::Qarg::__repr__);
   py::class_<snuqs::Carg, snuqs::Arg>(m, "Carg")
+      .def(py::init<const snuqs::Creg&>())
       .def(py::init<const snuqs::Creg&, size_t>())
       .def("reg", &snuqs::Carg::reg)
       .def("name", &snuqs::Carg::index)

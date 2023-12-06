@@ -8,7 +8,8 @@ namespace snuqs {
 
 class Arg {
 protected:
-  Arg(const Reg &qreg, size_t index);
+  Arg(const Reg &reg);
+  Arg(const Reg &reg, size_t index);
 
 public:
   const Reg &reg() const;
@@ -26,11 +27,13 @@ protected:
 
 class Qarg : public Arg {
 public:
+  Qarg(const Qreg &qreg);
   Qarg(const Qreg &qreg, size_t index);
 };
 
 class Carg : public Arg {
 public:
+  Carg(const Creg &creg);
   Carg(const Creg &creg, size_t index);
 };
 
