@@ -1,9 +1,8 @@
 #ifndef __CIRCUIT_H__
 #define __CIRCUIT_H__
 
-#include "circuit/creg.h"
+#include "circuit/reg.h"
 #include "circuit/qop.h"
-#include "circuit/qreg.h"
 
 #include <vector>
 

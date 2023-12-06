@@ -23,11 +23,11 @@ class Circuit:
 
         s += "qregs:\n"
         for qreg in self.qregs:
-            s += f"    {qreg.name}[{qreg.dim}]\n"
+            s += f"    {qreg}\n"
 
         s += "cregs:\n"
         for creg in self.cregs:
-            s += f"    {creg.name}[{creg.dim}]\n"
+            s += f"    {creg}\n"
 
         s += "qops:\n"
         for op in self.qops:

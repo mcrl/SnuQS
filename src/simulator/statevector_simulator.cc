@@ -2,8 +2,8 @@
 #include "assertion.h"
 #include "buffer/buffer.h"
 #include "circuit/circuit.h"
-#include "circuit/creg.h"
-#include "circuit/qreg.h"
+#include "circuit/reg.h"
+#include "circuit/arg.h"
 
 #include "simulator/statevector_simulator_cuda.h"
 

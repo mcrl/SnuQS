@@ -1,7 +1,7 @@
 #ifndef __PARAMETER_H__
 #define __PARAMETER_H__
 
-#include "circuit/creg.h"
+#include "circuit/arg.h"
 
 namespace snuqs {
 
@@ -12,10 +12,10 @@ public:
 
 class Identifier : public Parameter {
 public:
-  Identifier(const Creg &creg);
+  Identifier(const Carg &creg);
   virtual double eval() const override;
 
-  const Creg &creg_;
+  const Carg &carg_;
 };
 
 

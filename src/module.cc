@@ -1,8 +1,9 @@
 #include "buffer/buffer.h"
+#include "circuit/arg.h"
 #include "circuit/circuit.h"
-#include "circuit/creg.h"
 #include "circuit/parameter.h"
 #include "circuit/qop.h"
+#include "circuit/reg.h"
 #include "simulator/statevector_simulator.h"
 #include <pybind11/complex.h>
 #include <pybind11/pybind11.h>
@@ -13,6 +14,9 @@ namespace py = pybind11;
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
 
+  //
+  // Buffer
+  // 
   py::class_<snuqs::MemoryBuffer>(m, "MemoryBuffer")
       .def(py::init<size_t>())
       .def("__getitem__", &snuqs::MemoryBuffer::__getitem__)
@@ -23,15 +27,42 @@ PYBIND11_MODULE(_C, m) {
       .def("__getitem__", &snuqs::StorageBuffer::__getitem__)
       .def("__setitem__", &snuqs::StorageBuffer::__setitem__);
 
-  py::class_<snuqs::Creg>(m, "Creg")
+  //
+  // Reg
+  //
+  py::class_<snuqs::Reg>(m, "Reg");
+  py::class_<snuqs::Qreg, snuqs::Reg>(m, "Qreg")
+      .def(py::init<std::string, size_t>())
+      .def("name", &snuqs::Qreg::name)
+      .def("dim", &snuqs::Qreg::dim)
+      .def("__repr__", &snuqs::Qreg::__repr__);
+  py::class_<snuqs::Creg, snuqs::Reg>(m, "Creg")
       .def(py::init<std::string, size_t>())
       .def("name", &snuqs::Creg::name)
-      .def("value", &snuqs::Creg::value)
+      .def("dim", &snuqs::Creg::dim)
+      .def("__repr__", &snuqs::Creg::__repr__)
       .def("__getitem__", &snuqs::Creg::__getitem__)
       .def("__setitem__", &snuqs::Creg::__setitem__);
 
-  py::class_<snuqs::Cbit>(m, "Cbit")
-      .def(py::init<const snuqs::Creg&, size_t, snuqs::Creg::bitset::reference>());
+  //
+  // Arg
+  //
+  py::class_<snuqs::Arg>(m, "Arg");
+  py::class_<snuqs::Qarg, snuqs::Arg>(m, "Qarg")
+      .def(py::init<const snuqs::Qreg&, size_t>())
+      .def("reg", &snuqs::Qarg::reg)
+      .def("name", &snuqs::Qarg::index)
+      .def("dim", &snuqs::Qarg::dim)
+      .def("value", &snuqs::Qarg::value)
+      .def("__repr__", &snuqs::Qarg::__repr__);
+  py::class_<snuqs::Carg, snuqs::Arg>(m, "Carg")
+      .def(py::init<const snuqs::Creg&, size_t>())
+      .def("reg", &snuqs::Carg::reg)
+      .def("name", &snuqs::Carg::index)
+      .def("dim", &snuqs::Carg::dim)
+      .def("value", &snuqs::Carg::value)
+      .def("__repr__", &snuqs::Carg::__repr__);
+      
 
   py::class_<snuqs::Qop>(m, "Qop").def(py::init<>());
 
