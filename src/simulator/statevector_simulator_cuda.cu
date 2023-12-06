@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "assertion.h"
+
+#include "cuda_api.h"
 #include "statevector_simulator_cuda.h"
 
 namespace snuqs {
@@ -17,15 +19,33 @@ template <typename T> struct complex {
     this->imag = imag;
   }
 
-  __device__ complex<T> &operator=(const complex &other) {
-    this->real = other.real;
-    this->imag = other.imag;
-    return *this;
-  }
-
   __device__ complex<T> &operator=(double other) {
     this->real = other;
     this->imag = 0.;
+    return *this;
+  }
+
+  __device__ const complex<T> &operator+(const double &other) const {
+    T real = this->real + other;
+    T imag = this->imag;
+    return complex<T>(real, imag);
+  }
+
+  __device__ const complex<T> &operator-(const double &other) const {
+    T real = this->real - other;
+    T imag = this->imag;
+    return complex<T>(real, imag);
+  }
+
+  __device__ const complex<T> &operator*(const double &other) const {
+    T real = this->real * other;
+    T imag = this->imag * other;
+    return complex<T>(real, imag);
+  }
+
+  __device__ complex<T> &operator=(const complex &other) {
+    this->real = other.real;
+    this->imag = other.imag;
     return *this;
   }
 
@@ -48,10 +68,19 @@ template <typename T> struct complex {
   }
 };
 
-void synchronize() { CUDA_ASSERT(cudaDeviceSynchronize()); }
-
 namespace kernel {
-/*
+
+template <typename T>
+__global__ void initZero(cuda::complex<T> *buffer, size_t count) {
+  size_t i = blockDim.x * blockIdx.x + threadIdx.x;
+  if (i >= count)
+    return;
+
+  buffer[i] = 0.;
+  if (i == 0)
+    buffer[0] = 1.;
+}
+
 template <typename T>
 __global__ void oneQubitGate(cuda::complex<T> *buffer, size_t count,
                              const size_t target, std::vector<double> params) {
@@ -64,17 +93,22 @@ __global__ void oneQubitGate(cuda::complex<T> *buffer, size_t count,
   buffer[idx] = a0 + a1;
   buffer[idx + s] = a0 / a1;
 }
-*/
 
 template <typename T>
-__global__ void initZero(cuda::complex<T> *buffer, size_t count) {
+__global__ void controlledOneQubitGate(cuda::complex<T> *buffer, size_t count,
+                                       const size_t control,
+                                       const size_t target,
+                                       std::vector<double> params) {
   size_t i = blockDim.x * blockIdx.x + threadIdx.x;
-  if (i >= count)
-    return;
+  size_t target_small = (control < target) ? control : target;
+  size_t target_large = (control > target) ? control : target;
+  size_t st0 = (1ul << target_small);
+  size_t st1 = (1ul << target_large);
+  size_t cst = 1ul << control;
+  size_t st = st0 + st1;
 
-  buffer[i] = 0;
-  if (i == 0)
-    buffer[0] = 1;
+  size_t ci = ((i >> target_small) << (target_small + 1)) + (i & (st0 - 1));
+  size_t idx = ((ci >> target_large) << (target_large + 1)) + (ci & (st1 - 1));
 }
 
 } // namespace kernel
@@ -85,7 +119,7 @@ void gate<T>::initZero(std::complex<T> *buffer, size_t count,
                        std::vector<double> params) {
   kernel::initZero<T><<<(count + 255) / 256, 256>>>(
       reinterpret_cast<cuda::complex<T> *>(buffer), count);
-  CUDA_ASSERT(cudaGetLastError());
+  api::assertKernelLaunch();
 }
 
 template <typename T>
@@ -97,6 +131,9 @@ void gate<T>::id(std::complex<T> *buffer, size_t count,
 template <typename T>
 void gate<T>::x(std::complex<T> *buffer, size_t count,
                 std::vector<size_t> targets, std::vector<double> params) {
+  //  kernel::oneQubitGate<T><<<(count + 255) / 256, 256>>>(
+  //      reinterpret_cast<cuda::complex<T> *>(buffer), targets[0], params[0]);
+  api::assertKernelLaunch();
   NOT_IMPLEMENTED();
 }
 

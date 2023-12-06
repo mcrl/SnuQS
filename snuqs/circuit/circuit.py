@@ -1,5 +1,4 @@
-from .qreg import Qreg
-from .creg import Creg
+from .reg import Qreg, Creg
 from .qop import Qop
 
 

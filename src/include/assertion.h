@@ -9,13 +9,4 @@
 
 #define DO_NOTHING()
 
-#define CUDA_ASSERT(e)                                                         \
-  do {                                                                         \
-    cudaError_t err = (e);                                                     \
-    if (err != cudaSuccess) {                                                  \
-      printf("[%s:%d] CUDA ERROR: %s\n", __FILE__, __LINE__,                   \
-             cudaGetErrorString(err));                                         \
-    }                                                                          \
-  } while (0)
-
 #endif // __ASSERTION_H__

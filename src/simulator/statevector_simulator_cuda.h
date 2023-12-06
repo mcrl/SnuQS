@@ -3,11 +3,10 @@
 
 #include <complex>
 #include <vector>
+#include "cuda_api.h"
 
 namespace snuqs {
 namespace cuda {
-
-void synchronize();
 
 template <typename T> class gate {
 public:

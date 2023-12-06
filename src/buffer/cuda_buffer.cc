@@ -1,8 +1,8 @@
 #include "assertion.h"
 #include "buffer.h"
+#include "cuda_api.h"
 
 #include <cstdlib>
-#include <cuda_runtime.h>
 #include <new>
 
 #include <iostream>
@@ -14,7 +14,7 @@ namespace cuda {
 // Cuda Buffer
 //
 template <typename T> CudaBuffer<T>::CudaBuffer(size_t count) : count_(count) {
-  CUDA_ASSERT(cudaMalloc(&buf_, sizeof(std::complex<T>) * count));
+  api::malloc((void **)&buf_, sizeof(std::complex<T>) * count);
   if (buf_ == nullptr) {
     throw std::bad_alloc();
   }
@@ -22,7 +22,7 @@ template <typename T> CudaBuffer<T>::CudaBuffer(size_t count) : count_(count) {
 
 template <typename T> CudaBuffer<T>::~CudaBuffer() {
   if (buf_ != nullptr)
-    CUDA_ASSERT(cudaFree(buf_));
+    cudaFree(buf_);
 }
 template <typename T> void *CudaBuffer<T>::ptr() { return buf_; }
 
@@ -38,14 +38,14 @@ void CudaBuffer<T>::__setitem__(size_t key, std::complex<double> val) {
 
 template <typename T>
 void CudaBuffer<T>::read(void *buf, size_t count, size_t offset) {
-  CUDA_ASSERT(cudaMemcpy(buf, &buf_[offset], sizeof(std::complex<T>) * count,
-                         cudaMemcpyDeviceToHost));
+  cudaMemcpy(buf, &buf_[offset], sizeof(std::complex<T>) * count,
+             cudaMemcpyDeviceToHost);
 }
 
 template <typename T>
 void CudaBuffer<T>::write(void *buf, size_t count, size_t offset) {
-  CUDA_ASSERT(cudaMemcpy(&buf_[offset], buf, sizeof(std::complex<T>) * count,
-                         cudaMemcpyHostToDevice));
+  cudaMemcpy(&buf_[offset], buf, sizeof(std::complex<T>) * count,
+             cudaMemcpyHostToDevice);
 }
 
 template class CudaBuffer<double>;

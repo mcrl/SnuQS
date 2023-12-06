@@ -4,7 +4,7 @@ from .qasm_symbol_table import QasmSymbolTable
 from typing import Dict
 
 from snuqs.circuit import Circuit, Qgate
-from snuqs.circuit import Qreg, Creg
+from snuqs.circuit import Qreg, Creg, Qarg, Carg
 from snuqs.circuit import U, CX, Measure, Reset, Barrier, Cond, Custom
 from snuqs.circuit import Parameter, BinOp, NegOp, UnaryOp, Parenthesis, Identifier, Constant, Pi
 
@@ -68,19 +68,23 @@ class QasmCircuitGenerator(QasmStage):
         else:
             return Pi()
 
-    def qargAsQreg(self, ctx: QASMParser.QargContext):
+    def createQarg(self, ctx: QASMParser.QargContext):
         qreg = self.qreg_map[ctx.ID().getText()]
         if ctx.NNINTEGER():
-            dim = int(ctx.NNINTEGER().getText())
-            qreg = qreg[dim]
-        return qreg
+            index = int(ctx.NNINTEGER().getText())
+            qarg = Qarg(qreg, index)
+        else:
+            qarg = Qarg(qreg)
+        return qarg
 
-    def cargAsCreg(self, ctx: QASMParser.CargContext):
+    def createCarg(self, ctx: QASMParser.CargContext):
         creg = self.creg_map[ctx.ID().getText()]
         if ctx.NNINTEGER():
-            dim = int(ctx.NNINTEGER().getText())
-            creg = creg[dim]
-        return creg
+            index = int(ctx.NNINTEGER().getText())
+            carg = Carg(creg, index)
+        else:
+            carg = Carg(creg)
+        return carg
 
     def createGop(self,
                   ctx: QASMParser.GopContext,
@@ -144,7 +148,7 @@ class QasmCircuitGenerator(QasmStage):
 
     def createCustomGate(self, ctx: QASMParser.QopCustomGateContext):
         symbol = ctx.ID().getText()
-        qreg = [self.qargAsQreg(qarg) for qarg in ctx.arglist().qarg()]
+        qargs = [self.createQarg(qarg) for qarg in ctx.arglist().qarg()]
         params = []
         if ctx.explist():
             params = [self.expAsParameter(exp) for exp in ctx.explist().exp()]
@@ -153,11 +157,11 @@ class QasmCircuitGenerator(QasmStage):
             decl = self.opaque_map[symbol]
             for subcls in Qgate.__subclasses__():
                 if subcls.__name__ == symbol.upper():
-                    return subcls(qreg, params=params)
+                    return subcls(qargs, params=params)
         else:
             decl = self.gate_map[symbol]
             qubit_map = {
-                _id.getText(): qreg for _id, qreg in zip(decl.idlist().ID(), qreg)
+                _id.getText(): qarg for _id, qarg in zip(decl.idlist().ID(), qargs)
             }
             param_map = {}
             if decl.paramlist():
@@ -170,25 +174,25 @@ class QasmCircuitGenerator(QasmStage):
                 for gop in decl.goplist().gop():
                     gops.append(self.createGop(gop, qubit_map, param_map))
 
-            return Custom(symbol, gops, qreg, params=params)
+            return Custom(symbol, gops, qargs, params=params)
 
     def createQop(self, ctx: QASMParser.QopStatementContext):
         if ctx.qopUGate():
-            qreg = self.qargAsQreg(ctx.qopUGate().qarg())
+            qarg = self.createQarg(ctx.qopUGate().qarg())
             params = [self.expAsParameter(exp)
                       for exp in ctx.qopUGate().explist().exp()]
-            return U([qreg], params=params)
+            return U([qarg], params=params)
         elif ctx.qopCXGate():
-            qreg0 = self.qargAsQreg(ctx.qopCXGate().qarg()[0])
-            qreg1 = self.qargAsQreg(ctx.qopCXGate().qarg()[1])
-            return CX([qreg0, qreg1])
+            qarg0 = self.createQarg(ctx.qopCXGate().qarg()[0])
+            qarg1 = self.createQarg(ctx.qopCXGate().qarg()[1])
+            return CX([qarg0, qarg1])
         elif ctx.qopMeasure():
-            qreg = self.qargAsQreg(ctx.qopMeasure().qarg())
-            creg = self.cargAsCreg(ctx.qopMeasure().carg())
-            return Measure([qreg], [creg])
+            qarg = self.createQarg(ctx.qopMeasure().qarg())
+            carg = self.createCarg(ctx.qopMeasure().carg())
+            return Measure([qarg], [carg])
         elif ctx.qopReset():
-            qreg = self.qargAsQreg(ctx.qopReset().qarg())
-            return Reset([qreg])
+            qarg = self.createQarg(ctx.qopReset().qarg())
+            return Reset([qarg])
         elif ctx.qopCustomGate():
             return self.createCustomGate(ctx.qopCustomGate())
 
@@ -245,5 +249,5 @@ class QasmCircuitGenerator(QasmStage):
 
     # Enter a parse tree produced by QASMParser#barrierStatement.
     def enterBarrierStatement(self, ctx: QASMParser.BarrierStatementContext):
-        qreglist = [self.qargAsQreg(qarg) for qarg in ctx.arglist().qarg()]
-        self.circuit.append(Barrier(qreglist))
+        qargs = [self.createQarg(qarg) for qarg in ctx.arglist().qarg()]
+        self.circuit.append(Barrier(qargs))

@@ -1,12 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
-from .qreg import Qreg
-from .creg import Creg
+from .arg import Qarg, Carg
 from .parameter import Parameter
 
 
 class Qop(metaclass=ABCMeta):
-    def __init__(self, qbits: List[Qreg], params: List[Parameter] = []):
+    def __init__(self, qbits: List[Qarg], params: List[Parameter] = []):
         if len(qbits) == 0:
             raise ValueError("List of qbits must not be empty")
 
@@ -15,7 +14,7 @@ class Qop(metaclass=ABCMeta):
 
 
 class Barrier(Qop):
-    def __init__(self, qbits: List[Qreg]):
+    def __init__(self, qbits: List[Qarg]):
         super().__init__(qbits)
 
     def __repr__(self):
@@ -24,7 +23,7 @@ class Barrier(Qop):
 
 
 class Reset(Qop):
-    def __init__(self, qbits: List[Qreg]):
+    def __init__(self, qbits: List[Qarg]):
         super().__init__(qbits)
 
     def __repr__(self):
@@ -33,7 +32,7 @@ class Reset(Qop):
 
 
 class Measure(Qop):
-    def __init__(self, qbits: List[Qreg], cbits: List[Creg]):
+    def __init__(self, qbits: List[Qarg], cbits: List[Carg]):
         super().__init__(qbits)
 
         if len(qbits) != len(cbits):
@@ -56,7 +55,7 @@ class Measure(Qop):
 
 
 class Cond(Qop):
-    def __init__(self, op: Qop, creg: Creg, val: int):
+    def __init__(self, op: Qop, creg: Carg, val: int):
         super().__init__(op.qbits)
         self.op = op
         self.creg = creg
@@ -67,7 +66,7 @@ class Cond(Qop):
 
 
 class Custom(Qop):
-    def __init__(self, name: str, qops: List[Qop], qbits: List[Qreg], params: List[Parameter] = []):
+    def __init__(self, name: str, qops: List[Qop], qbits: List[Qarg], params: List[Parameter] = []):
         super().__init__(qbits, params)
         self.name = name
         self.qops = qops
@@ -86,7 +85,7 @@ class Custom(Qop):
 
 
 class Qgate(Qop, metaclass=ABCMeta):
-    def __init__(self, qbits: List[Qreg], params: List[Parameter] = []):
+    def __init__(self, qbits: List[Qarg], params: List[Parameter] = []):
         super().__init__(qbits, params)
 
         if len(qbits) != self.num_target_qubits():

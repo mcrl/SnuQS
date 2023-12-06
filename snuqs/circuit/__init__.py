@@ -1,5 +1,6 @@
-from .qreg import Qbit, Qreg
-from .creg import Cbit, Creg
+from .reg import Qreg, Creg
+from .arg import Qarg, Carg
+
 from .circuit import Circuit
 
 from .parameter import Parameter, BinOp, Identifier, NegOp, UnaryOp, Parenthesis, Constant, Pi

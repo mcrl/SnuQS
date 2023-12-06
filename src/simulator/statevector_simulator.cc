@@ -22,14 +22,14 @@ void StatevectorSimulator::test() {
       reinterpret_cast<std::complex<double> *>(buffer.ptr());
 
   cuda::gate<double>::initZero(buf, 512, {0}, {});
-  cuda::synchronize();
+  cuda::api::deviceSynchronize();
 
-  std::complex<double> *cmem = reinterpret_cast<std::complex<double>*>(malloc(512 * sizeof(std::complex<double>)));
+  std::complex<double> *cmem = reinterpret_cast<std::complex<double> *>(
+      malloc(512 * sizeof(std::complex<double>)));
   buffer.read(cmem, 512, 0);
 
   for (int i = 0; i < 512; ++i) {
-      printf("%d: %lf+%lfJ\n",
-              i, cmem[i].real(), cmem[i].imag());
+    printf("%d: %lf+%lfJ\n", i, cmem[i].real(), cmem[i].imag());
   }
   printf("HERE Allocated\n");
 }

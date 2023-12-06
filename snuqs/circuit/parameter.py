@@ -1,8 +1,18 @@
+#import snuqs._C as _C
+#Parameter = _C.Parameter
+#BinOp = _C.BinOp
+#Identifier = _C.Identifier
+#NegOp = _C.NegOp
+#UnaryOp = _C.UnaryOp
+#Parenthesis = _C.Parenthesis
+#Constant = _C.Constant
+#Pi = _C.Pi
+
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 import math
 import operator
-from .creg import Creg
+from .reg import Creg
 
 
 class Parameter(metaclass=ABCMeta):
