@@ -3,7 +3,8 @@ from .arg import Qarg, Carg
 
 from .circuit import Circuit
 
-from .parameter import Parameter, BinOp, Identifier, NegOp, UnaryOp, Parenthesis, Constant, Pi
+from .parameter import Parameter, Identifier, BinOp, BinOpType, NegOp
+from .parameter import UnaryOp, UnaryOpType, Parenthesis, Constant, Pi
 
 from .qop import Qop, Barrier, Reset, Measure, Cond, Qgate, Custom
 from .qop import ID, X, Y, Z, H, S, SDG, T, TDG, SX, SXDG, P

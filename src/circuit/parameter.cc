@@ -5,8 +5,8 @@
 
 namespace snuqs {
 
-Identifier::Identifier(const Carg &carg) : carg_(carg) {}
-double Identifier::eval() const { return carg_.value(); }
+Identifier::Identifier(const Creg &creg) : creg_(creg) {}
+double Identifier::eval() const { return creg_.value(); }
 
 BinOp::BinOp(BinOpType op, const Parameter &param0, const Parameter &param1)
     : op_(op), param0_(param0), param1_(param1) {}

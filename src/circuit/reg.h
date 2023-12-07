@@ -33,6 +33,7 @@ template <size_t nbits> class _BitsetImpl {};
 class Creg : public Reg {
 public:
   Creg(std::string name, size_t dim);
+  size_t value() const;
   virtual std::string __repr__() const override;
   bool __getitem__(size_t key);
   void __setitem__(size_t key, bool val);

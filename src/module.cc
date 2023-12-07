@@ -40,6 +40,7 @@ PYBIND11_MODULE(_C, m) {
       .def(py::init<std::string, size_t>())
       .def("name", &snuqs::Creg::name)
       .def("dim", &snuqs::Creg::dim)
+      .def("value", &snuqs::Creg::value)
       .def("__repr__", &snuqs::Creg::__repr__)
       .def("__getitem__", &snuqs::Creg::__getitem__)
       .def("__setitem__", &snuqs::Creg::__setitem__);
@@ -80,6 +81,10 @@ PYBIND11_MODULE(_C, m) {
   // Parameter
   //
   py::class_<snuqs::Parameter>(m, "Parameter");
+
+  py::class_<snuqs::Identifier, snuqs::Parameter>(m, "Identifier")
+      .def(py::init<const snuqs::Creg &>())
+      .def("eval", &snuqs::Identifier::eval);
 
   py::class_<snuqs::BinOp, snuqs::Parameter>(m, "BinOp")
       .def(py::init<snuqs::BinOpType, const snuqs::Parameter &,

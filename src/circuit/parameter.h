@@ -12,12 +12,11 @@ public:
 
 class Identifier : public Parameter {
 public:
-  Identifier(const Carg &creg);
+  Identifier(const Creg &creg);
   virtual double eval() const override;
 
-  const Carg &carg_;
+  const Creg &creg_;
 };
-
 
 enum class BinOpType {
   ADD = 1,

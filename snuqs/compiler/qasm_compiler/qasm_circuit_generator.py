@@ -6,7 +6,8 @@ from typing import Dict
 from snuqs.circuit import Circuit, Qgate
 from snuqs.circuit import Qreg, Creg, Qarg, Carg
 from snuqs.circuit import U, CX, Measure, Reset, Barrier, Cond, Custom
-from snuqs.circuit import Parameter, BinOp, NegOp, UnaryOp, Parenthesis, Identifier, Constant, Pi
+from snuqs.circuit import Parameter, Identifier, BinOp, BinOpType, NegOp
+from snuqs.circuit import UnaryOp, UnaryOpType, Parenthesis, Constant, Pi
 
 
 class QasmCircuitGenerator(QasmStage):
@@ -18,37 +19,39 @@ class QasmCircuitGenerator(QasmStage):
               expr0: QASMParser.ExpContext,
               expr1: QASMParser.ExpContext):
         if op == '+':
-            return BinOp(BinOp.Type.ADD,
+            return BinOp(BinOpType.ADD,
                          self.expAsParameter(expr0),
                          self.expAsParameter(expr1))
         elif op == '-':
-            return BinOp(BinOp.Type.SUB,
+            return BinOp(BinOpType.SUB,
                          self.expAsParameter(expr0),
                          self.expAsParameter(expr1))
         elif op == '*':
-            return BinOp(BinOp.Type.MUL,
+            return BinOp(BinOpType.MUL,
                          self.expAsParameter(expr0),
                          self.expAsParameter(expr1))
         elif op == '/':
-            return BinOp(BinOp.Type.DIV,
+            return BinOp(BinOpType.DIV,
                          self.expAsParameter(expr0),
                          self.expAsParameter(expr1))
 
     def unaryOp(self, op: str, expr: QASMParser.ExpContext):
         if op == 'sin':
-            return UnaryOp(UnaryOp.Type.SIN, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.SIN, self.expAsParameter(expr))
         elif op == 'cos':
-            return UnaryOp(UnaryOp.Type.COS, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.COS, self.expAsParameter(expr))
         elif op == 'tan':
-            return UnaryOp(UnaryOp.Type.TAN, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.TAN, self.expAsParameter(expr))
         elif op == 'exp':
-            return UnaryOp(UnaryOp.Type.EXP, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.EXP, self.expAsParameter(expr))
         elif op == 'ln':
-            return UnaryOp(UnaryOp.Type.LN, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.LN, self.expAsParameter(expr))
         elif op == 'sqrt':
-            return UnaryOp(UnaryOp.Type.SQRT, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.SQRT, self.expAsParameter(expr))
 
     def expAsParameter(self, exp: QASMParser.ExpContext):
+        raise NotImplementedError("HERE")
+        print(exp.getText())
         if exp.binop():
             return self.binOp(exp.binop().getText(),
                               exp.exp()[0],
