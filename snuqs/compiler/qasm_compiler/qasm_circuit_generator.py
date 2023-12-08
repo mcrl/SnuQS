@@ -17,53 +17,68 @@ class QasmCircuitGenerator(QasmStage):
 
     def binOp(self, op: str,
               expr0: QASMParser.ExpContext,
-              expr1: QASMParser.ExpContext):
+              expr1: QASMParser.ExpContext,
+              param_map: Dict[str, Parameter]
+              ):
         if op == '+':
             return BinOp(BinOpType.ADD,
-                         self.expAsParameter(expr0),
-                         self.expAsParameter(expr1))
+                         self.expAsParameter(expr0, param_map),
+                         self.expAsParameter(expr1, param_map))
         elif op == '-':
             return BinOp(BinOpType.SUB,
-                         self.expAsParameter(expr0),
-                         self.expAsParameter(expr1))
+                         self.expAsParameter(expr0, param_map),
+                         self.expAsParameter(expr1, param_map))
         elif op == '*':
             return BinOp(BinOpType.MUL,
-                         self.expAsParameter(expr0),
-                         self.expAsParameter(expr1))
+                         self.expAsParameter(expr0, param_map),
+                         self.expAsParameter(expr1, param_map))
         elif op == '/':
             return BinOp(BinOpType.DIV,
-                         self.expAsParameter(expr0),
-                         self.expAsParameter(expr1))
+                         self.expAsParameter(expr0, param_map),
+                         self.expAsParameter(expr1, param_map))
 
-    def unaryOp(self, op: str, expr: QASMParser.ExpContext):
+    def unaryOp(self,
+                op: str,
+                expr: QASMParser.ExpContext,
+                param_map: Dict[str, Parameter]):
         if op == 'sin':
-            return UnaryOp(UnaryOpType.SIN, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.SIN,
+                           self.expAsParameter(expr, param_map))
         elif op == 'cos':
-            return UnaryOp(UnaryOpType.COS, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.COS,
+                           self.expAsParameter(expr, param_map))
         elif op == 'tan':
-            return UnaryOp(UnaryOpType.TAN, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.TAN,
+                           self.expAsParameter(expr, param_map))
         elif op == 'exp':
-            return UnaryOp(UnaryOpType.EXP, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.EXP,
+                           self.expAsParameter(expr, param_map))
         elif op == 'ln':
-            return UnaryOp(UnaryOpType.LN, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.LN,
+                           self.expAsParameter(expr, param_map))
         elif op == 'sqrt':
-            return UnaryOp(UnaryOpType.SQRT, self.expAsParameter(expr))
+            return UnaryOp(UnaryOpType.SQRT,
+                           self.expAsParameter(expr, param_map))
 
-    def expAsParameter(self, exp: QASMParser.ExpContext):
-        raise NotImplementedError("HERE")
-        print(exp.getText())
+    def expAsParameter(self, exp: QASMParser.ExpContext,
+                       param_map: Dict[str, Parameter]):
         if exp.binop():
             return self.binOp(exp.binop().getText(),
                               exp.exp()[0],
-                              exp.exp()[1])
+                              exp.exp()[1],
+                              param_map)
         elif exp.negop():
-            return NegOp(self.expAsParameter(exp.exp()[0]))
+            return NegOp(self.expAsParameter(exp.exp()[0], param_map))
         elif exp.unaryop():
-            return self.unaryOp(exp.unaryop().getText(), exp.exp()[0])
+            return self.unaryOp(exp.unaryop().getText(), exp.exp()[0], param_map)
         elif exp.exp():
-            return Parenthesis(self.expAsParameter(exp.exp()[0]))
+            return Parenthesis(self.expAsParameter(exp.exp()[0], param_map))
         elif exp.ID():
-            return Identifier(self.creg_map[exp.ID().getText()])
+            symbol = exp.ID().getText()
+            if symbol in param_map:
+                return param_map[symbol]
+            else:
+                return Identifier(self.creg_map[symbol])
         elif exp.REAL():
             return Constant(float(exp.REAL().getText()))
         elif exp.NNINTEGER():
@@ -92,13 +107,12 @@ class QasmCircuitGenerator(QasmStage):
     def createGop(self,
                   ctx: QASMParser.GopContext,
                   qubit_map: Dict[str, Qreg],
-                  param_map: Dict[str, Parameter]):
+                  param_map: Dict[str, Parameter]
+                  ):
         if ctx.gopUGate():
             qreg = qubit_map[ctx.gopUGate().ID().getText()]
-            self.creg_map, tmp = param_map, self.creg_map
-            params = [self.expAsParameter(exp)
+            params = [self.expAsParameter(exp, param_map)
                       for exp in ctx.gopUGate().explist().exp()]
-            self.creg_map = tmp
             return U([qreg], params=params)
         elif ctx.gopCXGate():
             qregs = [qubit_map[_id.getText()] for _id in ctx.gopCXGate().ID()]
@@ -110,12 +124,10 @@ class QasmCircuitGenerator(QasmStage):
         elif ctx.gopCustomGate():
             qregs = [qubit_map[_id.getText()]
                      for _id in ctx.gopCustomGate().idlist().ID()]
-            self.creg_map, tmp = param_map, self.creg_map
             params = []
             if ctx.gopCustomGate().explist():
-                params = [self.expAsParameter(exp)
+                params = [self.expAsParameter(exp, param_map)
                           for exp in ctx.gopCustomGate().explist().exp()]
-            self.creg_map = tmp
 
             symbol = ctx.gopCustomGate().ID().getText()
             if symbol in self.opaque_map:
@@ -128,12 +140,10 @@ class QasmCircuitGenerator(QasmStage):
                 qregs = [
                     qubit_map[_id.getText()] for _id in ctx.gopCustomGate().idlist().ID()
                 ]
-                self.creg_map, tmp = param_map, self.creg_map
                 params = []
                 if ctx.gopCustomGate().explist():
-                    params = [self.expAsParameter(exp)
+                    params = [self.expAsParameter(exp, param_map)
                               for exp in ctx.gopCustomGate().explist().exp()]
-                self.creg_map = tmp
                 _qubit_map = {
                     _id.getText(): qreg for _id, qreg in zip(decl.idlist().ID(), qregs)
                 }
@@ -154,7 +164,7 @@ class QasmCircuitGenerator(QasmStage):
         qargs = [self.createQarg(qarg) for qarg in ctx.arglist().qarg()]
         params = []
         if ctx.explist():
-            params = [self.expAsParameter(exp) for exp in ctx.explist().exp()]
+            params = [self.expAsParameter(exp, {}) for exp in ctx.explist().exp()]
 
         if symbol in self.opaque_map:
             decl = self.opaque_map[symbol]
@@ -182,7 +192,7 @@ class QasmCircuitGenerator(QasmStage):
     def createQop(self, ctx: QASMParser.QopStatementContext):
         if ctx.qopUGate():
             qarg = self.createQarg(ctx.qopUGate().qarg())
-            params = [self.expAsParameter(exp)
+            params = [self.expAsParameter(exp, {})
                       for exp in ctx.qopUGate().explist().exp()]
             return U([qarg], params=params)
         elif ctx.qopCXGate():
