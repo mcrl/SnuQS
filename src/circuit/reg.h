@@ -26,6 +26,7 @@ protected:
 class Qreg : public Reg {
 public:
   Qreg(std::string name, size_t dim);
+  std::string __repr__() const override;
 };
 
 template <size_t nbits> class _BitsetImpl {};

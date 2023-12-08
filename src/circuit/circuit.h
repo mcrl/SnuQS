@@ -1,22 +1,27 @@
 #ifndef __CIRCUIT_H__
 #define __CIRCUIT_H__
 
-#include "circuit/reg.h"
 #include "circuit/qop.h"
+#include "circuit/reg.h"
 
+#include <memory>
 #include <vector>
 
 namespace snuqs {
 
 class Circuit {
 public:
-  Circuit(size_t num_qbits, size_t num_bits);
-  void append(Qop qop);
+  Circuit(const std::string &name);
+  void append_qreg(std::shared_ptr<Qreg> qreg);
+  void append_creg(std::shared_ptr<Creg> creg);
+  void append(std::shared_ptr<Qop> qop);
+  std::string __repr__();
 
 private:
-  size_t num_qbits_;
-  size_t num_bits_;
-  std::vector<Qop> qops_;
+  std::string name_;
+  std::vector<std::shared_ptr<Qreg>> qregs_;
+  std::vector<std::shared_ptr<Creg>> cregs_;
+  std::vector<std::shared_ptr<Qop>> qops_;
 };
 } // namespace snuqs
 

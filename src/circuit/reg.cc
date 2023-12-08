@@ -19,6 +19,9 @@ std::string Reg::__repr__() const {
 }
 
 Qreg::Qreg(std::string name, size_t dim) : Reg(name, dim) {}
+std::string Qreg::__repr__() const {
+  return name_ + "[" + std::to_string(dim_) + "]";
+}
 
 size_t Creg::value() const { return bitset_.to_ulong(); }
 Creg::Creg(std::string name, size_t dim) : Reg(name, dim), bitset_{0} {}

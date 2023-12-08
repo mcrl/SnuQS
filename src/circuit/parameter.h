@@ -7,7 +7,8 @@ namespace snuqs {
 
 class Parameter {
 public:
-  virtual double eval() const = 0;
+    Parameter() {};
+  virtual double eval() const { return 0.0; };
 };
 
 class Identifier : public Parameter {

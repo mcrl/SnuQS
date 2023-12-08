@@ -113,7 +113,7 @@ class QasmCircuitGenerator(QasmStage):
             qreg = qubit_map[ctx.gopUGate().ID().getText()]
             params = [self.expAsParameter(exp, param_map)
                       for exp in ctx.gopUGate().explist().exp()]
-            return U([qreg], params=params)
+            return U([qreg], params)
         elif ctx.gopCXGate():
             qregs = [qubit_map[_id.getText()] for _id in ctx.gopCXGate().ID()]
             return CX(qregs)
@@ -133,7 +133,7 @@ class QasmCircuitGenerator(QasmStage):
             if symbol in self.opaque_map:
                 for subcls in Qgate.__subclasses__():
                     if subcls.__name__ == symbol.capitalize():
-                        return subcls(qregs, params=params)
+                        return subcls(qregs, params)
             else:
                 symbol = ctx.gopCustomGate().ID().getText()
                 decl = self.gate_map[symbol]
@@ -157,7 +157,7 @@ class QasmCircuitGenerator(QasmStage):
                 for gop in decl.goplist().gop():
                     gops.append(self.createGop(gop, _qubit_map, _param_map))
 
-                return Custom(symbol, gops, qregs, params=params)
+                return Custom(symbol, gops, qregs, params)
 
     def createCustomGate(self, ctx: QASMParser.QopCustomGateContext):
         symbol = ctx.ID().getText()
@@ -170,7 +170,7 @@ class QasmCircuitGenerator(QasmStage):
             decl = self.opaque_map[symbol]
             for subcls in Qgate.__subclasses__():
                 if subcls.__name__ == symbol.upper():
-                    return subcls(qargs, params=params)
+                    return subcls(qargs, params)
         else:
             decl = self.gate_map[symbol]
             qubit_map = {
@@ -187,14 +187,14 @@ class QasmCircuitGenerator(QasmStage):
                 for gop in decl.goplist().gop():
                     gops.append(self.createGop(gop, qubit_map, param_map))
 
-            return Custom(symbol, gops, qargs, params=params)
+            return Custom(symbol, gops, qargs, params)
 
     def createQop(self, ctx: QASMParser.QopStatementContext):
         if ctx.qopUGate():
             qarg = self.createQarg(ctx.qopUGate().qarg())
             params = [self.expAsParameter(exp, {})
                       for exp in ctx.qopUGate().explist().exp()]
-            return U([qarg], params=params)
+            return U([qarg])
         elif ctx.qopCXGate():
             qarg0 = self.createQarg(ctx.qopCXGate().qarg()[0])
             qarg1 = self.createQarg(ctx.qopCXGate().qarg()[1])

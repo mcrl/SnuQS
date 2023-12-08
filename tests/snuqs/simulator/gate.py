@@ -8,7 +8,6 @@ class GateTest(unittest.TestCase):
         circ = compiler.compile('qasm/gate/h.qasm')
         sim = StatevectorSimulator()
         result = sim.run(circ)
-        print(result)
 
 
 if __name__ == '__main__':
