@@ -35,7 +35,6 @@ class QasmCompiler:
                 QasmOpaqueGateChecker(symtab),
                 QasmCircuitGenerator(circuit, symtab),
             ]
-
             walker = QasmWalker()
             for stage in stages:
                 walker.walk(stage, tree)

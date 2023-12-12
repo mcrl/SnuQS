@@ -7,10 +7,11 @@
 namespace snuqs {
 namespace cuda {
 
-std::vector<size_t> qargsToIndices(const std::vector<Qarg> &args) {
+std::vector<size_t>
+qargsToIndices(const std::vector<std::shared_ptr<Qarg>> &args) {
   std::vector<size_t> indices(args.size());
   for (int i = 0; i < args.size(); ++i) {
-    indices[i] = args[i].index();
+    indices[i] = args[i]->globalIndex();
   }
   return indices;
 }
@@ -180,7 +181,8 @@ static void exec_gate(Qgate *qop, Buffer<T> *buffer, size_t num_states) {
 }
 
 template <typename T>
-void exec(Qop *qop, Buffer<T> *buffer, size_t num_states) {
+void exec(Qop *qop, Buffer<T> *buffer, size_t num_states,
+          Buffer<T> *mem_buffer) {
   switch (qop->type()) {
   case QopType::BARRIER:
     NOT_IMPLEMENTED();
@@ -192,16 +194,23 @@ void exec(Qop *qop, Buffer<T> *buffer, size_t num_states) {
     NOT_IMPLEMENTED();
   case QopType::CUSTOM:
     for (auto &qop : dynamic_cast<Custom *>(qop)->qops()) {
-      exec<T>(qop.get(), buffer, num_states);
+      exec<T>(qop.get(), buffer, num_states, mem_buffer);
     }
     break;
   case QopType::QGATE:
     exec_gate<T>(dynamic_cast<Qgate *>(qop), buffer, num_states);
+    break;
+  case QopType::GLOBAL_SWAP:
+    QopImpl<T>::global_swap(buffer->ptr(), num_states,
+                            qargsToIndices(qop->qargs_),
+                            paramsToValues(qop->params_), mem_buffer->ptr());
   }
 }
 
-template void exec<float>(Qop *qop, Buffer<float> *buffer, size_t num_states);
-template void exec<double>(Qop *qop, Buffer<double> *buffer, size_t num_states);
+template void exec<float>(Qop *qop, Buffer<float> *buffer, size_t num_states,
+                          Buffer<float> *mem_buffer);
+template void exec<double>(Qop *qop, Buffer<double> *buffer, size_t num_states,
+                           Buffer<double> *mem_buffer);
 
 } // namespace cuda
 } // namespace snuqs

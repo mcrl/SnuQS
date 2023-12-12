@@ -10,8 +10,9 @@ namespace cuda {
 
 template <typename T> class QopImpl {
 public:
-  static void initZero(std::complex<T> *buffer, size_t count,
-                       std::vector<size_t> targets, std::vector<double> params);
+  static void initZeroState(std::complex<T> *buffer, size_t count,
+                            std::vector<size_t> targets,
+                            std::vector<double> params);
 
   static void id(std::complex<T> *buffer, size_t count,
                  std::vector<size_t> targets, std::vector<double> params);
@@ -123,6 +124,11 @@ public:
 
   static void cswap(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets, std::vector<double> params);
+
+  static void global_swap(std::complex<T> *buffer, size_t count,
+                          std::vector<size_t> targets,
+                          std::vector<double> params,
+                          std::complex<T> *mem_buffer);
 };
 
 } // namespace cuda

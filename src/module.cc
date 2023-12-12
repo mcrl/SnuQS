@@ -21,6 +21,7 @@ PYBIND11_MODULE(_C, m) {
   py::class_<snuqs::MemoryBuffer<double>, snuqs::Buffer<double>,
              std::shared_ptr<snuqs::MemoryBuffer<double>>>(m, "MemoryBuffer")
       .def(py::init<size_t>())
+      .def(py::init<size_t, bool>())
       .def("__getitem__", &snuqs::MemoryBuffer<double>::__getitem__)
       .def("__setitem__", &snuqs::MemoryBuffer<double>::__setitem__);
 
@@ -51,22 +52,15 @@ PYBIND11_MODULE(_C, m) {
   //
   // Arg
   //
-  py::class_<snuqs::Arg>(m, "Arg");
-  py::class_<snuqs::Qarg, snuqs::Arg>(m, "Qarg")
-      .def(py::init<const snuqs::Qreg &>())
-      .def(py::init<const snuqs::Qreg &, size_t>())
-      .def("reg", &snuqs::Qarg::reg)
-      .def("name", &snuqs::Qarg::index)
-      .def("dim", &snuqs::Qarg::dim)
-      .def("value", &snuqs::Qarg::value)
+  py::class_<snuqs::Qarg, std::shared_ptr<snuqs::Qarg>>(m, "Qarg")
+      .def(py::init<std::shared_ptr<const snuqs::Qreg>>())
+      .def(py::init<std::shared_ptr<const snuqs::Qreg>, size_t>())
+      .def("index", &snuqs::Qarg::index)
       .def("__repr__", &snuqs::Qarg::__repr__);
-  py::class_<snuqs::Carg, snuqs::Arg>(m, "Carg")
+
+  py::class_<snuqs::Carg, std::shared_ptr<snuqs::Carg>>(m, "Carg")
       .def(py::init<const snuqs::Creg &>())
       .def(py::init<const snuqs::Creg &, size_t>())
-      .def("reg", &snuqs::Carg::reg)
-      .def("name", &snuqs::Carg::index)
-      .def("dim", &snuqs::Carg::dim)
-      .def("value", &snuqs::Carg::value)
       .def("__repr__", &snuqs::Carg::__repr__);
 
   py::class_<snuqs::StatevectorSimulator<double>>(m, "StatevectorSimulator")
@@ -134,6 +128,7 @@ PYBIND11_MODULE(_C, m) {
       .def("append_qreg", &snuqs::Circuit::append_qreg)
       .def("append_creg", &snuqs::Circuit::append_creg)
       .def("append", &snuqs::Circuit::append)
+      .def("name", &snuqs::Circuit::name)
       .def("__repr__", &snuqs::Circuit::__repr__);
 
   //
@@ -149,23 +144,25 @@ PYBIND11_MODULE(_C, m) {
 
   py::class_<snuqs::Qop, std::shared_ptr<snuqs::Qop>>(m, "Qop")
       .def(py::init<snuqs::QopType>())
-      .def(py::init<snuqs::QopType, std::vector<snuqs::Qarg>>())
-      .def(py::init<snuqs::QopType, std::vector<snuqs::Qarg>,
+      .def(
+          py::init<snuqs::QopType, std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<snuqs::QopType, std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("qargs", &snuqs::Qop::qargs)
       .def("params", &snuqs::Qop::params);
 
   py::class_<snuqs::Barrier, snuqs::Qop, std::shared_ptr<snuqs::Barrier>>(
       m, "Barrier")
-      .def(py::init<std::vector<snuqs::Qarg>>());
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>());
 
   py::class_<snuqs::Reset, snuqs::Qop, std::shared_ptr<snuqs::Reset>>(m,
                                                                       "Reset")
-      .def(py::init<std::vector<snuqs::Qarg>>());
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>());
 
   py::class_<snuqs::Measure, snuqs::Qop, std::shared_ptr<snuqs::Measure>>(
       m, "Measure")
-      .def(py::init<std::vector<snuqs::Qarg>, std::vector<snuqs::Carg>>());
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
+                    std::vector<snuqs::Carg>>());
 
   py::class_<snuqs::Cond, snuqs::Qop, std::shared_ptr<snuqs::Cond>>(m, "Cond")
       .def(py::init<std::shared_ptr<snuqs::Qop>, std::shared_ptr<snuqs::Creg>,
@@ -174,7 +171,7 @@ PYBIND11_MODULE(_C, m) {
   py::class_<snuqs::Custom, snuqs::Qop, std::shared_ptr<snuqs::Custom>>(
       m, "Custom")
       .def(py::init<std::string, std::vector<std::shared_ptr<snuqs::Qop>>,
-                    std::vector<snuqs::Qarg>,
+                    std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>());
 
   py::enum_<snuqs::QgateType>(m, "QgateType")
@@ -216,264 +213,265 @@ PYBIND11_MODULE(_C, m) {
       .value("CCX", snuqs::QgateType::CCX)
       .value("CSWAP", snuqs::QgateType::CSWAP);
 
-  py::class_<snuqs::Qgate, snuqs::Qop, std::shared_ptr<snuqs::Qgate>>(m, "Qgate");
+  py::class_<snuqs::Qgate, snuqs::Qop, std::shared_ptr<snuqs::Qgate>>(m,
+                                                                      "Qgate");
 
   py::class_<snuqs::ID, snuqs::Qgate, std::shared_ptr<snuqs::ID>>(m, "ID")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::ID::numQargs)
       .def("numParams", &snuqs::ID::numParams);
 
   py::class_<snuqs::X, snuqs::Qgate, std::shared_ptr<snuqs::X>>(m, "X")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::X::numQargs)
       .def("numParams", &snuqs::X::numParams);
 
   py::class_<snuqs::Y, snuqs::Qgate, std::shared_ptr<snuqs::Y>>(m, "Y")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::Y::numQargs)
       .def("numParams", &snuqs::Y::numParams);
 
   py::class_<snuqs::Z, snuqs::Qgate, std::shared_ptr<snuqs::Z>>(m, "Z")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::Z::numQargs)
       .def("numParams", &snuqs::Z::numParams);
 
   py::class_<snuqs::H, snuqs::Qgate, std::shared_ptr<snuqs::H>>(m, "H")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::H::numQargs)
       .def("numParams", &snuqs::H::numParams);
 
   py::class_<snuqs::S, snuqs::Qgate, std::shared_ptr<snuqs::S>>(m, "S")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::S::numQargs)
       .def("numParams", &snuqs::S::numParams);
 
   py::class_<snuqs::SDG, snuqs::Qgate, std::shared_ptr<snuqs::SDG>>(m, "SDG")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::SDG::numQargs)
       .def("numParams", &snuqs::SDG::numParams);
 
   py::class_<snuqs::T, snuqs::Qgate, std::shared_ptr<snuqs::T>>(m, "T")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::T::numQargs)
       .def("numParams", &snuqs::T::numParams);
 
   py::class_<snuqs::TDG, snuqs::Qgate, std::shared_ptr<snuqs::TDG>>(m, "TDG")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::TDG::numQargs)
       .def("numParams", &snuqs::TDG::numParams);
 
   py::class_<snuqs::SX, snuqs::Qgate, std::shared_ptr<snuqs::SX>>(m, "SX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::SX::numQargs)
       .def("numParams", &snuqs::SX::numParams);
 
   py::class_<snuqs::SXDG, snuqs::Qgate, std::shared_ptr<snuqs::SXDG>>(m, "SXDG")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::SXDG::numQargs)
       .def("numParams", &snuqs::SXDG::numParams);
 
   py::class_<snuqs::P, snuqs::Qgate, std::shared_ptr<snuqs::P>>(m, "P")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::P::numQargs)
       .def("numParams", &snuqs::P::numParams);
 
   py::class_<snuqs::RX, snuqs::Qgate, std::shared_ptr<snuqs::RX>>(m, "RX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::RX::numQargs)
       .def("numParams", &snuqs::RX::numParams);
 
   py::class_<snuqs::RY, snuqs::Qgate, std::shared_ptr<snuqs::RY>>(m, "RY")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::RY::numQargs)
       .def("numParams", &snuqs::RY::numParams);
 
   py::class_<snuqs::RZ, snuqs::Qgate, std::shared_ptr<snuqs::RZ>>(m, "RZ")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::RZ::numQargs)
       .def("numParams", &snuqs::RZ::numParams);
 
   py::class_<snuqs::U0, snuqs::Qgate, std::shared_ptr<snuqs::U0>>(m, "U0")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::U0::numQargs)
       .def("numParams", &snuqs::U0::numParams);
 
   py::class_<snuqs::U1, snuqs::Qgate, std::shared_ptr<snuqs::U1>>(m, "U1")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::U1::numQargs)
       .def("numParams", &snuqs::U1::numParams);
 
   py::class_<snuqs::U2, snuqs::Qgate, std::shared_ptr<snuqs::U2>>(m, "U2")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::U2::numQargs)
       .def("numParams", &snuqs::U2::numParams);
 
   py::class_<snuqs::U3, snuqs::Qgate, std::shared_ptr<snuqs::U3>>(m, "U3")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::U3::numQargs)
       .def("numParams", &snuqs::U3::numParams);
 
   py::class_<snuqs::U, snuqs::Qgate, std::shared_ptr<snuqs::U>>(m, "U")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::U::numQargs)
       .def("numParams", &snuqs::U::numParams);
 
   py::class_<snuqs::CX, snuqs::Qgate, std::shared_ptr<snuqs::CX>>(m, "CX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CX::numQargs)
       .def("numParams", &snuqs::CX::numParams);
 
   py::class_<snuqs::CZ, snuqs::Qgate, std::shared_ptr<snuqs::CZ>>(m, "CZ")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CZ::numQargs)
       .def("numParams", &snuqs::CZ::numParams);
 
   py::class_<snuqs::CY, snuqs::Qgate, std::shared_ptr<snuqs::CY>>(m, "CY")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CY::numQargs)
       .def("numParams", &snuqs::CY::numParams);
 
   py::class_<snuqs::SWAP, snuqs::Qgate, std::shared_ptr<snuqs::SWAP>>(m, "SWAP")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::SWAP::numQargs)
       .def("numParams", &snuqs::SWAP::numParams);
 
   py::class_<snuqs::CH, snuqs::Qgate, std::shared_ptr<snuqs::CH>>(m, "CH")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CH::numQargs)
       .def("numParams", &snuqs::CH::numParams);
 
   py::class_<snuqs::CSX, snuqs::Qgate, std::shared_ptr<snuqs::CSX>>(m, "CSX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CSX::numQargs)
       .def("numParams", &snuqs::CSX::numParams);
 
   py::class_<snuqs::CRX, snuqs::Qgate, std::shared_ptr<snuqs::CRX>>(m, "CRX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CRX::numQargs)
       .def("numParams", &snuqs::CRX::numParams);
 
   py::class_<snuqs::CRY, snuqs::Qgate, std::shared_ptr<snuqs::CRY>>(m, "CRY")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CRY::numQargs)
       .def("numParams", &snuqs::CRY::numParams);
 
   py::class_<snuqs::CRZ, snuqs::Qgate, std::shared_ptr<snuqs::CRZ>>(m, "CRZ")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CRZ::numQargs)
       .def("numParams", &snuqs::CRZ::numParams);
 
   py::class_<snuqs::CU1, snuqs::Qgate, std::shared_ptr<snuqs::CU1>>(m, "CU1")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CU1::numQargs)
       .def("numParams", &snuqs::CU1::numParams);
 
   py::class_<snuqs::CP, snuqs::Qgate, std::shared_ptr<snuqs::CP>>(m, "CP")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CP::numQargs)
       .def("numParams", &snuqs::CP::numParams);
 
   py::class_<snuqs::RXX, snuqs::Qgate, std::shared_ptr<snuqs::RXX>>(m, "RXX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::RXX::numQargs)
       .def("numParams", &snuqs::RXX::numParams);
 
   py::class_<snuqs::RZZ, snuqs::Qgate, std::shared_ptr<snuqs::RZZ>>(m, "RZZ")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::RZZ::numQargs)
       .def("numParams", &snuqs::RZZ::numParams);
 
   py::class_<snuqs::CU3, snuqs::Qgate, std::shared_ptr<snuqs::CU3>>(m, "CU3")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CU3::numQargs)
       .def("numParams", &snuqs::CU3::numParams);
 
   py::class_<snuqs::CU, snuqs::Qgate, std::shared_ptr<snuqs::CU>>(m, "CU")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CU::numQargs)
       .def("numParams", &snuqs::CU::numParams);
 
   py::class_<snuqs::CCX, snuqs::Qgate, std::shared_ptr<snuqs::CCX>>(m, "CCX")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CCX::numQargs)
       .def("numParams", &snuqs::CCX::numParams);
 
   py::class_<snuqs::CSWAP, snuqs::Qgate, std::shared_ptr<snuqs::CSWAP>>(m,
                                                                         "CSWAP")
-      .def(py::init<std::vector<snuqs::Qarg>>())
-      .def(py::init<std::vector<snuqs::Qarg>,
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CSWAP::numQargs)
       .def("numParams", &snuqs::CSWAP::numParams);

@@ -6,7 +6,7 @@
 
 namespace snuqs {
 namespace cuda {
-template <typename T> void exec(Qop *qop, Buffer<T> *buffer, size_t num_states);
+template <typename T> void exec(Qop *qop, Buffer<T> *buffer, size_t num_states, Buffer<T> *mem_buffer);
 } // namespace cuda
 } // namespace snuqs
 

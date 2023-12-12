@@ -16,17 +16,21 @@ public:
 
   std::string name() const;
   size_t dim() const;
+  size_t baseDim() const;
+  void setBaseDim(size_t base_dim);
   virtual std::string __repr__() const;
 
 protected:
   std::string name_;
   size_t dim_;
+  size_t base_dim_;
 };
 
 class Qreg : public Reg {
 public:
   Qreg(std::string name, size_t dim);
   std::string __repr__() const override;
+  bool operator==(const Qreg &other) const;
 };
 
 template <size_t nbits> class _BitsetImpl {};

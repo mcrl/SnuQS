@@ -1,4 +1,4 @@
-from snuqs._C import Arg, Qarg, Carg
+from snuqs._C import Qarg, Carg
 #from .reg import Reg
 #from abc import ABCMeta
 #

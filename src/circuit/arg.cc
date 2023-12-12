@@ -1,24 +1,39 @@
 #include "arg.h"
 
 namespace snuqs {
-Arg::Arg(const Reg &reg) : reg_(reg), index_(-1), dim_(reg.dim()) {}
-Arg::Arg(const Reg &reg, size_t index) : reg_(reg), index_(index), dim_(1) {}
-const Reg &Arg::reg() const { return reg_; }
-size_t Arg::index() const { return index_; }
-size_t Arg::dim() const { return dim_; }
-size_t Arg::value() const { return value_; }
-std::string Arg::__repr__() const {
+Qarg::Qarg(std::shared_ptr<const Qreg> qreg) : qreg_(qreg) {}
+Qarg::Qarg(std::shared_ptr<const Qreg> qreg, size_t index)
+    : index_(index), qreg_(qreg) {}
+std::shared_ptr<const Qreg> Qarg::qreg() const { return qreg_; }
+std::string Qarg::__repr__() const {
+  std::string name = qreg_->name();
   if (index_ == -1) {
-    return reg_.name();
+    return name;
   } else {
-    return reg_.name() + "[" + std::to_string(index_) + "]";
+    return name + "[" + std::to_string(index_) + "]";
   }
 }
 
-Qarg::Qarg(const Qreg &qreg) : Arg(qreg) {}
-Qarg::Qarg(const Qreg &qreg, size_t index) : Arg(qreg, index) {}
+size_t Qarg::index() const { return index_; }
+size_t Qarg::globalIndex() const { return qreg_->baseDim() + index_; }
 
-Carg::Carg(const Creg &creg) : Arg(creg) {}
-Carg::Carg(const Creg &creg, size_t index) : Arg(creg, index) {}
+bool Qarg::operator<(const Qarg &other) const {
+  return this->globalIndex() < other.globalIndex();
+}
+
+bool Qarg::operator==(const Qarg &other) const {
+  return (this->qreg() == other.qreg()) && (this->index() && other.index());
+}
+
+Carg::Carg(const Creg &creg) : creg_(creg) {}
+Carg::Carg(const Creg &creg, size_t index) : index_(index), creg_(creg) {}
+std::string Carg::__repr__() const {
+  std::string name = creg_.name();
+  if (index_ == -1) {
+    return name;
+  } else {
+    return name + "[" + std::to_string(index_) + "]";
+  }
+}
 
 } // namespace snuqs

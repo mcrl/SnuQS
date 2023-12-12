@@ -3,38 +3,37 @@
 
 #include "reg.h"
 #include <cstddef>
+#include <memory>
 
 namespace snuqs {
 
-class Arg {
-protected:
-  Arg(const Reg &reg);
-  Arg(const Reg &reg, size_t index);
-
+class Qarg {
 public:
-  const Reg &reg() const;
-  size_t index() const;
-  size_t dim() const;
-  size_t value() const;
+  Qarg(std::shared_ptr<const Qreg> qreg);
+  Qarg(std::shared_ptr<const Qreg> qreg, size_t index);
+  std::shared_ptr<const Qreg> qreg() const;
   std::string __repr__() const;
+  size_t index() const;
+  size_t globalIndex() const;
+  bool operator<(const Qarg &other) const;
+  bool operator==(const Qarg &other) const;
 
-protected:
-  const Reg &reg_;
+  std::shared_ptr<const Qreg> qreg_;
+
+private:
   size_t index_;
-  size_t dim_;
-  size_t value_;
+  size_t base_;
 };
 
-class Qarg : public Arg {
-public:
-  Qarg(const Qreg &qreg);
-  Qarg(const Qreg &qreg, size_t index);
-};
-
-class Carg : public Arg {
+class Carg {
 public:
   Carg(const Creg &creg);
   Carg(const Creg &creg, size_t index);
+  const Creg &creg() const;
+  std::string __repr__() const;
+
+  const Creg &creg_;
+  size_t index_;
 };
 
 } // namespace snuqs

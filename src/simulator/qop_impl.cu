@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <bitset>
 #include <complex>
 #include <cstdint>
 #include <vector>
@@ -107,7 +109,7 @@ __global__ void measure(cuda::complex<T> *buffer, size_t count, size_t target,
 }
 
 template <typename T>
-__global__ void initZero(cuda::complex<T> *buffer, size_t count) {
+__global__ void initZeroState(cuda::complex<T> *buffer, size_t count) {
   size_t i = blockDim.x * blockIdx.x + threadIdx.x;
   if (i >= count)
     return;
@@ -256,10 +258,10 @@ __global__ void FourQubitGate(cuda::complex<T> *buffer, size_t count,
 } // namespace kernel
 
 template <typename T>
-void QopImpl<T>::initZero(std::complex<T> *buffer, size_t count,
-                          std::vector<size_t> targets,
-                          std::vector<double> params) {
-  kernel::initZero<T><<<(count + 255) / 256, 256>>>(
+void QopImpl<T>::initZeroState(std::complex<T> *buffer, size_t count,
+                               std::vector<size_t> targets,
+                               std::vector<double> params) {
+  kernel::initZeroState<T><<<(count + 255) / 256, 256>>>(
       reinterpret_cast<cuda::complex<T> *>(buffer), count);
   api::assertKernelLaunch();
 }
@@ -1077,6 +1079,68 @@ void QopImpl<T>::cswap(std::complex<T> *buffer, size_t count,
       reinterpret_cast<cuda::complex<T> *>(buffer), count, targets[0],
       targets[1], targets[2], f0, f1, f2, f3, f4, f5, f6, f7);
   api::assertKernelLaunch();
+}
+
+template <typename T>
+void QopImpl<T>::global_swap(std::complex<T> *buffer, size_t count,
+                             std::vector<size_t> targets,
+                             std::vector<double> params,
+                             std::complex<T> *mem_buffer) {
+  size_t target0 = std::min(targets[0], targets[1]);
+  size_t target1 = std::max(targets[0], targets[1]);
+  size_t diff = target1 - target0;
+
+  int device, num_devices;
+  api::getDevice(&device);
+  api::getDeviceCount(&num_devices);
+
+  size_t num_states_per_device = count;
+  size_t num_states_per_block = (1ull << target0);
+  size_t num_blocks_per_device = num_states_per_device / num_states_per_block;
+
+  for (size_t i = 0; i < num_blocks_per_device; ++i) {
+    size_t block_num = device * num_blocks_per_device + i;
+    std::bitset<64> bitset_tmp{block_num};
+    std::bitset<64> bitset{block_num};
+    bitset[0] = bitset_tmp[diff];
+    bitset[diff] = bitset_tmp[0];
+    size_t changed_num = bitset.to_ulong();
+
+    api::memcpyAsync(&mem_buffer[changed_num * num_states_per_block],
+                     &buffer[i * num_states_per_block],
+                     num_states_per_block * sizeof(std::complex<T>),
+                     cudaMemcpyDeviceToHost, 0);
+  }
+
+  for (size_t i = 0; i < num_blocks_per_device; ++i) {
+    size_t block_num = device * num_blocks_per_device + i;
+    std::bitset<64> bitset_tmp{block_num};
+    std::bitset<64> bitset{block_num};
+    bitset[0] = bitset_tmp[diff];
+    bitset[diff] = bitset_tmp[0];
+    size_t changed_num = bitset.to_ulong();
+
+    api::memcpyAsync(&mem_buffer[changed_num * num_states_per_block],
+                     &buffer[i * num_states_per_block],
+                     num_states_per_block * sizeof(std::complex<T>),
+                     cudaMemcpyDeviceToHost, 0);
+  }
+
+  api::deviceSynchronize();
+#pragma omp barrier
+
+  for (size_t i = 0; i < num_blocks_per_device; ++i) {
+    size_t block_num = device * num_blocks_per_device + i;
+    std::bitset<64> bitset_tmp{block_num};
+    std::bitset<64> bitset{block_num};
+    bitset[0] = bitset_tmp[diff];
+    bitset[diff] = bitset_tmp[0];
+    size_t changed_num = bitset.to_ulong();
+    api::memcpyAsync(&buffer[i * num_states_per_block],
+                     &mem_buffer[changed_num * num_states_per_block],
+                     num_states_per_block * sizeof(std::complex<T>),
+                     cudaMemcpyHostToDevice, 0);
+  }
 }
 
 template class QopImpl<double>;

@@ -18,12 +18,14 @@ public:
 template <typename T> class MemoryBuffer : public Buffer<T> {
 public:
   MemoryBuffer(size_t count);
+  MemoryBuffer(size_t count, bool pinned);
   virtual ~MemoryBuffer() override;
   virtual std::complex<T> *ptr() override;
   virtual std::complex<T> __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, std::complex<T> val) override;
 
 private:
+  bool pinned_;
   size_t count_;
   std::complex<T> *buf_;
 };
