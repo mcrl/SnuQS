@@ -35,8 +35,3 @@ opaque cu3(theta,phi,lambda) c, t;
 opaque cu(theta,phi,lambda,gamma) c, t;
 opaque ccx a,b,c;
 opaque cswap a,b,c;
-opaque rccx a,b,c;
-opaque rc3x a,b,c,d;
-opaque c3x a,b,c,d;
-opaque c3sqrtx a,b,c,d;
-opaque c4x a,b,c,d,e;

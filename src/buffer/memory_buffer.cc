@@ -4,31 +4,37 @@
 #include <cstdlib>
 #include <new>
 
-#include <iostream>
-
 namespace snuqs {
 
 //
 // Memory Buffer
 //
-MemoryBuffer::MemoryBuffer(size_t count) : count_(count) {
-  buf_ = reinterpret_cast<std::complex<double> *>(
-      malloc(sizeof(std::complex<double>) * count));
+template <typename T>
+MemoryBuffer<T>::MemoryBuffer(size_t count) : count_(count) {
+  buf_ = reinterpret_cast<std::complex<T> *>(
+      malloc(sizeof(std::complex<T>) * count));
   if (buf_ == nullptr) {
     throw std::bad_alloc();
   }
 }
 
-MemoryBuffer::~MemoryBuffer() {
+template <typename T> MemoryBuffer<T>::~MemoryBuffer() {
   if (buf_ != nullptr)
     free(buf_);
 }
-void *MemoryBuffer::ptr() { return buf_; }
 
-std::complex<double> MemoryBuffer::__getitem__(size_t key) { return buf_[key]; }
+template <typename T> std::complex<T> *MemoryBuffer<T>::ptr() { return buf_; }
 
-void MemoryBuffer::__setitem__(size_t key, std::complex<double> val) {
+template <typename T> std::complex<T> MemoryBuffer<T>::__getitem__(size_t key) {
+  return buf_[key];
+}
+
+template <typename T>
+void MemoryBuffer<T>::__setitem__(size_t key, std::complex<T> val) {
   buf_[key] = val;
 }
+
+template class MemoryBuffer<float>;
+template class MemoryBuffer<double>;
 
 } // namespace snuqs

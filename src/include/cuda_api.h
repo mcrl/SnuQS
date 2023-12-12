@@ -17,39 +17,53 @@ static inline void assertCudaSuccess(cudaError_t err) {
   }
 }
 
-static void assertKernelLaunch() { assertCudaSuccess(cudaGetLastError()); }
+using ret_t = void;
+
+static ret_t assertKernelLaunch() { assertCudaSuccess(cudaGetLastError()); }
 
 using Stream = cudaStream_t;
 using MemcpyKind = cudaMemcpyKind;
 
-static void malloc(void **pptr, size_t count) {
+static ret_t malloc(void **pptr, size_t count) {
   assertCudaSuccess(cudaMalloc(pptr, count));
 }
 
-static void free(void *ptr) { assertCudaSuccess(cudaFree(ptr)); }
+static ret_t free(void *ptr) { assertCudaSuccess(cudaFree(ptr)); }
 
-static void memcpy(void *dst, const void *src, size_t count, MemcpyKind kind) {
+static ret_t memcpy(void *dst, const void *src, size_t count, MemcpyKind kind) {
   assertCudaSuccess(cudaMemcpy(dst, src, count, kind));
 }
 
-static void memcpyAsync(void *dst, const void *src, size_t count,
+static ret_t memcpyAsync(void *dst, const void *src, size_t count,
                         MemcpyKind kind, Stream stream) {
   assertCudaSuccess(cudaMemcpyAsync(dst, src, count, kind, stream));
 }
 
-static void streamCreate(Stream *stream) {
+static ret_t streamCreate(Stream *stream) {
   assertCudaSuccess(cudaStreamCreate(stream));
 }
 
-static void streamDestroy(Stream stream) {
+static ret_t streamDestroy(Stream stream) {
   assertCudaSuccess(cudaStreamDestroy(stream));
 }
 
-static void streamSynchronize(Stream stream) {
+static ret_t streamSynchronize(Stream stream) {
   assertCudaSuccess(cudaStreamSynchronize(stream));
 }
 
-static void deviceSynchronize() { assertCudaSuccess(cudaDeviceSynchronize()); }
+static ret_t getDevice(int *devp) { assertCudaSuccess(cudaGetDevice(devp)); }
+
+static ret_t setDevice(int dev) { assertCudaSuccess(cudaSetDevice(dev)); }
+
+static ret_t getDeviceCount(int *countp) {
+  assertCudaSuccess(cudaGetDeviceCount(countp));
+}
+
+static ret_t memGetInfo(size_t *freep, size_t *totalp) {
+    assertCudaSuccess(cudaMemGetInfo(freep, totalp));
+}
+
+static ret_t deviceSynchronize() { assertCudaSuccess(cudaDeviceSynchronize()); }
 
 } // namespace api
 } // namespace cuda

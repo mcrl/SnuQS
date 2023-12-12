@@ -6,13 +6,12 @@
 
 namespace snuqs {
 
-class StatevectorSimulator : public Simulator {
+template <typename T> class StatevectorSimulator : public Simulator<T> {
 public:
   StatevectorSimulator();
   ~StatevectorSimulator();
 
-  virtual void run(Circuit &circ) override;
-  void test();
+  virtual std::shared_ptr<Buffer<T>> run(Circuit &circ) override;
 };
 
 } // namespace snuqs

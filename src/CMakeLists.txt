@@ -12,6 +12,11 @@ add_library(_C SHARED module.cc)
 
 include_directories("${PYBIND_INCLUDE_DIRS}" "." "./include")
 
+set(CMAKE_CUDA_FLAGS
+    ${CMAKE_CUDA_FLAGS}
+    "--extended-lambda -I${CMAKE_CURRENT_LIST_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include")
+set(CMAKE_CUDA_ARCHITECTURES ${CMAKE_CUDA_ARCHITECTURES} 70)
+
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")
 set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
@@ -26,9 +31,7 @@ target_link_libraries(
          CUDA::cudart)
 
 add_subdirectory(runtime)
-
 add_subdirectory(circuit)
-
 add_subdirectory(simulator)
 add_subdirectory(optimizer)
 add_subdirectory(buffer)

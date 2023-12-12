@@ -1,36 +1,78 @@
 #include "simulator/statevector_simulator.h"
 #include "assertion.h"
 #include "buffer/buffer.h"
+#include "circuit/arg.h"
 #include "circuit/circuit.h"
 #include "circuit/reg.h"
-#include "circuit/arg.h"
+#include "cuda_api.h"
+#include "simulator/run.h"
 
-#include "simulator/statevector_simulator_cuda.h"
+extern "C" {
+#include <sys/sysinfo.h>
+}
 
 namespace snuqs {
 
-StatevectorSimulator::StatevectorSimulator() {}
+template <typename T> StatevectorSimulator<T>::StatevectorSimulator() {}
 
-StatevectorSimulator::~StatevectorSimulator() {}
+template <typename T> StatevectorSimulator<T>::~StatevectorSimulator() {}
 
-void StatevectorSimulator::run(Circuit &circ) { NOT_IMPLEMENTED(); }
-
-void StatevectorSimulator::test() {
-
-  cuda::CudaBuffer<double> buffer(512);
-  std::complex<double> *buf =
-      reinterpret_cast<std::complex<double> *>(buffer.ptr());
-
-  cuda::gate<double>::initZero(buf, 512, {0}, {});
-  cuda::api::deviceSynchronize();
-
-  std::complex<double> *cmem = reinterpret_cast<std::complex<double> *>(
-      malloc(512 * sizeof(std::complex<double>)));
-  buffer.read(cmem, 512, 0);
-
-  for (int i = 0; i < 512; ++i) {
-    printf("%d: %lf+%lfJ\n", i, cmem[i].real(), cmem[i].imag());
+template <typename T>
+std::shared_ptr<Buffer<T>> StatevectorSimulator<T>::run(Circuit &circ) {
+  //
+  //
+  //
+  size_t num_qubits = 0;
+  for (auto &qreg : circ.qregs()) {
+    num_qubits += qreg->dim();
   }
-  printf("HERE Allocated\n");
+
+  //
+  //
+  //
+  size_t state_size = (1ull << num_qubits) * sizeof(std::complex<T>);
+
+  //
+  //
+  //
+  int num_devices;
+  cuda::api::getDeviceCount(&num_devices);
+
+  //
+  //
+  //
+  size_t min_cuda_mem = SIZE_MAX;
+  for (int i = 0; i < num_devices; ++i) {
+    size_t free, total;
+    cuda::api::setDevice(i);
+    cuda::api::memGetInfo(&free, &total);
+    min_cuda_mem = std::min(free, min_cuda_mem);
+  }
+  size_t min_cuda_mem_md = min_cuda_mem * num_devices;
+
+  //
+  //
+  //
+  struct sysinfo info;
+  sysinfo(&info);
+  size_t min_cpu_mem = info.freeram;
+
+  if (state_size <= min_cuda_mem) {
+      std::shared_ptr<Buffer<T>> buffer = cuda::runSingleGPU<T>(circ);
+      return buffer;
+  } else if (state_size <= min_cuda_mem_md) {
+      std::shared_ptr<Buffer<T>> buffer = cuda::runMultiGPU<T>(circ);
+      return buffer;
+  } else if (state_size <= min_cpu_mem) {
+      std::shared_ptr<Buffer<T>> buffer = cuda::runCPU<T>(circ);
+      return buffer;
+  } else {
+      std::shared_ptr<Buffer<T>> buffer = cuda::runStorage<T>(circ);
+      return buffer;
+  }
 }
+
+template class StatevectorSimulator<float>;
+template class StatevectorSimulator<double>;
+
 } // namespace snuqs

@@ -1,6 +1,7 @@
 #include "qop.h"
 #include "assertion.h"
 
+#include <iostream>
 #include <sstream>
 
 namespace snuqs {
@@ -8,40 +9,43 @@ namespace snuqs {
 //
 // Qop
 //
-Qop::Qop() {}
-Qop::Qop(std::vector<Qarg> qbits) : qbits_(qbits) {}
-Qop::Qop(std::vector<Qarg> qbits,
+Qop::Qop(QopType type) : type_(type) {}
+Qop::Qop(QopType type, std::vector<Qarg> qargs) : type_(type), qargs_(qargs) {}
+Qop::Qop(QopType type, std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : qbits_(qbits), params_(params) {}
+    : type_(type), qargs_(qargs), params_(params) {}
 Qop::~Qop() {}
+QopType Qop::type() const { return type_; }
+std::vector<Qarg> Qop::qargs() { return qargs_; }
+std::vector<std::shared_ptr<Parameter>> Qop::params() { return params_; }
 std::string Qop::__repr__() const { return "qop"; }
 
-Barrier::Barrier(std::vector<Qarg> qbits) : Qop(qbits) {}
+Barrier::Barrier(std::vector<Qarg> qargs) : Qop(QopType::BARRIER, qargs) {}
 std::string Barrier::__repr__() const {
   std::ostringstream s;
   s << "barrier ";
-  for (auto &q : qbits_) {
+  for (auto &q : qargs_) {
     s << q.__repr__();
   }
   return s.str();
 }
 
-Reset::Reset(std::vector<Qarg> qbits) : Qop(qbits) {}
+Reset::Reset(std::vector<Qarg> qargs) : Qop(QopType::RESET, qargs) {}
 std::string Reset::__repr__() const {
   std::ostringstream s;
   s << "reset ";
-  for (auto &q : qbits_) {
+  for (auto &q : qargs_) {
     s << q.__repr__();
   }
   return s.str();
 }
 
-Measure::Measure(std::vector<Qarg> qbits, std::vector<Carg> cbits)
-    : Qop(qbits), cbits_(cbits) {}
+Measure::Measure(std::vector<Qarg> qargs, std::vector<Carg> cbits)
+    : Qop(QopType::MEASURE, qargs), cbits_(cbits) {}
 std::string Measure::__repr__() const {
   std::ostringstream s;
   s << "Measure ";
-  for (auto &q : qbits_) {
+  for (auto &q : qargs_) {
     s << q.__repr__();
   }
   s << " -> ";
@@ -53,7 +57,7 @@ std::string Measure::__repr__() const {
 }
 
 Cond::Cond(std::shared_ptr<Qop> op, std::shared_ptr<Creg> creg, size_t val)
-    : op_(op), creg_(creg), val_(val) {}
+    : Qop(QopType::COND), op_(op), creg_(creg), val_(val) {}
 std::string Cond::__repr__() const {
   std::ostringstream s;
   s << "if (" << creg_->__repr__() << " == " << val_ << ") ";
@@ -63,9 +67,10 @@ std::string Cond::__repr__() const {
 }
 
 Custom::Custom(const std::string &name, std::vector<std::shared_ptr<Qop>> qops,
-               std::vector<Qarg> qbits,
+               std::vector<Qarg> qargs,
                std::vector<std::shared_ptr<Parameter>> params)
-    : Qop(qbits, params), name_(name), qops_(qops) {}
+    : Qop(QopType::CUSTOM, qargs, params), name_(name), qops_(qops) {}
+std::vector<std::shared_ptr<Qop>> Custom::qops() { return qops_; }
 std::string Custom::__repr__() const {
   std::ostringstream s;
 
@@ -78,36 +83,109 @@ std::string Custom::__repr__() const {
   }
 
   s << " ";
-  for (auto &q : qbits_) {
+  for (auto &q : qargs_) {
     s << q.__repr__() << ", ";
   }
   s << "\n";
-  for (auto &op : qops_) {
-    s << op->__repr__() << "\n";
-  }
+  //  for (auto &op : qops_) {
+  //    s << op->__repr__() << "\n";
+  //  }
 
   return s.str();
 }
 
-Qgate::Qgate(std::vector<Qarg> qbits) : Qop(qbits) {}
-Qgate::Qgate(std::vector<Qarg> qbits,
+static std::string qgateTypeToString(QgateType type) {
+  switch (type) {
+  case QgateType::ID:
+    return "ID";
+  case QgateType::X:
+    return "X";
+  case QgateType::Y:
+    return "Y";
+  case QgateType::Z:
+    return "Z";
+  case QgateType::H:
+    return "H";
+  case QgateType::S:
+    return "S";
+  case QgateType::SDG:
+    return "SDG";
+  case QgateType::T:
+    return "T";
+  case QgateType::TDG:
+    return "TDG";
+  case QgateType::SX:
+    return "SX";
+  case QgateType::SXDG:
+    return "SXDG";
+  case QgateType::P:
+    return "P";
+  case QgateType::RX:
+    return "RX";
+  case QgateType::RY:
+    return "RY";
+  case QgateType::RZ:
+    return "RZ";
+  case QgateType::U0:
+    return "U0";
+  case QgateType::U1:
+    return "U1";
+  case QgateType::U2:
+    return "U2";
+  case QgateType::U3:
+    return "U3";
+  case QgateType::U:
+    return "U";
+  case QgateType::CX:
+    return "CX";
+  case QgateType::CZ:
+    return "CZ";
+  case QgateType::CY:
+    return "CY";
+  case QgateType::SWAP:
+    return "SWAP";
+  case QgateType::CH:
+    return "CH";
+  case QgateType::CSX:
+    return "CSX";
+  case QgateType::CRX:
+    return "CRX";
+  case QgateType::CRY:
+    return "CRY";
+  case QgateType::CRZ:
+    return "CRZ";
+  case QgateType::CU1:
+    return "CU1";
+  case QgateType::CP:
+    return "CP";
+  case QgateType::RXX:
+    return "RXX";
+  case QgateType::RZZ:
+    return "RZZ";
+  case QgateType::CU3:
+    return "CU3";
+  case QgateType::CU:
+    return "CU";
+  case QgateType::CCX:
+    return "CCX";
+  case QgateType::CSWAP:
+    return "CSWAP";
+  }
+  CANNOT_BE_HERE();
+  return "INVALID";
+}
+
+Qgate::Qgate(QgateType gate_type, std::vector<Qarg> qargs)
+    : Qop(QopType::QGATE, qargs), gate_type_(gate_type) {}
+
+Qgate::Qgate(QgateType gate_type, std::vector<Qarg> qargs,
              std::vector<std::shared_ptr<Parameter>> params)
-    : Qop(qbits, params) {}
-size_t Qgate::numQubits() const {
-  NOT_IMPLEMENTED();
-  return 0;
-}
-size_t Qgate::numParams() const {
-  NOT_IMPLEMENTED();
-  return 0;
-}
-std::string Qgate::name() const {
-  NOT_IMPLEMENTED();
-  return "Qgate";
-}
+    : Qop(QopType::QGATE, qargs, params), gate_type_(gate_type) {}
+
+QgateType Qgate::gate_type() const { return gate_type_; }
 std::string Qgate::__repr__() const {
   std::ostringstream s;
-  s << name();
+  s << qgateTypeToString(gate_type_);
   if (params_.size() > 0) {
     s << "(";
     for (auto &p : params_) {
@@ -117,324 +195,247 @@ std::string Qgate::__repr__() const {
   }
 
   s << " ";
-  for (auto &q : qbits_) {
+  for (auto &q : qargs_) {
     s << q.__repr__() << ", ";
   }
 
   return s.str();
 }
 
-ID::ID(std::vector<Qarg> qbits) : Qgate(qbits) {}
-ID::ID(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t ID::numQubits() const { return 1; }
+ID::ID(std::vector<Qarg> qargs) : Qgate(QgateType::ID, qargs) {}
+ID::ID(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::ID, qargs, params) {}
+size_t ID::numQargs() const { return 1; }
 size_t ID::numParams() const { return 0; }
-std::string ID::name() const { return "ID"; }
 
-X::X(std::vector<Qarg> qbits) : Qgate(qbits) {}
-X::X(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t X::numQubits() const { return 1; }
+X::X(std::vector<Qarg> qargs) : Qgate(QgateType::X, qargs) {}
+X::X(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::X, qargs, params) {}
+size_t X::numQargs() const { return 1; }
 size_t X::numParams() const { return 0; }
-std::string X::name() const { return "X"; }
 
-Y::Y(std::vector<Qarg> qbits) : Qgate(qbits) {}
-Y::Y(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t Y::numQubits() const { return 1; }
+Y::Y(std::vector<Qarg> qargs) : Qgate(QgateType::Y, qargs) {}
+Y::Y(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::Y, qargs, params) {}
+size_t Y::numQargs() const { return 1; }
 size_t Y::numParams() const { return 0; }
-std::string Y::name() const { return "Y"; }
 
-Z::Z(std::vector<Qarg> qbits) : Qgate(qbits) {}
-Z::Z(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t Z::numQubits() const { return 1; }
+Z::Z(std::vector<Qarg> qargs) : Qgate(QgateType::Z, qargs) {}
+Z::Z(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::Z, qargs, params) {}
+size_t Z::numQargs() const { return 1; }
 size_t Z::numParams() const { return 0; }
-std::string Z::name() const { return "Z"; }
 
-H::H(std::vector<Qarg> qbits) : Qgate(qbits) {}
-H::H(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t H::numQubits() const { return 1; }
+H::H(std::vector<Qarg> qargs) : Qgate(QgateType::H, qargs) {}
+H::H(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::H, qargs, params) {}
+size_t H::numQargs() const { return 1; }
 size_t H::numParams() const { return 0; }
-std::string H::name() const { return "H"; }
 
-S::S(std::vector<Qarg> qbits) : Qgate(qbits) {}
-S::S(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t S::numQubits() const { return 1; }
+S::S(std::vector<Qarg> qargs) : Qgate(QgateType::S, qargs) {}
+S::S(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::S, qargs, params) {}
+size_t S::numQargs() const { return 1; }
 size_t S::numParams() const { return 0; }
-std::string S::name() const { return "S"; }
 
-SDG::SDG(std::vector<Qarg> qbits) : Qgate(qbits) {}
-SDG::SDG(std::vector<Qarg> qbits,
+SDG::SDG(std::vector<Qarg> qargs) : Qgate(QgateType::SDG, qargs) {}
+SDG::SDG(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t SDG::numQubits() const { return 1; }
+    : Qgate(QgateType::SDG, qargs, params) {}
+size_t SDG::numQargs() const { return 1; }
 size_t SDG::numParams() const { return 0; }
-std::string SDG::name() const { return "SDG"; }
 
-T::T(std::vector<Qarg> qbits) : Qgate(qbits) {}
-T::T(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t T::numQubits() const { return 1; }
+T::T(std::vector<Qarg> qargs) : Qgate(QgateType::T, qargs) {}
+T::T(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::T, qargs, params) {}
+size_t T::numQargs() const { return 1; }
 size_t T::numParams() const { return 0; }
-std::string T::name() const { return "T"; }
 
-TDG::TDG(std::vector<Qarg> qbits) : Qgate(qbits) {}
-TDG::TDG(std::vector<Qarg> qbits,
+TDG::TDG(std::vector<Qarg> qargs) : Qgate(QgateType::TDG, qargs) {}
+TDG::TDG(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t TDG::numQubits() const { return 1; }
+    : Qgate(QgateType::TDG, qargs, params) {}
+size_t TDG::numQargs() const { return 1; }
 size_t TDG::numParams() const { return 0; }
-std::string TDG::name() const { return "TDG"; }
 
-SX::SX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-SX::SX(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t SX::numQubits() const { return 1; }
+SX::SX(std::vector<Qarg> qargs) : Qgate(QgateType::SX, qargs) {}
+SX::SX(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::SX, qargs, params) {}
+size_t SX::numQargs() const { return 1; }
 size_t SX::numParams() const { return 0; }
-std::string SX::name() const { return "SX"; }
 
-SXDG::SXDG(std::vector<Qarg> qbits) : Qgate(qbits) {}
-SXDG::SXDG(std::vector<Qarg> qbits,
+SXDG::SXDG(std::vector<Qarg> qargs) : Qgate(QgateType::SXDG, qargs) {}
+SXDG::SXDG(std::vector<Qarg> qargs,
            std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t SXDG::numQubits() const { return 1; }
+    : Qgate(QgateType::SXDG, qargs, params) {}
+size_t SXDG::numQargs() const { return 1; }
 size_t SXDG::numParams() const { return 0; }
-std::string SXDG::name() const { return "SXDG"; }
 
-P::P(std::vector<Qarg> qbits) : Qgate(qbits) {}
-P::P(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t P::numQubits() const { return 1; }
+P::P(std::vector<Qarg> qargs) : Qgate(QgateType::P, qargs) {}
+P::P(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::P, qargs, params) {}
+size_t P::numQargs() const { return 1; }
 size_t P::numParams() const { return 1; }
-std::string P::name() const { return "P"; }
 
-RX::RX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RX::RX(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RX::numQubits() const { return 1; }
+RX::RX(std::vector<Qarg> qargs) : Qgate(QgateType::RX, qargs) {}
+RX::RX(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::RX, qargs, params) {}
+size_t RX::numQargs() const { return 1; }
 size_t RX::numParams() const { return 1; }
-std::string RX::name() const { return "RX"; }
 
-RY::RY(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RY::RY(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RY::numQubits() const { return 1; }
+RY::RY(std::vector<Qarg> qargs) : Qgate(QgateType::RY, qargs) {}
+RY::RY(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::RY, qargs, params) {}
+size_t RY::numQargs() const { return 1; }
 size_t RY::numParams() const { return 1; }
-std::string RY::name() const { return "RY"; }
 
-RZ::RZ(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RZ::RZ(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RZ::numQubits() const { return 1; }
+RZ::RZ(std::vector<Qarg> qargs) : Qgate(QgateType::RZ, qargs) {}
+RZ::RZ(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::RZ, qargs, params) {}
+size_t RZ::numQargs() const { return 1; }
 size_t RZ::numParams() const { return 1; }
-std::string RZ::name() const { return "RZ"; }
 
-U0::U0(std::vector<Qarg> qbits) : Qgate(qbits) {}
-U0::U0(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t U0::numQubits() const { return 1; }
+U0::U0(std::vector<Qarg> qargs) : Qgate(QgateType::U0, qargs) {}
+U0::U0(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::U0, qargs, params) {}
+size_t U0::numQargs() const { return 1; }
 size_t U0::numParams() const { return 1; }
-std::string U0::name() const { return "U0"; }
 
-U1::U1(std::vector<Qarg> qbits) : Qgate(qbits) {}
-U1::U1(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t U1::numQubits() const { return 1; }
+U1::U1(std::vector<Qarg> qargs) : Qgate(QgateType::U1, qargs) {}
+U1::U1(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::U1, qargs, params) {}
+size_t U1::numQargs() const { return 1; }
 size_t U1::numParams() const { return 1; }
-std::string U1::name() const { return "U1"; }
 
-U2::U2(std::vector<Qarg> qbits) : Qgate(qbits) {}
-U2::U2(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t U2::numQubits() const { return 1; }
+U2::U2(std::vector<Qarg> qargs) : Qgate(QgateType::U2, qargs) {}
+U2::U2(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::U2, qargs, params) {}
+size_t U2::numQargs() const { return 1; }
 size_t U2::numParams() const { return 2; }
-std::string U2::name() const { return "U2"; }
 
-U3::U3(std::vector<Qarg> qbits) : Qgate(qbits) {}
-U3::U3(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t U3::numQubits() const { return 1; }
+U3::U3(std::vector<Qarg> qargs) : Qgate(QgateType::U3, qargs) {}
+U3::U3(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::U3, qargs, params) {}
+size_t U3::numQargs() const { return 1; }
 size_t U3::numParams() const { return 3; }
-std::string U3::name() const { return "U3"; }
 
-U::U(std::vector<Qarg> qbits) : Qgate(qbits) {}
-U::U(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t U::numQubits() const { return 1; }
+U::U(std::vector<Qarg> qargs) : Qgate(QgateType::U, qargs) {}
+U::U(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::U, qargs, params) {}
+size_t U::numQargs() const { return 1; }
 size_t U::numParams() const { return 3; }
-std::string U::name() const { return "U"; }
 
-CX::CX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CX::CX(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CX::numQubits() const { return 2; }
+CX::CX(std::vector<Qarg> qargs) : Qgate(QgateType::CX, qargs) {}
+CX::CX(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::CX, qargs, params) {}
+size_t CX::numQargs() const { return 2; }
 size_t CX::numParams() const { return 0; }
-std::string CX::name() const { return "CX"; }
 
-CZ::CZ(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CZ::CZ(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CZ::numQubits() const { return 2; }
+CZ::CZ(std::vector<Qarg> qargs) : Qgate(QgateType::CZ, qargs) {}
+CZ::CZ(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::CZ, qargs, params) {}
+size_t CZ::numQargs() const { return 2; }
 size_t CZ::numParams() const { return 0; }
-std::string CZ::name() const { return "CZ"; }
 
-CY::CY(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CY::CY(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CY::numQubits() const { return 2; }
+CY::CY(std::vector<Qarg> qargs) : Qgate(QgateType::CY, qargs) {}
+CY::CY(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::CY, qargs, params) {}
+size_t CY::numQargs() const { return 2; }
 size_t CY::numParams() const { return 0; }
-std::string CY::name() const { return "CY"; }
 
-SWAP::SWAP(std::vector<Qarg> qbits) : Qgate(qbits) {}
-SWAP::SWAP(std::vector<Qarg> qbits,
+SWAP::SWAP(std::vector<Qarg> qargs) : Qgate(QgateType::SWAP, qargs) {}
+SWAP::SWAP(std::vector<Qarg> qargs,
            std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t SWAP::numQubits() const { return 2; }
+    : Qgate(QgateType::SWAP, qargs, params) {}
+size_t SWAP::numQargs() const { return 2; }
 size_t SWAP::numParams() const { return 0; }
-std::string SWAP::name() const { return "SWAP"; }
 
-CH::CH(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CH::CH(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CH::numQubits() const { return 2; }
+CH::CH(std::vector<Qarg> qargs) : Qgate(QgateType::CH, qargs) {}
+CH::CH(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::CH, qargs, params) {}
+size_t CH::numQargs() const { return 2; }
 size_t CH::numParams() const { return 0; }
-std::string CH::name() const { return "CH"; }
 
-CSX::CSX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CSX::CSX(std::vector<Qarg> qbits,
+CSX::CSX(std::vector<Qarg> qargs) : Qgate(QgateType::CSX, qargs) {}
+CSX::CSX(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CSX::numQubits() const { return 2; }
+    : Qgate(QgateType::CSX, qargs, params) {}
+size_t CSX::numQargs() const { return 2; }
 size_t CSX::numParams() const { return 0; }
-std::string CSX::name() const { return "CSX"; }
 
-CRX::CRX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CRX::CRX(std::vector<Qarg> qbits,
+CRX::CRX(std::vector<Qarg> qargs) : Qgate(QgateType::CRX, qargs) {}
+CRX::CRX(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CRX::numQubits() const { return 2; }
+    : Qgate(QgateType::CRX, qargs, params) {}
+size_t CRX::numQargs() const { return 2; }
 size_t CRX::numParams() const { return 1; }
-std::string CRX::name() const { return "CRX"; }
 
-CRY::CRY(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CRY::CRY(std::vector<Qarg> qbits,
+CRY::CRY(std::vector<Qarg> qargs) : Qgate(QgateType::CRY, qargs) {}
+CRY::CRY(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CRY::numQubits() const { return 2; }
+    : Qgate(QgateType::CRY, qargs, params) {}
+size_t CRY::numQargs() const { return 2; }
 size_t CRY::numParams() const { return 1; }
-std::string CRY::name() const { return "CRY"; }
 
-CRZ::CRZ(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CRZ::CRZ(std::vector<Qarg> qbits,
+CRZ::CRZ(std::vector<Qarg> qargs) : Qgate(QgateType::CRZ, qargs) {}
+CRZ::CRZ(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CRZ::numQubits() const { return 2; }
+    : Qgate(QgateType::CRZ, qargs, params) {}
+size_t CRZ::numQargs() const { return 2; }
 size_t CRZ::numParams() const { return 1; }
-std::string CRZ::name() const { return "CRZ"; }
 
-CU1::CU1(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CU1::CU1(std::vector<Qarg> qbits,
+CU1::CU1(std::vector<Qarg> qargs) : Qgate(QgateType::CU1, qargs) {}
+CU1::CU1(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CU1::numQubits() const { return 2; }
+    : Qgate(QgateType::CU1, qargs, params) {}
+size_t CU1::numQargs() const { return 2; }
 size_t CU1::numParams() const { return 1; }
-std::string CU1::name() const { return "CU1"; }
 
-CP::CP(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CP::CP(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CP::numQubits() const { return 2; }
+CP::CP(std::vector<Qarg> qargs) : Qgate(QgateType::CP, qargs) {}
+CP::CP(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::CP, qargs, params) {}
+size_t CP::numQargs() const { return 2; }
 size_t CP::numParams() const { return 1; }
-std::string CP::name() const { return "CP"; }
 
-RXX::RXX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RXX::RXX(std::vector<Qarg> qbits,
+RXX::RXX(std::vector<Qarg> qargs) : Qgate(QgateType::RXX, qargs) {}
+RXX::RXX(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RXX::numQubits() const { return 2; }
+    : Qgate(QgateType::RXX, qargs, params) {}
+size_t RXX::numQargs() const { return 2; }
 size_t RXX::numParams() const { return 1; }
-std::string RXX::name() const { return "RXX"; }
 
-RZZ::RZZ(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RZZ::RZZ(std::vector<Qarg> qbits,
+RZZ::RZZ(std::vector<Qarg> qargs) : Qgate(QgateType::RZZ, qargs) {}
+RZZ::RZZ(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RZZ::numQubits() const { return 2; }
+    : Qgate(QgateType::RZZ, qargs, params) {}
+size_t RZZ::numQargs() const { return 2; }
 size_t RZZ::numParams() const { return 1; }
-std::string RZZ::name() const { return "RZZ"; }
 
-CU3::CU3(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CU3::CU3(std::vector<Qarg> qbits,
+CU3::CU3(std::vector<Qarg> qargs) : Qgate(QgateType::CU3, qargs) {}
+CU3::CU3(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CU3::numQubits() const { return 2; }
+    : Qgate(QgateType::CU3, qargs, params) {}
+size_t CU3::numQargs() const { return 2; }
 size_t CU3::numParams() const { return 3; }
-std::string CU3::name() const { return "CU3"; }
 
-CU::CU(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CU::CU(std::vector<Qarg> qbits, std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CU::numQubits() const { return 2; }
+CU::CU(std::vector<Qarg> qargs) : Qgate(QgateType::CU, qargs) {}
+CU::CU(std::vector<Qarg> qargs, std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::CU, qargs, params) {}
+size_t CU::numQargs() const { return 2; }
 size_t CU::numParams() const { return 4; }
-std::string CU::name() const { return "CU"; }
 
-CCX::CCX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CCX::CCX(std::vector<Qarg> qbits,
+CCX::CCX(std::vector<Qarg> qargs) : Qgate(QgateType::CCX, qargs) {}
+CCX::CCX(std::vector<Qarg> qargs,
          std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CCX::numQubits() const { return 3; }
+    : Qgate(QgateType::CCX, qargs, params) {}
+size_t CCX::numQargs() const { return 3; }
 size_t CCX::numParams() const { return 0; }
-std::string CCX::name() const { return "CCX"; }
 
-CSWAP::CSWAP(std::vector<Qarg> qbits) : Qgate(qbits) {}
-CSWAP::CSWAP(std::vector<Qarg> qbits,
+CSWAP::CSWAP(std::vector<Qarg> qargs) : Qgate(QgateType::CSWAP, qargs) {}
+CSWAP::CSWAP(std::vector<Qarg> qargs,
              std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t CSWAP::numQubits() const { return 3; }
+    : Qgate(QgateType::CSWAP, qargs, params) {}
+size_t CSWAP::numQargs() const { return 3; }
 size_t CSWAP::numParams() const { return 0; }
-std::string CSWAP::name() const { return "CSWAP"; }
-
-RCCX::RCCX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RCCX::RCCX(std::vector<Qarg> qbits,
-           std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RCCX::numQubits() const { return 3; }
-size_t RCCX::numParams() const { return 0; }
-std::string RCCX::name() const { return "RCCX"; }
-
-RC3X::RC3X(std::vector<Qarg> qbits) : Qgate(qbits) {}
-RC3X::RC3X(std::vector<Qarg> qbits,
-           std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t RC3X::numQubits() const { return 4; }
-size_t RC3X::numParams() const { return 0; }
-std::string RC3X::name() const { return "RC3X"; }
-
-C3X::C3X(std::vector<Qarg> qbits) : Qgate(qbits) {}
-C3X::C3X(std::vector<Qarg> qbits,
-         std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t C3X::numQubits() const { return 4; }
-size_t C3X::numParams() const { return 0; }
-std::string C3X::name() const { return "C3X"; }
-
-C3SQRTX::C3SQRTX(std::vector<Qarg> qbits) : Qgate(qbits) {}
-C3SQRTX::C3SQRTX(std::vector<Qarg> qbits,
-                 std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t C3SQRTX::numQubits() const { return 4; }
-size_t C3SQRTX::numParams() const { return 0; }
-std::string C3SQRTX::name() const { return "C3SQRTX"; }
-
-C4X::C4X(std::vector<Qarg> qbits) : Qgate(qbits) {}
-C4X::C4X(std::vector<Qarg> qbits,
-         std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(qbits, params) {}
-size_t C4X::numQubits() const { return 5; }
-size_t C4X::numParams() const { return 0; }
-std::string C4X::name() const { return "C4X"; }
 
 } // namespace snuqs

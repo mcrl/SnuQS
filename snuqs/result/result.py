@@ -1,27 +1,36 @@
 from enum import Enum
 from snuqs.buffer import Buffer
 
+from typing import Dict
+import threading
+
 
 class Result:
     class Status(Enum):
         CREATED = 1
         RUNNING = 2
-        CANCELLED = 3
-        DONE = 4
-        ERROR = 5
+        DONE = 3
 
-    def __init__(self, buffer: Buffer):
-        self.buffer = Buffer
+    def __init__(self, thread: threading.Thread, ret: Dict[str, any]):
+        self.ret = ret
+        self.thread = thread
         self.status = Result.Status.CREATED
+        self.start()
 
     def start(self):
-        self.status = Result.Status.RUNNING
-        pass
+        if self.status == Result.Status.CREATED:
+            self.status = Result.Status.RUNNING
+            self.thread.start()
 
     def wait(self):
-        self.status = Result.Status.DONE
-        pass
+        if self.status != Result.Status.DONE:
+            self.thread.join()
+            self.status = Result.Status.DONE
 
     def get_statevector(self):
         self.wait()
-        return self.circ.qreg.numpy()
+        return self.ret['state']
+
+    def __repr__(self):
+        rp = f'Result <{self.status}>'
+        return rp

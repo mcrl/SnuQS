@@ -18,7 +18,6 @@ if(OpenMP_FOUND)
       "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif(OpenMP_FOUND)
 
-# find_package(ANTLR4 REQUIRED)
 find_package(CUDAToolkit 11.7 REQUIRED)
 if(CUDAToolkit_FOUND)
   include_directories(BEFORE SYSTEM ${CUDAToolkit_INCLUDE_DIRS})

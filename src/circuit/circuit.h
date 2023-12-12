@@ -17,6 +17,15 @@ public:
   void append(std::shared_ptr<Qop> qop);
   std::string __repr__();
 
+  std::vector<std::shared_ptr<Qop>> &qops();
+  const std::vector<std::shared_ptr<Qop>> &qops() const;
+
+  std::vector<std::shared_ptr<Qreg>> &qregs();
+  const std::vector<std::shared_ptr<Qreg>> &qregs() const;
+
+  std::vector<std::shared_ptr<Creg>> &cregs();
+  const std::vector<std::shared_ptr<Creg>> &cregs() const;
+
 private:
   std::string name_;
   std::vector<std::shared_ptr<Qreg>> qregs_;

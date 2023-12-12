@@ -132,7 +132,7 @@ class QasmCircuitGenerator(QasmStage):
             symbol = ctx.gopCustomGate().ID().getText()
             if symbol in self.opaque_map:
                 for subcls in Qgate.__subclasses__():
-                    if subcls.__name__ == symbol.capitalize():
+                    if subcls.__name__ == symbol.upper():
                         return subcls(qregs, params)
             else:
                 symbol = ctx.gopCustomGate().ID().getText()
@@ -194,7 +194,7 @@ class QasmCircuitGenerator(QasmStage):
             qarg = self.createQarg(ctx.qopUGate().qarg())
             params = [self.expAsParameter(exp, {})
                       for exp in ctx.qopUGate().explist().exp()]
-            return U([qarg])
+            return U([qarg], params)
         elif ctx.qopCXGate():
             qarg0 = self.createQarg(ctx.qopCXGate().qarg()[0])
             qarg1 = self.createQarg(ctx.qopCXGate().qarg()[1])

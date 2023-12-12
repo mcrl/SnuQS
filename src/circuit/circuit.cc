@@ -1,5 +1,4 @@
 #include "circuit/circuit.h"
-#include <iostream>
 #include <sstream>
 
 namespace snuqs {
@@ -33,6 +32,19 @@ std::string Circuit::__repr__() {
   }
 
   return s.str();
+}
+
+std::vector<std::shared_ptr<Qop>> &Circuit::qops() { return qops_; }
+const std::vector<std::shared_ptr<Qop>> &Circuit::qops() const { return qops_; }
+
+std::vector<std::shared_ptr<Qreg>> &Circuit::qregs() { return qregs_; }
+const std::vector<std::shared_ptr<Qreg>> &Circuit::qregs() const {
+  return qregs_;
+}
+
+std::vector<std::shared_ptr<Creg>> &Circuit::cregs() { return cregs_; }
+const std::vector<std::shared_ptr<Creg>> &Circuit::cregs() const {
+  return cregs_;
 }
 
 } // namespace snuqs

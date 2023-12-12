@@ -2,6 +2,7 @@
 #define __PARAMETER_H__
 
 #include "circuit/arg.h"
+#include <memory>
 
 namespace snuqs {
 
@@ -28,20 +29,20 @@ enum class BinOpType {
 
 class BinOp : public Parameter {
 public:
-  BinOp(BinOpType op, const Parameter &param0, const Parameter &param1);
+  BinOp(BinOpType op, std::shared_ptr<Parameter> param0, std::shared_ptr<Parameter> param1);
   virtual double eval() const override;
 
   BinOpType op_;
-  const Parameter &param0_;
-  const Parameter &param1_;
+  std::shared_ptr<Parameter> param0_;
+  std::shared_ptr<Parameter> param1_;
 };
 
 class NegOp : public Parameter {
 public:
-  NegOp(const Parameter &param);
+  NegOp(std::shared_ptr<Parameter> param);
   virtual double eval() const override;
 
-  const Parameter &param_;
+  std::shared_ptr<Parameter> param_;
 };
 
 enum class UnaryOpType {
@@ -55,19 +56,19 @@ enum class UnaryOpType {
 
 class UnaryOp : public Parameter {
 public:
-  UnaryOp(UnaryOpType op, const Parameter &param);
+  UnaryOp(UnaryOpType op, std::shared_ptr<Parameter> param);
   virtual double eval() const override;
 
   UnaryOpType op_;
-  const Parameter &param_;
+  std::shared_ptr<Parameter> param_;
 };
 
 class Parenthesis : public Parameter {
 public:
-  Parenthesis(const Parameter &param);
+  Parenthesis(std::shared_ptr<Parameter> param);
   virtual double eval() const override;
 
-  const Parameter &param_;
+  std::shared_ptr<Parameter> param_;
 };
 
 class Constant : public Parameter {

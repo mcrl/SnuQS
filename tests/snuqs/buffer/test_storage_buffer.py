@@ -9,8 +9,7 @@ class StorageBufferTest(unittest.TestCase):
         count = 2**32
         buffer = StorageBuffer(count, 'devices.yaml')
 
-        random.seed(-1)
-        rands = {random.randint(0, count-1): random.random()+random.random()*1j for _ in range(50)}
+        rands = {random.randint(0, count-1): random.random()+random.random()*1j for _ in range(200)}
         for k, v in rands.items():
             buffer[k] = v
 
