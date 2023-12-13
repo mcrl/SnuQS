@@ -8,6 +8,8 @@ import tempfile
 import qiskit
 from snuqs import QasmCompiler
 
+import time
+
 
 class StatevectorSimulator:
     def __init__(self):
@@ -19,9 +21,11 @@ class StatevectorSimulator:
     def run(self, circ: Circuit):
         if isinstance(circ, qiskit.QuantumCircuit):
             with tempfile.NamedTemporaryFile() as f:
+                s = time.time()
                 circ.qasm(filename=f.name)
                 compiler = QasmCompiler()
                 circ = compiler.compile(f.name)
+                print(f"compile time: {time.time()-s}")
 
         ret = {}
         return Result(threading.Thread(target=self._run, args=[circ, ret]), ret)

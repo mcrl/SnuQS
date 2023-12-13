@@ -20,11 +20,21 @@ PYBIND11_MODULE(_C, m) {
   py::class_<snuqs::Buffer<double>, std::shared_ptr<snuqs::Buffer<double>>>(
       m, "Buffer");
   py::class_<snuqs::MemoryBuffer<double>, snuqs::Buffer<double>,
-             std::shared_ptr<snuqs::MemoryBuffer<double>>>(m, "MemoryBuffer")
+             std::shared_ptr<snuqs::MemoryBuffer<double>>>(
+      m, "MemoryBuffer", py::buffer_protocol())
       .def(py::init<size_t>())
       .def(py::init<size_t, bool>())
       .def("__getitem__", &snuqs::MemoryBuffer<double>::__getitem__)
-      .def("__setitem__", &snuqs::MemoryBuffer<double>::__setitem__);
+      .def("__setitem__", &snuqs::MemoryBuffer<double>::__setitem__)
+      .def_buffer([](snuqs::MemoryBuffer<double> &m) -> py::buffer_info {
+        return py::buffer_info(
+            m.ptr(),                      /* Pointer to buffer */
+            sizeof(std::complex<double>), /* Size of one scalar */
+            py::format_descriptor<std::complex<double>>::format(), /* Python
+                                                       struct-style format
+                                                       descriptor */
+            1, {m.count()}, {sizeof(std::complex<double>)});
+      });
 
   py::class_<snuqs::StorageBuffer<double>, snuqs::Buffer<double>,
              std::shared_ptr<snuqs::StorageBuffer<double>>>(m, "StorageBuffer")

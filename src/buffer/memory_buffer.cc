@@ -57,6 +57,7 @@ void MemoryBuffer<T>::__setitem__(size_t key, std::complex<T> val) {
   buf_[key] = val;
 }
 
+template <typename T> size_t MemoryBuffer<T>::count() const { return count_; }
 template class MemoryBuffer<float>;
 template class MemoryBuffer<double>;
 

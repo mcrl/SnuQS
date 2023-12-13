@@ -23,6 +23,7 @@ public:
   virtual std::complex<T> *ptr() override;
   virtual std::complex<T> __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, std::complex<T> val) override;
+  size_t count() const;
 
 private:
   bool pinned_;
