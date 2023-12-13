@@ -1193,7 +1193,8 @@ void QopImpl<T>::memcpy_d2h(std::complex<T> *buffer, size_t count,
   api::getDeviceCount(&num_devices);
 
   size_t num_states_per_device = count;
-  size_t num_states_per_block = (1ull << min_target);
+  size_t num_states_per_block =
+      (min_target == -1) ? num_states_per_device : (1ull << min_target);
   size_t num_blocks_per_device = num_states_per_device / num_states_per_block;
 
   for (size_t i = 0; i < num_blocks_per_device; ++i) {

@@ -87,17 +87,16 @@ std::shared_ptr<Circuit> transpileMultiGPU(Circuit &_circ, int num_qubits,
       std::sort(non_local_args.begin(), non_local_args.end(),
                 [](auto a, auto b) { return *b < *a; });
 
-      std::map<Qarg, Qarg> qarg_map;
+      std::map<std::shared_ptr<Qarg>, std::shared_ptr<Qarg>> qarg_map;
 
       for (size_t j = 0; j < non_local_args.size(); ++j) {
-        qarg_map[*non_local_args[j]] = *target_args[j];
-        qarg_map[*target_args[j]] = *non_local_args[j];
+        qarg_map[non_local_args[j]] = target_args[j];
       }
       std::vector<std::shared_ptr<Qarg>> new_qargs;
       for (auto &qarg : qargs) {
         size_t index = qarg->globalIndex();
         if (index >= num_qubits_per_device) {
-          new_qargs.push_back(std::make_shared<Qarg>(qarg_map[*qarg]));
+          new_qargs.push_back(qarg_map[qarg]);
         } else {
           new_qargs.push_back(qarg);
         }
@@ -123,6 +122,7 @@ std::shared_ptr<Circuit> transpileMultiGPU(Circuit &_circ, int num_qubits,
       circ->append(qop);
     }
   }
+
   auto &last_qreg = qregs[qregs.size() - 1];
   circ->append(std::make_shared<MemcpyD2H>());
   circ->append(std::make_shared<Sync>());

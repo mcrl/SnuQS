@@ -4,4 +4,4 @@ numpy
 fire
 sphinx
 qiskit
-yaml
+pyyaml
