@@ -4,6 +4,7 @@
 #include "circuit/qop.h"
 #include "circuit/reg.h"
 #include "simulator/statevector_simulator.h"
+#include <complex>
 #include <pybind11/complex.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -114,6 +115,7 @@ PYBIND11_MODULE(_C, m) {
   py::class_<snuqs::Constant, snuqs::Parameter,
              std::shared_ptr<snuqs::Constant>>(m, "Constant")
       .def(py::init<double>())
+      .def(py::init<std::complex<double>>())
       .def("eval", &snuqs::Constant::eval);
 
   py::class_<snuqs::Pi, snuqs::Constant, std::shared_ptr<snuqs::Pi>>(m, "Pi")

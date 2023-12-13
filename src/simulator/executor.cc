@@ -16,9 +16,9 @@ qargsToIndices(const std::vector<std::shared_ptr<Qarg>> &args) {
   return indices;
 }
 
-std::vector<double>
+std::vector<std::complex<double>>
 paramsToValues(const std::vector<std::shared_ptr<Parameter>> &params) {
-  std::vector<double> values(params.size());
+  std::vector<std::complex<double>> values(params.size());
 
   for (int i = 0; i < params.size(); ++i) {
     values[i] = params[i]->eval();
@@ -26,8 +26,8 @@ paramsToValues(const std::vector<std::shared_ptr<Parameter>> &params) {
   return values;
 }
 
-std::map<size_t, size_t> qargMapToIndexMap(
-    const std::map<Qarg, Qarg> &qarg_map) {
+std::map<size_t, size_t>
+qargMapToIndexMap(const std::map<Qarg, Qarg> &qarg_map) {
   std::map<size_t, size_t> index_map;
 
   for (auto &kv : qarg_map) {

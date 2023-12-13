@@ -35,8 +35,10 @@ def run_qiskit(file_name):
 
 class TestTest(unittest.TestCase):
     def test_test(self):
-        state_qiskit = run_qiskit('test.qasm')
+        state_qiskit = run_snuqs('test.qasm')
         print(state_qiskit)
 
 if __name__ == '__main__':
+    import sys
+    sys.setrecursionlimit(10**7)
     unittest.main()

@@ -79,6 +79,19 @@ class QasmCircuitGenerator(QasmStage):
                 return param_map[symbol]
             else:
                 return Identifier(self.creg_map[symbol])
+        elif exp.complex_():
+            real = 0
+            imag = 0
+            numbers = [float(v.getText()) for v in exp.complex_().REAL()]
+            real = numbers[0]
+            if len(numbers) == 2:
+                imag = numbers[1]
+            op = exp.complex_().addsub().getText()
+            if op == '+':
+                val = real + imag * 1j
+            elif op == '-':
+                val = real - imag * 1j
+            return Constant(val)
         elif exp.REAL():
             return Constant(float(exp.REAL().getText()))
         elif exp.NNINTEGER():

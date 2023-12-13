@@ -167,11 +167,22 @@ exp
 : REAL
 | NNINTEGER
 | ID
+| complex
 | exp binop exp
 | negop exp
 | unaryop '(' exp ')'
 | '(' exp ')'
 | 'pi'
+;
+
+complex
+: REAL addsub REAL 'j'
+| addsub REAL 'j'
+;
+
+addsub
+: '+'
+| '-'
 ;
 
 binop

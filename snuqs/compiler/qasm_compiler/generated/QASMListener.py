@@ -305,6 +305,24 @@ class QASMListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by QASMParser#complex.
+    def enterComplex(self, ctx:QASMParser.ComplexContext):
+        pass
+
+    # Exit a parse tree produced by QASMParser#complex.
+    def exitComplex(self, ctx:QASMParser.ComplexContext):
+        pass
+
+
+    # Enter a parse tree produced by QASMParser#addsub.
+    def enterAddsub(self, ctx:QASMParser.AddsubContext):
+        pass
+
+    # Exit a parse tree produced by QASMParser#addsub.
+    def exitAddsub(self, ctx:QASMParser.AddsubContext):
+        pass
+
+
     # Enter a parse tree produced by QASMParser#binop.
     def enterBinop(self, ctx:QASMParser.BinopContext):
         pass

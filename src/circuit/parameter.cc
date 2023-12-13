@@ -6,12 +6,13 @@
 namespace snuqs {
 
 Identifier::Identifier(const Creg &creg) : creg_(creg) {}
-double Identifier::eval() const { return creg_.value(); }
+std::complex<double> Identifier::eval() const { return creg_.value(); }
 
-BinOp::BinOp(BinOpType op, std::shared_ptr<Parameter> param0, std::shared_ptr<Parameter> param1)
+BinOp::BinOp(BinOpType op, std::shared_ptr<Parameter> param0,
+             std::shared_ptr<Parameter> param1)
     : op_(op), param0_(param0), param1_(param1) {}
 
-double BinOp::eval() const {
+std::complex<double> BinOp::eval() const {
   switch (op_) {
   case BinOpType::ADD:
     return param0_->eval() + param1_->eval();
@@ -27,12 +28,12 @@ double BinOp::eval() const {
 }
 
 NegOp::NegOp(std::shared_ptr<Parameter> param) : param_(param) {}
-double NegOp::eval() const { return -param_->eval(); }
+std::complex<double> NegOp::eval() const { return -param_->eval(); }
 
 UnaryOp::UnaryOp(UnaryOpType op, std::shared_ptr<Parameter> param)
     : op_(op), param_(param) {}
 
-double UnaryOp::eval() const {
+std::complex<double> UnaryOp::eval() const {
   switch (op_) {
   case UnaryOpType::SIN:
     return sin(param_->eval());
@@ -51,12 +52,13 @@ double UnaryOp::eval() const {
 }
 
 Parenthesis::Parenthesis(std::shared_ptr<Parameter> param) : param_(param) {}
-double Parenthesis::eval() const { return param_->eval(); }
+std::complex<double> Parenthesis::eval() const { return param_->eval(); }
 
 Constant::Constant(double value) : value_(value) {}
-double Constant::eval() const { return value_; }
+Constant::Constant(std::complex<double> value) : value_(value) {}
+std::complex<double> Constant::eval() const { return value_; }
 
 Pi::Pi() : Constant(M_PI) {}
-double Pi::eval() const { return value_; }
+std::complex<double> Pi::eval() const { return value_; }
 
 } // namespace snuqs

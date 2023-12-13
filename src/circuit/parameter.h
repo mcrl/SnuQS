@@ -2,20 +2,21 @@
 #define __PARAMETER_H__
 
 #include "circuit/arg.h"
+#include <complex>
 #include <memory>
 
 namespace snuqs {
 
 class Parameter {
 public:
-    Parameter() {};
-  virtual double eval() const { return 0.0; };
+  Parameter(){};
+  virtual std::complex<double> eval() const { return 0.0; };
 };
 
 class Identifier : public Parameter {
 public:
   Identifier(const Creg &creg);
-  virtual double eval() const override;
+  virtual std::complex<double> eval() const override;
 
   const Creg &creg_;
 };
@@ -29,8 +30,9 @@ enum class BinOpType {
 
 class BinOp : public Parameter {
 public:
-  BinOp(BinOpType op, std::shared_ptr<Parameter> param0, std::shared_ptr<Parameter> param1);
-  virtual double eval() const override;
+  BinOp(BinOpType op, std::shared_ptr<Parameter> param0,
+        std::shared_ptr<Parameter> param1);
+  virtual std::complex<double> eval() const override;
 
   BinOpType op_;
   std::shared_ptr<Parameter> param0_;
@@ -40,7 +42,7 @@ public:
 class NegOp : public Parameter {
 public:
   NegOp(std::shared_ptr<Parameter> param);
-  virtual double eval() const override;
+  virtual std::complex<double> eval() const override;
 
   std::shared_ptr<Parameter> param_;
 };
@@ -57,7 +59,7 @@ enum class UnaryOpType {
 class UnaryOp : public Parameter {
 public:
   UnaryOp(UnaryOpType op, std::shared_ptr<Parameter> param);
-  virtual double eval() const override;
+  virtual std::complex<double> eval() const override;
 
   UnaryOpType op_;
   std::shared_ptr<Parameter> param_;
@@ -66,7 +68,7 @@ public:
 class Parenthesis : public Parameter {
 public:
   Parenthesis(std::shared_ptr<Parameter> param);
-  virtual double eval() const override;
+  virtual std::complex<double> eval() const override;
 
   std::shared_ptr<Parameter> param_;
 };
@@ -74,15 +76,16 @@ public:
 class Constant : public Parameter {
 public:
   Constant(double value);
-  virtual double eval() const override;
+  Constant(std::complex<double> value);
+  virtual std::complex<double> eval() const override;
 
-  double value_;
+  std::complex<double> value_;
 };
 
 class Pi : public Constant {
 public:
   Pi();
-  virtual double eval() const override;
+  virtual std::complex<double> eval() const override;
 };
 
 } // namespace snuqs
