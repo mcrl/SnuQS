@@ -1,7 +1,7 @@
 antlr4-python3-runtime==4.13.1
-pybind11
-numpy
+pybind11==2.11.1
+numpy==1.26.1
 fire
 sphinx
-qiskit
+qiskit=0.45.1
 pyyaml
