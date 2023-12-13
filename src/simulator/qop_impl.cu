@@ -276,11 +276,7 @@ __global__ void FourQubitGate(cuda::complex<T> *buffer, size_t count,
 } // namespace kernel
 template <typename T>
 void QopImpl<T>::initialize(std::complex<T> *buffer, size_t count,
-                            std::vector<size_t> targets,
-                            std::vector<std::complex<T>> params) {
-  if ((1ull << targets.size()) != count) {
-    CANNOT_BE_HERE();
-  }
+                            const std::vector<std::complex<T>> &params) {
   api::memcpyAsync(buffer, params.data(), sizeof(std::complex<T>) * (count),
                    cudaMemcpyHostToDevice, 0);
 }
@@ -1349,8 +1345,8 @@ void QopImpl<T>::sync(std::complex<T> *buffer, size_t count,
 #pragma omp barrier
 }
 
+//template class QopImpl<float>;
 template class QopImpl<double>;
-template class QopImpl<float>;
 
 } // namespace cuda
 } // namespace snuqs

@@ -526,12 +526,12 @@ public:
 
 class INITIALIZE : public Qgate {
 public:
-  INITIALIZE(std::vector<std::shared_ptr<Qarg>> qargs);
-  INITIALIZE(std::vector<std::shared_ptr<Qarg>> qargs,
-             std::vector<std::shared_ptr<Parameter>> params);
+  INITIALIZE(const std::vector<std::complex<double>> &params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
   virtual std::shared_ptr<Qop> clone() const override;
+
+  std::vector<std::complex<double>> init_params_;
 };
 
 class InitZeroState : public Qop {

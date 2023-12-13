@@ -36,7 +36,7 @@ template <typename T> std::shared_ptr<Buffer<T>> runSingleGPU(Circuit &_circ) {
   return mem_buffer;
 }
 
-template std::shared_ptr<Buffer<float>> runSingleGPU<float>(Circuit &circ);
+//template std::shared_ptr<Buffer<float>> runSingleGPU<float>(Circuit &circ);
 template std::shared_ptr<Buffer<double>> runSingleGPU<double>(Circuit &circ);
 
 } // namespace cuda

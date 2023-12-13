@@ -31,29 +31,40 @@ class StatevectorSimulator:
     def qiskit_for_snuqs(self, circ: qiskit.QuantumCircuit):
         circ = circ.copy()
         new_data = []
-        for instr in circ.data:
-            if instr.operation.name == "initialize":
-                new_data.append(
-                    qiskit.circuit.CircuitInstruction(
-                        Initialize("initialize", instr.operation.num_qubits,
-                                   instr.operation.params),
-                        instr.qubits,
-                        instr.clbits
-                    )
-                )
-            else:
-                new_data.append(instr)
+        first_init = None
+        if circ.data[0].operation.name == "initialize" and len(circ.data[0].qubits) == circ.num_qubits:
+            first_init = snuqs._C.INITIALIZE(circ.data[0].operation.params)
+            circ.data = circ.data[1:]
 
-        circ.data = new_data
+#        for instr in circ.data:
+#            if instr.operation.name == "initialize":
+#                new_data.append(
+#                    qiskit.circuit.CircuitInstruction(
+#                        Initialize("initialize", instr.operation.num_qubits,
+#                                   instr.operation.params),
+#                        instr.qubits,
+#                        instr.clbits
+#                    )
+#                )
+#            else:
+#                new_data.append(instr)
+#
+#        circ.data = new_data
+
+        with tempfile.NamedTemporaryFile() as f:
+            circ.qasm(filename=f.name)
+            compiler = QasmCompiler()
+            circ = compiler.compile(f.name)
+            if first_init:
+                circ.prepend(first_init)
         return circ
 
     def run(self, circ: Union[qiskit.QuantumCircuit, Circuit]):
         if isinstance(circ, qiskit.QuantumCircuit):
             circ = self.qiskit_for_snuqs(circ)
-            with tempfile.NamedTemporaryFile() as f:
-                circ.qasm(filename=f.name)
-                compiler = QasmCompiler()
-                circ = compiler.compile(f.name)
-
+        elif isinstance(circ, Circuit):
+            pass
+        else:
+            raise "Illegal input to simulator"
         ret = {}
         return Result(threading.Thread(target=self._run, args=[circ, ret]), ret)

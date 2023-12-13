@@ -15,8 +15,7 @@ public:
   static void setZero(std::complex<T> *buffer, size_t count);
   static void reset(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets);
-  static void initialize(std::complex<T> *buffer, size_t count,
-                 std::vector<size_t> targets, std::vector<std::complex<T>> params);
+  static void initialize(std::complex<T> *buffer, size_t count, const std::vector<std::complex<T>> &params);
 
   static void id(std::complex<T> *buffer, size_t count,
                  std::vector<size_t> targets, std::vector<std::complex<T>> params);

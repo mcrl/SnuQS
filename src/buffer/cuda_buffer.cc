@@ -49,7 +49,7 @@ void CudaBuffer<T>::write(void *buf, size_t count, size_t offset) {
 }
 
 template class CudaBuffer<double>;
-template class CudaBuffer<float>;
+//template class CudaBuffer<float>;
 
 } // namespace cuda
 } // namespace snuqs

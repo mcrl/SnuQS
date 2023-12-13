@@ -72,7 +72,7 @@ void StorageBuffer<T>::write(void *buf, size_t count, size_t offset) {
   NOT_IMPLEMENTED();
 }
 
-template class StorageBuffer<float>;
+//template class StorageBuffer<float>;
 template class StorageBuffer<double>;
 
 } // namespace snuqs

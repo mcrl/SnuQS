@@ -64,8 +64,8 @@ std::shared_ptr<Buffer<T>> runCPU(Circuit &_circ, size_t mem_per_device) {
   return mem_buffer;
 }
 
-template std::shared_ptr<Buffer<float>> runCPU<float>(Circuit &circ,
-                                                      size_t mem_per_device);
+//template std::shared_ptr<Buffer<float>> runCPU<float>(Circuit &circ,
+//                                                      size_t mem_per_device);
 template std::shared_ptr<Buffer<double>> runCPU<double>(Circuit &circ,
                                                         size_t mem_per_device);
 } // namespace cuda

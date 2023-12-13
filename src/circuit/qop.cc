@@ -636,15 +636,12 @@ std::shared_ptr<Qop> CSWAP::clone() const {
   return std::make_shared<CSWAP>(qargs_, params_);
 }
 
-INITIALIZE::INITIALIZE(std::vector<std::shared_ptr<Qarg>> qargs)
-    : Qgate(QgateType::INITIALIZE, qargs) {}
-INITIALIZE::INITIALIZE(std::vector<std::shared_ptr<Qarg>> qargs,
-                       std::vector<std::shared_ptr<Parameter>> params)
-    : Qgate(QgateType::INITIALIZE, qargs, params) {}
+INITIALIZE::INITIALIZE(const std::vector<std::complex<double>> &params)
+    : Qgate(QgateType::INITIALIZE, {}, {}), init_params_(params) {}
 size_t INITIALIZE::numQargs() const { return 3; }
 size_t INITIALIZE::numParams() const { return 0; }
 std::shared_ptr<Qop> INITIALIZE::clone() const {
-  return std::make_shared<INITIALIZE>(qargs_, params_);
+  return std::make_shared<INITIALIZE>(init_params_);
 }
 
 InitZeroState::InitZeroState() : Qop(QopType::INIT_ZERO_STATE, {}) {}

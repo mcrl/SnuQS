@@ -190,8 +190,7 @@ static void exec_gate(Qgate *qop, Buffer<T> *buffer, size_t num_states) {
     break;
   case QgateType::INITIALIZE:
     QopImpl<T>::initialize(buffer->ptr(), num_states,
-                           qargsToIndices(qop->qargs_),
-                           paramsToValues<T>(qop->params_));
+                           reinterpret_cast<INITIALIZE *>(qop)->init_params_);
     break;
   default:
     NOT_IMPLEMENTED();
@@ -256,8 +255,8 @@ void exec(Qop *qop, Buffer<T> *buffer, size_t num_states,
   }
 }
 
-template void exec<float>(Qop *qop, Buffer<float> *buffer, size_t num_states,
-                          Buffer<float> *mem_buffer);
+//template void exec<float>(Qop *qop, Buffer<float> *buffer, size_t num_states,
+//                          Buffer<float> *mem_buffer);
 template void exec<double>(Qop *qop, Buffer<double> *buffer, size_t num_states,
                            Buffer<double> *mem_buffer);
 

@@ -140,6 +140,7 @@ PYBIND11_MODULE(_C, m) {
       .def("append_qreg", &snuqs::Circuit::append_qreg)
       .def("append_creg", &snuqs::Circuit::append_creg)
       .def("append", &snuqs::Circuit::append)
+      .def("prepend", &snuqs::Circuit::prepend)
       .def("name", &snuqs::Circuit::name)
       .def("__repr__", &snuqs::Circuit::__repr__);
 
@@ -490,9 +491,7 @@ PYBIND11_MODULE(_C, m) {
 
   py::class_<snuqs::INITIALIZE, snuqs::Qgate,
              std::shared_ptr<snuqs::INITIALIZE>>(m, "INITIALIZE")
-      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
-      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
-                    std::vector<std::shared_ptr<snuqs::Parameter>>>())
+      .def(py::init<const std::vector<std::complex<double>>&>())
       .def("numQargs", &snuqs::INITIALIZE::numQargs)
       .def("numParams", &snuqs::INITIALIZE::numParams);
 }

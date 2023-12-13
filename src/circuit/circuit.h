@@ -15,6 +15,7 @@ public:
   void append_qreg(std::shared_ptr<Qreg> qreg);
   void append_creg(std::shared_ptr<Creg> creg);
   void append(std::shared_ptr<Qop> qop);
+  void prepend(std::shared_ptr<Qop> qop);
 
   std::shared_ptr<Qreg> getQregForIndex(size_t index) const;
 
