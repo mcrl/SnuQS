@@ -9,6 +9,7 @@
 #include "cuda_api.h"
 #include "qop_impl.h"
 
+#include <cassert>
 #include <iostream>
 #include <random>
 
@@ -273,6 +274,16 @@ __global__ void FourQubitGate(cuda::complex<T> *buffer, size_t count,
 }
 
 } // namespace kernel
+template <typename T>
+void QopImpl<T>::initialize(std::complex<T> *buffer, size_t count,
+                            std::vector<size_t> targets,
+                            std::vector<std::complex<T>> params) {
+  if ((1ull << targets.size()) != count) {
+    CANNOT_BE_HERE();
+  }
+  api::memcpyAsync(buffer, params.data(), sizeof(std::complex<T>) * (count),
+                   cudaMemcpyHostToDevice, 0);
+}
 
 template <typename T>
 void QopImpl<T>::reset(std::complex<T> *buffer, size_t count,
@@ -297,14 +308,14 @@ void QopImpl<T>::setZero(std::complex<T> *buffer, size_t count) {
 template <typename T>
 void QopImpl<T>::id(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   /* Do Nothing */
 }
 
 template <typename T>
 void QopImpl<T>::x(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a1;
   };
@@ -323,7 +334,7 @@ void QopImpl<T>::x(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::y(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a1 * cuda::complex<T>(0, -1);
   };
@@ -341,7 +352,7 @@ void QopImpl<T>::y(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::z(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a0;
   };
@@ -359,7 +370,7 @@ void QopImpl<T>::z(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::h(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
 
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return (a0 + a1) * M_SQRT1_2;
@@ -379,7 +390,7 @@ void QopImpl<T>::h(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::s(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a0;
   };
@@ -398,7 +409,7 @@ void QopImpl<T>::s(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::sdg(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a0;
   };
@@ -417,7 +428,7 @@ void QopImpl<T>::sdg(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::t(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a0;
   };
@@ -437,7 +448,7 @@ void QopImpl<T>::t(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::tdg(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     return a0;
   };
@@ -457,7 +468,7 @@ void QopImpl<T>::tdg(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::sx(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     cuda::complex<T> coef0(1, 1);
     cuda::complex<T> coef1(1, -1);
@@ -480,7 +491,7 @@ void QopImpl<T>::sx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::sxdg(std::complex<T> *buffer, size_t count,
                       std::vector<size_t> targets,
-                      std::vector<std::complex<double>> params) {
+                      std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1) {
     cuda::complex<T> coef0(1, -1);
     cuda::complex<T> coef1(1, 1);
@@ -503,14 +514,14 @@ void QopImpl<T>::sxdg(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::p(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   u1(buffer, count, targets, params);
 }
 
 template <typename T>
 void QopImpl<T>::rx(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> _cos_th = cos(theta / 2.);
   std::complex<double> _sin_th = sin(theta / 2.);
@@ -539,7 +550,7 @@ void QopImpl<T>::rx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::ry(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> _cos_th = cos(theta / 2.);
   std::complex<double> _sin_th = sin(theta / 2.);
@@ -567,7 +578,7 @@ void QopImpl<T>::ry(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::rz(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   std::complex<double> lambda = params[0];
   std::complex<double> _exp_neg_lambda = exp(-(lambda / 2.) * 1i);
   std::complex<double> _exp_lambda = exp((lambda / 2.) * 1i);
@@ -594,14 +605,14 @@ void QopImpl<T>::rz(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::u0(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   /* Do Nothing */
 }
 
 template <typename T>
 void QopImpl<T>::u1(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   std::complex<double> lambda = params[0];
   std::complex<double> _exp_lambda = exp(lambda * 1i);
   cuda::complex<T> exp_lambda(_exp_lambda.real(), _exp_lambda.imag());
@@ -625,7 +636,7 @@ void QopImpl<T>::u1(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::u2(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   std::complex<double> phi = params[0];
   std::complex<double> lambda = params[1];
 
@@ -660,14 +671,14 @@ void QopImpl<T>::u2(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::u3(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   u(buffer, count, targets, params);
 }
 
 template <typename T>
 void QopImpl<T>::u(std::complex<T> *buffer, size_t count,
                    std::vector<size_t> targets,
-                   std::vector<std::complex<double>> params) {
+                   std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> phi = params[1];
   std::complex<double> lambda = params[2];
@@ -706,7 +717,7 @@ void QopImpl<T>::u(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cx(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1,
                            cuda::complex<T> a2,
                            cuda::complex<T> a3) { return a0; };
@@ -728,7 +739,7 @@ void QopImpl<T>::cx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cy(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1,
                            cuda::complex<T> a2,
                            cuda::complex<T> a3) { return a0; };
@@ -752,7 +763,7 @@ void QopImpl<T>::cy(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cz(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1,
                            cuda::complex<T> a2,
                            cuda::complex<T> a3) { return a0; };
@@ -774,7 +785,7 @@ void QopImpl<T>::cz(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::swap(std::complex<T> *buffer, size_t count,
                       std::vector<size_t> targets,
-                      std::vector<std::complex<double>> params) {
+                      std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1,
                            cuda::complex<T> a2,
                            cuda::complex<T> a3) { return a0; };
@@ -796,7 +807,7 @@ void QopImpl<T>::swap(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::ch(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1,
                            cuda::complex<T> a2,
                            cuda::complex<T> a3) { return a0; };
@@ -820,7 +831,7 @@ void QopImpl<T>::ch(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::csx(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(cuda::complex<T> a0, cuda::complex<T> a1,
                            cuda::complex<T> a2,
                            cuda::complex<T> a3) { return a0; };
@@ -848,7 +859,7 @@ void QopImpl<T>::csx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::crx(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> _cos_th = cos(theta / 2.);
   std::complex<double> _sin_th = sin(theta / 2.);
@@ -881,7 +892,7 @@ void QopImpl<T>::crx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cry(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> _cos_th = cos(theta / 2.);
   std::complex<double> _sin_th = sin(theta / 2.);
@@ -914,7 +925,7 @@ void QopImpl<T>::cry(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::crz(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> lambda = params[0];
   std::complex<double> _exp_neg_lambda = exp(-(lambda / 2.) * 1i);
   std::complex<double> _exp_lambda = exp((lambda / 2.) * 1i);
@@ -946,14 +957,14 @@ void QopImpl<T>::crz(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cp(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   cu1(buffer, count, targets, params);
 }
 
 template <typename T>
 void QopImpl<T>::cu1(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> lambda = params[0];
   std::complex<double> _exp_lambda = exp(lambda * 1i);
   cuda::complex<T> exp_lambda(_exp_lambda.real(), _exp_lambda.imag());
@@ -980,7 +991,7 @@ void QopImpl<T>::cu1(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::rxx(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> _cos_th = cos(theta / 2.);
   std::complex<double> _sin_th = sin(theta / 2.);
@@ -1019,7 +1030,7 @@ void QopImpl<T>::rxx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::rzz(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> _exp_neg_th = exp((-theta / 2.) * 1i);
   std::complex<double> _exp_th = exp((theta / 2.) * 1i);
@@ -1056,7 +1067,7 @@ void QopImpl<T>::rzz(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cu3(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> phi = params[1];
   std::complex<double> lambda = params[2];
@@ -1099,7 +1110,7 @@ void QopImpl<T>::cu3(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cu(std::complex<T> *buffer, size_t count,
                     std::vector<size_t> targets,
-                    std::vector<std::complex<double>> params) {
+                    std::vector<std::complex<T>> params) {
   std::complex<double> theta = params[0];
   std::complex<double> phi = params[1];
   std::complex<double> lambda = params[2];
@@ -1147,7 +1158,7 @@ void QopImpl<T>::cu(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::ccx(std::complex<T> *buffer, size_t count,
                      std::vector<size_t> targets,
-                     std::vector<std::complex<double>> params) {
+                     std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(
                 cuda::complex<T> a0, cuda::complex<T> a1, cuda::complex<T> a2,
                 cuda::complex<T> a3, cuda::complex<T> a4, cuda::complex<T> a5,
@@ -1190,7 +1201,7 @@ void QopImpl<T>::ccx(std::complex<T> *buffer, size_t count,
 template <typename T>
 void QopImpl<T>::cswap(std::complex<T> *buffer, size_t count,
                        std::vector<size_t> targets,
-                       std::vector<std::complex<double>> params) {
+                       std::vector<std::complex<T>> params) {
   auto f0 = [=] __device__(
                 cuda::complex<T> a0, cuda::complex<T> a1, cuda::complex<T> a2,
                 cuda::complex<T> a3, cuda::complex<T> a4, cuda::complex<T> a5,
@@ -1257,7 +1268,7 @@ static size_t transform_block_num(size_t block_num, size_t min_target,
 template <typename T>
 void QopImpl<T>::global_swap(std::complex<T> *buffer, size_t count,
                              std::vector<size_t> targets,
-                             std::vector<std::complex<double>> params,
+                             std::vector<std::complex<T>> params,
                              std::complex<T> *mem_buffer) {
   size_t target0 = std::min(targets[0], targets[1]);
   size_t target1 = std::max(targets[0], targets[1]);

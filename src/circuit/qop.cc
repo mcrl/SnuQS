@@ -202,6 +202,9 @@ static std::string qgateTypeToString(QgateType type) {
     return "CCX";
   case QgateType::CSWAP:
     return "CSWAP";
+
+  case QgateType::INITIALIZE:
+    return "INITIALIZE";
   }
   CANNOT_BE_HERE();
   return "INVALID";
@@ -631,6 +634,17 @@ size_t CSWAP::numQargs() const { return 3; }
 size_t CSWAP::numParams() const { return 0; }
 std::shared_ptr<Qop> CSWAP::clone() const {
   return std::make_shared<CSWAP>(qargs_, params_);
+}
+
+INITIALIZE::INITIALIZE(std::vector<std::shared_ptr<Qarg>> qargs)
+    : Qgate(QgateType::INITIALIZE, qargs) {}
+INITIALIZE::INITIALIZE(std::vector<std::shared_ptr<Qarg>> qargs,
+                       std::vector<std::shared_ptr<Parameter>> params)
+    : Qgate(QgateType::INITIALIZE, qargs, params) {}
+size_t INITIALIZE::numQargs() const { return 3; }
+size_t INITIALIZE::numParams() const { return 0; }
+std::shared_ptr<Qop> INITIALIZE::clone() const {
+  return std::make_shared<INITIALIZE>(qargs_, params_);
 }
 
 InitZeroState::InitZeroState() : Qop(QopType::INIT_ZERO_STATE, {}) {}

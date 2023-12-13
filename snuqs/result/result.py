@@ -4,8 +4,6 @@ from snuqs.buffer import Buffer
 from typing import Dict
 import threading
 
-import time
-
 
 class Result:
     class Status(Enum):
@@ -26,9 +24,7 @@ class Result:
 
     def wait(self):
         if self.status != Result.Status.DONE:
-            s = time.time()
             self.thread.join()
-            print(f"Wait time: {time.time() - s}")
             self.status = Result.Status.DONE
 
     def get_statevector(self):

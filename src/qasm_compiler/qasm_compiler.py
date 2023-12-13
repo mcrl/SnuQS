@@ -9,7 +9,6 @@ from .qasm_exception import QasmException
 from snuqs.circuit import Circuit
 
 
-
 class QasmCompiler:
     """
     OpenQASM Compiler for SnuQS.

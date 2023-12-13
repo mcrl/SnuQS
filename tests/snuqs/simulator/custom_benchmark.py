@@ -34,30 +34,24 @@ def run_qiskit(file_name):
 
 
 class CustomBenchmarkTest(unittest.TestCase):
-    def test_init7(self):
-        state_snuqs = run_snuqs('qasm/custom_benchmark/init7.qasm')
-#        state_qiskit = run_qiskit('qasm/custom_benchmark/init7.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
+    def test_test5(self):
+        state_snuqs = run_snuqs('qasm/custom_benchmark/test5.qasm')
+        state_qiskit = run_qiskit('qasm/custom_benchmark/test5.qasm')
+        for x, y in zip(state_snuqs, state_qiskit):
+            self.assertAlmostEqual(x, y)
 
-#    def test_test5(self):
-#        state_snuqs = run_snuqs('qasm/custom_benchmark/test5.qasm')
-#        state_qiskit = run_qiskit('qasm/custom_benchmark/test5.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
+    def test_test7(self):
+        state_snuqs = run_snuqs('qasm/custom_benchmark/test7.qasm')
+        state_qiskit = run_qiskit('qasm/custom_benchmark/test7.qasm')
+        for x, y in zip(state_snuqs, state_qiskit):
+            self.assertAlmostEqual(x, y)
 
-#    def test_test7(self):
-#        state_snuqs = run_snuqs('qasm/custom_benchmark/test7.qasm')
-#        state_qiskit = run_qiskit('qasm/custom_benchmark/test7.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
+    def test_test9(self):
+        state_snuqs = run_snuqs('qasm/custom_benchmark/test9.qasm')
+        state_qiskit = run_qiskit('qasm/custom_benchmark/test9.qasm')
+        for x, y in zip(state_snuqs, state_qiskit):
+            self.assertAlmostEqual(x, y)
 
-#    def test_test9(self):
-#        state_snuqs = run_snuqs('qasm/custom_benchmark/test9.qasm')
-#        state_qiskit = run_qiskit('qasm/custom_benchmark/test9.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
-#
 #    def test_test11(self):
 #        state_snuqs = run_snuqs('qasm/custom_benchmark/test11.qasm')
 #        state_qiskit = run_qiskit('qasm/custom_benchmark/test11.qasm')
@@ -69,6 +63,7 @@ class CustomBenchmarkTest(unittest.TestCase):
 #        state_qiskit = run_qiskit('qasm/custom_benchmark/test13.qasm')
 #        for x, y in zip(state_snuqs, state_qiskit):
 #            self.assertAlmostEqual(x, y)
+
 
 
 if __name__ == '__main__':

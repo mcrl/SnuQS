@@ -2,13 +2,23 @@ import snuqs._C
 from snuqs.circuit import Circuit
 from snuqs.result import Result
 import threading
-from typing import Dict
+from typing import Dict, List, Union
 
 import tempfile
 import qiskit
 from snuqs import QasmCompiler
 
-import time
+
+class Initialize(qiskit.circuit.Gate):
+    def __init__(self, name, num_qubits, params: List[complex]):
+        self.name = name
+        self.num_qubits = num_qubits
+        self._params = params
+        self._num_clbits = 0
+        self._condition = None
+
+    def validate_parameter(self, parameter):
+        return True
 
 
 class StatevectorSimulator:
@@ -18,14 +28,32 @@ class StatevectorSimulator:
     def _run(self, circ: Circuit, ret: Dict[str, any]):
         ret['state'] = self.sim.run(circ)
 
-    def run(self, circ: Circuit):
+    def qiskit_for_snuqs(self, circ: qiskit.QuantumCircuit):
+        circ = circ.copy()
+        new_data = []
+        for instr in circ.data:
+            if instr.operation.name == "initialize":
+                new_data.append(
+                    qiskit.circuit.CircuitInstruction(
+                        Initialize("initialize", instr.operation.num_qubits,
+                                   instr.operation.params),
+                        instr.qubits,
+                        instr.clbits
+                    )
+                )
+            else:
+                new_data.append(instr)
+
+        circ.data = new_data
+        return circ
+
+    def run(self, circ: Union[qiskit.QuantumCircuit, Circuit]):
         if isinstance(circ, qiskit.QuantumCircuit):
+            circ = self.qiskit_for_snuqs(circ)
             with tempfile.NamedTemporaryFile() as f:
-                s = time.time()
                 circ.qasm(filename=f.name)
                 compiler = QasmCompiler()
                 circ = compiler.compile(f.name)
-                print(f"compile time: {time.time()-s}")
 
         ret = {}
         return Result(threading.Thread(target=self._run, args=[circ, ret]), ret)

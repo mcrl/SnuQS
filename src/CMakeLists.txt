@@ -28,6 +28,7 @@ target_link_libraries(
          runtime
          circuit
          simulator
+         #qasm_compiler
          transpile
          CUDA::cudart)
 

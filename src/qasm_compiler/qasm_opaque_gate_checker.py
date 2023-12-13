@@ -42,8 +42,6 @@ OPAQUE_GATES = [
     'cu',
     'ccx',
     'cswap',
-
-    'initialize',
 ]
 
 

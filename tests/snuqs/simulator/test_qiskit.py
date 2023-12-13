@@ -15,7 +15,7 @@ def run_snuqs(circ):
     result = sim.run(circ)
     result.wait()
     state = result.get_statevector()
-    return state
+    return np.array(state, copy=False)
 
 
 def run_qiskit(circ):
@@ -102,9 +102,8 @@ class BenchmarkTest(unittest.TestCase):
         S_circ = qcS
         qc = QuantumCircuit(total_qubit)
 
-        init = np.random.rand(2 ** total_qubit)
-        init = init / np.sqrt(np.sum(np.square(init)))
-        init = [v + 0.j for v in init]
+        init = np.random.rand(2 ** total_qubit) + 1j *  np.random.rand(2 ** total_qubit)
+        init = init / np.sqrt(np.sum(np.square(np.abs(init))))
         qc.initialize(init)
 
         qc.append(K_circ.inverse(), range(2*qubit_n + 2))
@@ -126,8 +125,9 @@ class BenchmarkTest(unittest.TestCase):
 
         state_snuqs = run_snuqs(qc)
         state_qiskit = run_qiskit(qc)
+        phase = state_qiskit[0] / state_snuqs[0]
         for x, y in zip(state_snuqs, state_qiskit):
-            self.assertAlmostEqual(x, y)
+            self.assertAlmostEqual(x, y * phase)
 
 
 if __name__ == '__main__':

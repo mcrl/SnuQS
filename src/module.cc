@@ -487,4 +487,12 @@ PYBIND11_MODULE(_C, m) {
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CSWAP::numQargs)
       .def("numParams", &snuqs::CSWAP::numParams);
+
+  py::class_<snuqs::INITIALIZE, snuqs::Qgate,
+             std::shared_ptr<snuqs::INITIALIZE>>(m, "INITIALIZE")
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>>())
+      .def(py::init<std::vector<std::shared_ptr<snuqs::Qarg>>,
+                    std::vector<std::shared_ptr<snuqs::Parameter>>>())
+      .def("numQargs", &snuqs::INITIALIZE::numQargs)
+      .def("numParams", &snuqs::INITIALIZE::numParams);
 }
