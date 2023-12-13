@@ -3,7 +3,7 @@
 #include "simulator/executor.h"
 #include "simulator/qop_impl.h"
 #include "simulator/run.h"
-#include "simulator/transpile.h"
+#include "transpile/transpile.h"
 
 #include <iostream>
 #include <unistd.h>

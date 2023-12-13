@@ -28,10 +28,12 @@ target_link_libraries(
          runtime
          circuit
          simulator
+         transpile
          CUDA::cudart)
 
 add_subdirectory(runtime)
 add_subdirectory(circuit)
 add_subdirectory(simulator)
+add_subdirectory(transpile)
 add_subdirectory(optimizer)
 add_subdirectory(buffer)

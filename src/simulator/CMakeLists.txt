@@ -1,6 +1,5 @@
 add_library(simulator STATIC statevector_simulator.cc
                              executor.cc
-                             transpile.cc
                              run_single_gpu.cc
                              run_multi_gpu.cc
                              run_cpu.cc
