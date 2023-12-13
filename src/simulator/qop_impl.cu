@@ -91,6 +91,22 @@ template <typename T> struct complex {
 namespace kernel {
 
 template <typename T>
+__global__ void reset(cuda::complex<T> *buffer, size_t count, size_t target) {
+  size_t i = blockDim.x * blockIdx.x + threadIdx.x;
+  size_t st = (1ul << target);
+
+  if ((i & st) == 0) {
+
+    cuda::complex<T> a0 = buffer[i];
+    cuda::complex<T> a1 = buffer[i + st];
+
+    double prob = a0.abssq() + a1.abssq();
+    buffer[i] = sqrt(prob);
+    buffer[i + st] = 0;
+  }
+}
+
+template <typename T>
 __global__ void measure(cuda::complex<T> *buffer, size_t count, size_t target,
                         double rand) {
   size_t i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -256,6 +272,14 @@ __global__ void FourQubitGate(cuda::complex<T> *buffer, size_t count,
 }
 
 } // namespace kernel
+
+template <typename T>
+void QopImpl<T>::reset(std::complex<T> *buffer, size_t count,
+                       std::vector<size_t> targets) {
+  kernel::reset<T><<<(count + 255) / 256, 256>>>(
+      reinterpret_cast<cuda::complex<T> *>(buffer), count, targets[0]);
+  api::assertKernelLaunch();
+}
 
 template <typename T>
 void QopImpl<T>::initZeroState(std::complex<T> *buffer, size_t count) {

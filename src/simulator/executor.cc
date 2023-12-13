@@ -185,9 +185,11 @@ void exec(Qop *qop, Buffer<T> *buffer, size_t num_states,
           Buffer<T> *mem_buffer) {
   switch (qop->type()) {
   case QopType::BARRIER:
-    NOT_IMPLEMENTED();
+    /* DO NOTHING */
+    break;
   case QopType::RESET:
-    NOT_IMPLEMENTED();
+    QopImpl<T>::reset(buffer->ptr(), num_states, qargsToIndices(qop->qargs_));
+    break;
   case QopType::MEASURE:
     NOT_IMPLEMENTED();
   case QopType::COND:

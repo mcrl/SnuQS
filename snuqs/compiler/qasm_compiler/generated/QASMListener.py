@@ -161,6 +161,15 @@ class QASMListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by QASMParser#gopReset.
+    def enterGopReset(self, ctx:QASMParser.GopResetContext):
+        pass
+
+    # Exit a parse tree produced by QASMParser#gopReset.
+    def exitGopReset(self, ctx:QASMParser.GopResetContext):
+        pass
+
+
     # Enter a parse tree produced by QASMParser#idlist.
     def enterIdlist(self, ctx:QASMParser.IdlistContext):
         pass

@@ -2,6 +2,7 @@ from .generated.QASMLexer import QASMLexer
 from antlr4 import InputStream, CommonTokenStream
 import snuqs
 import os
+import re
 
 
 PREFIXES = [
@@ -64,6 +65,13 @@ class QasmPreprocessor:
     def preprocess(self, file_name: str, idx: int = 1):
         with open(file_name) as f:
             qasm = f.read()
+
+        qasm = re.sub("include \"qelib1.inc\";", "", qasm)
+        includes = ''
+        for file_name in DEFAULT_INCLUDES:
+            includes += self.read_file(file_name)
+        qasm = re.sub("OPENQASM 2.0;", "OPENQASM 2.0;" + includes, qasm)
+        return qasm
 
         input_stream = InputStream(qasm)
         lexer = QASMLexer(input_stream)

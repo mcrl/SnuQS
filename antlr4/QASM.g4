@@ -68,6 +68,7 @@ gop
 | gopCXGate
 | gopBarrier
 | gopCustomGate
+| gopReset
 ;
 
 gopUGate
@@ -86,6 +87,10 @@ gopCustomGate
 : ID idlist ';'
 | ID '(' ')' idlist ';'
 | ID '(' explist ')' idlist ';'
+;
+
+gopReset
+: 'reset' ID ';'
 ;
 
 idlist

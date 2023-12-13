@@ -120,7 +120,7 @@ class QasmCircuitGenerator(QasmStage):
         elif ctx.gopBarrier():
             qregs = [qubit_map[_id.getText()]
                      for _id in ctx.gopBarrier().idlist().ID()]
-            return CX(qregs)
+            return Barrier(qregs)
         elif ctx.gopCustomGate():
             qregs = [qubit_map[_id.getText()]
                      for _id in ctx.gopCustomGate().idlist().ID()]
@@ -158,13 +158,17 @@ class QasmCircuitGenerator(QasmStage):
                     gops.append(self.createGop(gop, _qubit_map, _param_map))
 
                 return Custom(symbol, gops, qregs, params)
+        elif ctx.gopReset():
+            qreg = qubit_map[ctx.gopReset().ID().getText()]
+            return Reset([qreg])
 
     def createCustomGate(self, ctx: QASMParser.QopCustomGateContext):
         symbol = ctx.ID().getText()
         qargs = [self.createQarg(qarg) for qarg in ctx.arglist().qarg()]
         params = []
         if ctx.explist():
-            params = [self.expAsParameter(exp, {}) for exp in ctx.explist().exp()]
+            params = [self.expAsParameter(exp, {})
+                      for exp in ctx.explist().exp()]
 
         if symbol in self.opaque_map:
             decl = self.opaque_map[symbol]

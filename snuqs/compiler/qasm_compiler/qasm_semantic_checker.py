@@ -163,6 +163,12 @@ class QasmSemanticChecker(QasmStage):
                         raise LookupError(
                             f"parameter '{symbol}' has not been defined.")
 
+    # Enter a parse tree produced by QASMParser#gopReset.
+    def enterGopReset(self, ctx: QASMParser.GopResetContext):
+        symbol = ctx.ID().getText()
+        if not self.scope.contains(symbol, QasmScope.Type.TARGET):
+            raise LookupError(f"target '{symbol}' has not been defined.")
+
     # Exit a parse tree produced by QASMParser#qopUGate.
     def exitQopUGate(self, ctx: QASMParser.QopUGateContext):
         num_exprs = len(ctx.explist().exp())

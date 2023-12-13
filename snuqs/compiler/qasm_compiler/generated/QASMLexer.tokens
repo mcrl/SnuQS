@@ -54,9 +54,9 @@ BlockComment=40
 'CX'=14
 ','=15
 'barrier'=16
-'measure'=17
-'->'=18
-'reset'=19
+'reset'=17
+'measure'=18
+'->'=19
 'if'=20
 '=='=21
 'pi'=22

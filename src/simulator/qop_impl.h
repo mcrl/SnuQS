@@ -12,6 +12,8 @@ template <typename T> class QopImpl {
 public:
   static void initZeroState(std::complex<T> *buffer, size_t count);
   static void setZero(std::complex<T> *buffer, size_t count);
+  static void reset(std::complex<T> *buffer, size_t count,
+                    std::vector<size_t> targets);
 
   static void id(std::complex<T> *buffer, size_t count,
                  std::vector<size_t> targets, std::vector<double> params);
