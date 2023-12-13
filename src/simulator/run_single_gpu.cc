@@ -13,10 +13,9 @@ namespace snuqs {
 namespace cuda {
 
 template <typename T> std::shared_ptr<Buffer<T>> runSingleGPU(Circuit &_circ) {
-  std::shared_ptr<Circuit> circ = transpileSingleGPU(_circ);
 
   size_t num_qubits = 0;
-  for (auto &qreg : circ->qregs()) {
+  for (auto &qreg : _circ.qregs()) {
     num_qubits += qreg->dim();
   }
   api::setDevice(0);
@@ -28,7 +27,7 @@ template <typename T> std::shared_ptr<Buffer<T>> runSingleGPU(Circuit &_circ) {
   std::shared_ptr<Buffer<T>> mem_buffer =
       std::make_shared<MemoryBuffer<T>>(num_states);
 
-  QopImpl<T>::initZeroState(buffer->ptr(), num_states, {}, {});
+  std::shared_ptr<Circuit> circ = transpileSingleGPU(_circ);
 
   for (auto &qop : circ->qops()) {
     exec<T>(qop.get(), buffer.get(), num_states, mem_buffer.get());

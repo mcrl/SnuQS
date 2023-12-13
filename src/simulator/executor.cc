@@ -200,10 +200,24 @@ void exec(Qop *qop, Buffer<T> *buffer, size_t num_states,
   case QopType::QGATE:
     exec_gate<T>(dynamic_cast<Qgate *>(qop), buffer, num_states);
     break;
+  case QopType::INIT_ZERO_STATE:
+    QopImpl<T>::initZeroState(buffer->ptr(), num_states);
+    break;
+  case QopType::SET_ZERO:
+    QopImpl<T>::setZero(buffer->ptr(), num_states);
+    break;
   case QopType::GLOBAL_SWAP:
     QopImpl<T>::global_swap(buffer->ptr(), num_states,
                             qargsToIndices(qop->qargs_),
                             paramsToValues(qop->params_), mem_buffer->ptr());
+    break;
+  case QopType::FLUSH:
+    QopImpl<T>::flush(buffer->ptr(), num_states, qargsToIndices(qop->qargs_),
+                      mem_buffer->ptr());
+    break;
+  case QopType::SLICE:
+    NOT_IMPLEMENTED();
+    break;
   }
 }
 

@@ -64,7 +64,7 @@ std::shared_ptr<Buffer<T>> StatevectorSimulator<T>::run(Circuit &circ) {
       std::shared_ptr<Buffer<T>> buffer = cuda::runMultiGPU<T>(circ);
       return buffer;
   } else if (state_size <= min_cpu_mem) {
-      std::shared_ptr<Buffer<T>> buffer = cuda::runCPU<T>(circ);
+      std::shared_ptr<Buffer<T>> buffer = cuda::runCPU<T>(circ, min_cuda_mem);
       return buffer;
   } else {
       std::shared_ptr<Buffer<T>> buffer = cuda::runStorage<T>(circ);

@@ -16,7 +16,11 @@ enum class QopType {
   COND = 4,
   CUSTOM = 5,
   QGATE = 6,
-  GLOBAL_SWAP = 7,
+  INIT_ZERO_STATE = 7,
+  SET_ZERO = 8,
+  GLOBAL_SWAP = 9,
+  FLUSH = 10,
+  SLICE = 11,
 };
 
 class Qop {
@@ -32,6 +36,8 @@ public:
   QopType type() const;
   virtual std::string __repr__() const;
 
+  virtual std::shared_ptr<Qop> clone() const;
+
   std::vector<std::shared_ptr<Qarg>> qargs_;
   std::vector<std::shared_ptr<Parameter>> params_;
 
@@ -43,18 +49,21 @@ class Barrier : public Qop {
 public:
   Barrier(std::vector<std::shared_ptr<Qarg>> qargs);
   virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class Reset : public Qop {
 public:
   Reset(std::vector<std::shared_ptr<Qarg>> qargs);
   virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class Measure : public Qop {
 public:
   Measure(std::vector<std::shared_ptr<Qarg>> qargs, std::vector<Carg> cbits);
   virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 
 private:
   std::vector<Carg> cbits_;
@@ -64,6 +73,7 @@ class Cond : public Qop {
 public:
   Cond(std::shared_ptr<Qop> op, std::shared_ptr<Creg> creg, size_t val);
   virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 
 private:
   std::shared_ptr<Qop> op_;
@@ -78,6 +88,7 @@ public:
          std::vector<std::shared_ptr<Parameter>> params);
   std::vector<std::shared_ptr<Qop>> qops();
   virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 
 private:
   std::string name_;
@@ -145,6 +156,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class X : public Qgate {
@@ -154,6 +166,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class Y : public Qgate {
@@ -163,6 +176,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class Z : public Qgate {
@@ -172,6 +186,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class H : public Qgate {
@@ -181,6 +196,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class S : public Qgate {
@@ -190,6 +206,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class SDG : public Qgate {
@@ -199,6 +216,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class T : public Qgate {
@@ -208,6 +226,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class TDG : public Qgate {
@@ -217,6 +236,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class SX : public Qgate {
@@ -226,6 +246,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class SXDG : public Qgate {
@@ -235,6 +256,7 @@ public:
        std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class P : public Qgate {
@@ -244,6 +266,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class RX : public Qgate {
@@ -253,6 +276,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class RY : public Qgate {
@@ -262,6 +286,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class RZ : public Qgate {
@@ -271,6 +296,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class U0 : public Qgate {
@@ -280,6 +306,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class U1 : public Qgate {
@@ -289,6 +316,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class U2 : public Qgate {
@@ -298,6 +326,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class U3 : public Qgate {
@@ -307,6 +336,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class U : public Qgate {
@@ -316,6 +346,7 @@ public:
     std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CX : public Qgate {
@@ -325,6 +356,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CZ : public Qgate {
@@ -334,6 +366,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CY : public Qgate {
@@ -343,6 +376,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class SWAP : public Qgate {
@@ -352,6 +386,7 @@ public:
        std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CH : public Qgate {
@@ -361,6 +396,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CSX : public Qgate {
@@ -370,6 +406,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CRX : public Qgate {
@@ -379,6 +416,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CRY : public Qgate {
@@ -388,6 +426,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CRZ : public Qgate {
@@ -397,6 +436,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CU1 : public Qgate {
@@ -406,6 +446,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CP : public Qgate {
@@ -415,6 +456,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class RXX : public Qgate {
@@ -424,6 +466,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class RZZ : public Qgate {
@@ -433,6 +476,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CU3 : public Qgate {
@@ -442,6 +486,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CU : public Qgate {
@@ -451,6 +496,7 @@ public:
      std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CCX : public Qgate {
@@ -460,6 +506,7 @@ public:
       std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class CSWAP : public Qgate {
@@ -469,12 +516,43 @@ public:
         std::vector<std::shared_ptr<Parameter>> params);
   virtual size_t numQargs() const override;
   virtual size_t numParams() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+};
+
+class InitZeroState : public Qop {
+public:
+  InitZeroState();
+  virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+};
+
+class SetZero : public Qop {
+public:
+  SetZero();
+  virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
 };
 
 class GlobalSwap : public Qop {
 public:
   GlobalSwap(std::vector<std::shared_ptr<Qarg>> qargs);
   virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+};
+
+class Flush : public Qop {
+public:
+  Flush(std::vector<std::shared_ptr<Qarg>> qargs);
+  virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+};
+
+class Slice : public Qop {
+public:
+  Slice(size_t slice);
+  virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+  size_t slice_;
 };
 
 } // namespace snuqs
