@@ -27,14 +27,12 @@ template <typename T> std::shared_ptr<Buffer<T>> runSingleGPU(Circuit &_circ) {
   std::shared_ptr<Buffer<T>> mem_buffer =
       std::make_shared<MemoryBuffer<T>>(num_states);
 
-  std::shared_ptr<Circuit> circ = transpileSingleGPU(_circ);
+  std::shared_ptr<Circuit> circ = transpileSingleGPU(_circ, num_qubits);
 
   for (auto &qop : circ->qops()) {
     exec<T>(qop.get(), buffer.get(), num_states, mem_buffer.get());
   }
 
-  api::memcpy(mem_buffer->ptr(), buffer->ptr(),
-              num_states * sizeof(std::complex<T>), cudaMemcpyDeviceToHost);
   return mem_buffer;
 }
 

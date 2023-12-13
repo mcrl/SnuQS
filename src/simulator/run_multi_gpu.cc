@@ -41,10 +41,6 @@ template <typename T> std::shared_ptr<Buffer<T>> runMultiGPU(Circuit &_circ) {
     for (auto &qop : circ->qops()) {
       exec<T>(qop.get(), buffer.get(), num_states_per_device, mem_buffer.get());
     }
-
-    api::memcpy(mem_buffer->ptr() + i * num_states_per_device, buffer->ptr(),
-                num_states_per_device * sizeof(std::complex<T>),
-                cudaMemcpyDeviceToHost);
   }
 
   return mem_buffer;

@@ -645,6 +645,46 @@ std::shared_ptr<Qop> SetZero::clone() const {
   return std::make_shared<SetZero>();
 }
 
+MemcpyH2D::MemcpyH2D() : Qop(QopType::MEMCPY_H2D), slice_(0) {}
+MemcpyH2D::MemcpyH2D(std::map<Qarg, Qarg> qarg_map)
+    : Qop(QopType::MEMCPY_H2D), qarg_map_(qarg_map), slice_(0) {}
+MemcpyH2D::MemcpyH2D(std::map<Qarg, Qarg> qarg_map, size_t slice)
+    : Qop(QopType::MEMCPY_H2D), qarg_map_(qarg_map), slice_(slice) {}
+std::string MemcpyH2D::__repr__() const {
+  std::ostringstream s;
+  s << "memcpy-h2d ";
+  s << "(" << slice_ << ") ";
+  for (auto &kv : qarg_map_) {
+    s << kv.first.__repr__() << " <-> " << kv.second.__repr__() << ", ";
+  }
+  return s.str();
+}
+std::shared_ptr<Qop> MemcpyH2D::clone() const {
+  return std::make_shared<MemcpyH2D>(qarg_map_, slice_);
+}
+
+MemcpyD2H::MemcpyD2H() : Qop(QopType::MEMCPY_D2H), slice_(0) {}
+MemcpyD2H::MemcpyD2H(std::map<Qarg, Qarg> qarg_map)
+    : Qop(QopType::MEMCPY_D2H), qarg_map_(qarg_map), slice_(0) {}
+MemcpyD2H::MemcpyD2H(std::map<Qarg, Qarg> qarg_map, size_t slice)
+    : Qop(QopType::MEMCPY_D2H), qarg_map_(qarg_map), slice_(slice) {}
+std::string MemcpyD2H::__repr__() const {
+  std::ostringstream s;
+  s << "memcpy-d2h ";
+  s << "(" << slice_ << ") ";
+  for (auto &kv : qarg_map_) {
+    s << kv.first.__repr__() << " <-> " << kv.second.__repr__() << ", ";
+  }
+  return s.str();
+}
+std::shared_ptr<Qop> MemcpyD2H::clone() const {
+  return std::make_shared<MemcpyD2H>(qarg_map_, slice_);
+}
+
+Sync::Sync() : Qop(QopType::SYNC) {}
+std::string Sync::__repr__() const { return "sync "; }
+std::shared_ptr<Qop> Sync::clone() const { return std::make_shared<Sync>(); }
+
 GlobalSwap::GlobalSwap(std::vector<std::shared_ptr<Qarg>> qargs)
     : Qop(QopType::GLOBAL_SWAP, qargs) {}
 std::string GlobalSwap::__repr__() const {
@@ -658,22 +698,13 @@ std::shared_ptr<Qop> GlobalSwap::clone() const {
   return std::make_shared<GlobalSwap>(qargs_);
 }
 
-Flush::Flush(std::vector<std::shared_ptr<Qarg>> qargs)
-    : Qop(QopType::FLUSH, qargs) {}
-std::string Flush::__repr__() const {
-  std::ostringstream s;
-  s << "global-swap ";
-  s << qargs_[0]->__repr__() << " <-> " << qargs_[1]->__repr__();
-  return s.str();
-}
-
-std::shared_ptr<Qop> Flush::clone() const {
-  return std::make_shared<Flush>(qargs_);
-}
-
 Slice::Slice(size_t slice) : Qop(QopType::SLICE), slice_(slice) {}
-std::string Slice::__repr__() const { return "slice " + std::to_string(slice_); }
+std::string Slice::__repr__() const {
+  return "slice " + std::to_string(slice_);
+}
 
-std::shared_ptr<Qop> Slice::clone() const { return std::make_shared<Slice>(slice_); }
+std::shared_ptr<Qop> Slice::clone() const {
+  return std::make_shared<Slice>(slice_);
+}
 
 } // namespace snuqs

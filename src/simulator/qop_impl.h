@@ -3,6 +3,7 @@
 
 #include "cuda_api.h"
 #include <complex>
+#include <map>
 #include <vector>
 
 namespace snuqs {
@@ -130,8 +131,14 @@ public:
                           std::vector<size_t> targets,
                           std::vector<double> params,
                           std::complex<T> *mem_buffer);
-  static void flush(std::complex<T> *buffer, size_t count,
-                    std::vector<size_t> targets, std::complex<T> *mem_buffer);
+  static void memcpy_h2d(std::complex<T> *buffer, size_t count,
+                         std::map<size_t, size_t> index_map,
+                         std::complex<T> *mem_buffer, size_t offset);
+  static void memcpy_d2h(std::complex<T> *buffer, size_t count,
+                         std::map<size_t, size_t> index_map,
+                         std::complex<T> *mem_buffer, size_t offset);
+  static void sync(std::complex<T> *buffer, size_t count,
+                   std::complex<T> *mem_buffer);
 };
 
 } // namespace cuda

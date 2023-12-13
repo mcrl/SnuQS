@@ -1,6 +1,7 @@
 #include "arg.h"
 
 namespace snuqs {
+Qarg::Qarg() {}
 Qarg::Qarg(std::shared_ptr<const Qreg> qreg) : qreg_(qreg) {}
 Qarg::Qarg(std::shared_ptr<const Qreg> qreg, size_t index)
     : index_(index), qreg_(qreg) {}

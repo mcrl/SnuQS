@@ -9,6 +9,7 @@ namespace snuqs {
 
 class Qarg {
 public:
+  Qarg();
   Qarg(std::shared_ptr<const Qreg> qreg);
   Qarg(std::shared_ptr<const Qreg> qreg, size_t index);
   std::shared_ptr<const Qreg> qreg() const;
@@ -20,7 +21,6 @@ public:
 
   std::shared_ptr<const Qreg> qreg_;
 
-private:
   size_t index_;
   size_t base_;
 };

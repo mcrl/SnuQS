@@ -4,6 +4,7 @@
 #include "arg.h"
 #include "parameter.h"
 #include "types.h"
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -18,9 +19,11 @@ enum class QopType {
   QGATE = 6,
   INIT_ZERO_STATE = 7,
   SET_ZERO = 8,
-  GLOBAL_SWAP = 9,
-  FLUSH = 10,
-  SLICE = 11,
+  MEMCPY_H2D = 9,
+  MEMCPY_D2H = 10,
+  SYNC = 11,
+  GLOBAL_SWAP = 12,
+  SLICE = 13,
 };
 
 class Qop {
@@ -533,16 +536,41 @@ public:
   virtual std::shared_ptr<Qop> clone() const override;
 };
 
-class GlobalSwap : public Qop {
+class MemcpyH2D : public Qop {
 public:
-  GlobalSwap(std::vector<std::shared_ptr<Qarg>> qargs);
+  MemcpyH2D();
+  MemcpyH2D(std::map<Qarg, Qarg> qarg_map_);
+  MemcpyH2D(std::map<Qarg, Qarg> qarg_map_,
+            size_t slice);
+  virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+  std::map<Qarg, Qarg> qarg_map_;
+  size_t slice_;
+};
+
+class MemcpyD2H : public Qop {
+public:
+  MemcpyD2H();
+  MemcpyD2H(std::map<Qarg, Qarg> qarg_map_);
+  MemcpyD2H(std::map<Qarg, Qarg> qarg_map_,
+            size_t slice);
+  virtual std::string __repr__() const override;
+  virtual std::shared_ptr<Qop> clone() const override;
+
+  std::map<Qarg, Qarg> qarg_map_;
+  size_t slice_;
+};
+
+class Sync : public Qop {
+public:
+  Sync();
   virtual std::string __repr__() const override;
   virtual std::shared_ptr<Qop> clone() const override;
 };
 
-class Flush : public Qop {
+class GlobalSwap : public Qop {
 public:
-  Flush(std::vector<std::shared_ptr<Qarg>> qargs);
+  GlobalSwap(std::vector<std::shared_ptr<Qarg>> qargs);
   virtual std::string __repr__() const override;
   virtual std::shared_ptr<Qop> clone() const override;
 };

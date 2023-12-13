@@ -26,6 +26,16 @@ paramsToValues(const std::vector<std::shared_ptr<Parameter>> &params) {
   return values;
 }
 
+std::map<size_t, size_t> qargMapToIndexMap(
+    const std::map<Qarg, Qarg> &qarg_map) {
+  std::map<size_t, size_t> index_map;
+
+  for (auto &kv : qarg_map) {
+    index_map[kv.first.globalIndex()] = kv.second.globalIndex();
+  }
+  return index_map;
+}
+
 template <typename T>
 static void exec_gate(Qgate *qop, Buffer<T> *buffer, size_t num_states) {
   switch (qop->gate_type()) {
@@ -208,17 +218,28 @@ void exec(Qop *qop, Buffer<T> *buffer, size_t num_states,
   case QopType::SET_ZERO:
     QopImpl<T>::setZero(buffer->ptr(), num_states);
     break;
+  case QopType::MEMCPY_H2D:
+    QopImpl<T>::memcpy_h2d(
+        buffer->ptr(), num_states,
+        qargMapToIndexMap(reinterpret_cast<MemcpyD2H *>(qop)->qarg_map_),
+        mem_buffer->ptr(), reinterpret_cast<MemcpyH2D *>(qop)->slice_);
+    break;
+  case QopType::MEMCPY_D2H:
+    QopImpl<T>::memcpy_d2h(
+        buffer->ptr(), num_states,
+        qargMapToIndexMap(reinterpret_cast<MemcpyD2H *>(qop)->qarg_map_),
+        mem_buffer->ptr(), reinterpret_cast<MemcpyD2H *>(qop)->slice_);
+    break;
+  case QopType::SYNC:
+    QopImpl<T>::sync(buffer->ptr(), num_states, mem_buffer->ptr());
+    break;
   case QopType::GLOBAL_SWAP:
     QopImpl<T>::global_swap(buffer->ptr(), num_states,
                             qargsToIndices(qop->qargs_),
                             paramsToValues(qop->params_), mem_buffer->ptr());
     break;
-  case QopType::FLUSH:
-    QopImpl<T>::flush(buffer->ptr(), num_states, qargsToIndices(qop->qargs_),
-                      mem_buffer->ptr());
-    break;
   case QopType::SLICE:
-    NOT_IMPLEMENTED();
+    /* Do nothing */
     break;
   }
 }

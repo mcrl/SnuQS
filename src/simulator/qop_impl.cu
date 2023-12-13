@@ -1108,54 +1108,6 @@ void QopImpl<T>::cswap(std::complex<T> *buffer, size_t count,
   api::assertKernelLaunch();
 }
 
-template <typename T>
-void QopImpl<T>::global_swap(std::complex<T> *buffer, size_t count,
-                             std::vector<size_t> targets,
-                             std::vector<double> params,
-                             std::complex<T> *mem_buffer) {
-  size_t target0 = std::min(targets[0], targets[1]);
-  size_t target1 = std::max(targets[0], targets[1]);
-  size_t diff = target1 - target0;
-
-  int device, num_devices;
-  api::getDevice(&device);
-  api::getDeviceCount(&num_devices);
-
-  size_t num_states_per_device = count;
-  size_t num_states_per_block = (1ull << target0);
-  size_t num_blocks_per_device = num_states_per_device / num_states_per_block;
-
-  for (size_t i = 0; i < num_blocks_per_device; ++i) {
-    size_t block_num = device * num_blocks_per_device + i;
-    std::bitset<64> bitset_tmp{block_num};
-    std::bitset<64> bitset{block_num};
-    bitset[0] = bitset_tmp[diff];
-    bitset[diff] = bitset_tmp[0];
-    size_t changed_num = bitset.to_ulong();
-
-    api::memcpyAsync(&mem_buffer[changed_num * num_states_per_block],
-                     &buffer[i * num_states_per_block],
-                     num_states_per_block * sizeof(std::complex<T>),
-                     cudaMemcpyDeviceToHost, 0);
-  }
-
-  api::deviceSynchronize();
-#pragma omp barrier
-
-  for (size_t i = 0; i < num_blocks_per_device; ++i) {
-    size_t block_num = device * num_blocks_per_device + i;
-    std::bitset<64> bitset_tmp{block_num};
-    std::bitset<64> bitset{block_num};
-    bitset[0] = bitset_tmp[diff];
-    bitset[diff] = bitset_tmp[0];
-    size_t changed_num = bitset.to_ulong();
-    api::memcpyAsync(&buffer[i * num_states_per_block],
-                     &mem_buffer[changed_num * num_states_per_block],
-                     num_states_per_block * sizeof(std::complex<T>),
-                     cudaMemcpyHostToDevice, 0);
-  }
-}
-
 static size_t transform_block_num(size_t block_num, size_t q0, size_t q1) {
   // q0 < q1
   size_t diff = q1 - q0;
@@ -1166,10 +1118,25 @@ static size_t transform_block_num(size_t block_num, size_t q0, size_t q1) {
   return bitset.to_ulong();
 }
 
+static size_t transform_block_num(size_t block_num, size_t min_target,
+                                  std::map<size_t, size_t> index_map) {
+  if (min_target >= 64)
+    return block_num;
+  // q0 < q1
+
+  std::bitset<64> bitset_tmp{block_num};
+  std::bitset<64> bitset{block_num};
+  for (auto &kv : index_map) {
+    bitset[kv.first - min_target] = bitset_tmp[kv.second - min_target];
+  }
+  return bitset.to_ulong();
+}
+
 template <typename T>
-void QopImpl<T>::flush(std::complex<T> *buffer, size_t count,
-                       std::vector<size_t> targets,
-                       std::complex<T> *mem_buffer) {
+void QopImpl<T>::global_swap(std::complex<T> *buffer, size_t count,
+                             std::vector<size_t> targets,
+                             std::vector<double> params,
+                             std::complex<T> *mem_buffer) {
   size_t target0 = std::min(targets[0], targets[1]);
   size_t target1 = std::max(targets[0], targets[1]);
 
@@ -1191,6 +1158,59 @@ void QopImpl<T>::flush(std::complex<T> *buffer, size_t count,
                      cudaMemcpyDeviceToHost, 0);
   }
 
+  api::deviceSynchronize();
+#pragma omp barrier
+
+  for (size_t i = 0; i < num_blocks_per_device; ++i) {
+    size_t block_num = device * num_blocks_per_device + i;
+    size_t changed_num = transform_block_num(block_num, target0, target1);
+    api::memcpyAsync(&buffer[i * num_states_per_block],
+                     &mem_buffer[changed_num * num_states_per_block],
+                     num_states_per_block * sizeof(std::complex<T>),
+                     cudaMemcpyHostToDevice, 0);
+  }
+}
+
+template <typename T>
+void QopImpl<T>::memcpy_h2d(std::complex<T> *buffer, size_t count,
+                            std::map<size_t, size_t> index_map,
+                            std::complex<T> *mem_buffer, size_t slice) {
+  NOT_IMPLEMENTED();
+}
+
+template <typename T>
+void QopImpl<T>::memcpy_d2h(std::complex<T> *buffer, size_t count,
+                            std::map<size_t, size_t> index_map,
+                            std::complex<T> *mem_buffer, size_t slice) {
+  size_t min_target = -1;
+
+  for (auto &kv : index_map) {
+    min_target = std::min(min_target, kv.first);
+  }
+
+  int device, num_devices;
+  api::getDevice(&device);
+  api::getDeviceCount(&num_devices);
+
+  size_t num_states_per_device = count;
+  size_t num_states_per_block = (1ull << min_target);
+  size_t num_blocks_per_device = num_states_per_device / num_states_per_block;
+
+  for (size_t i = 0; i < num_blocks_per_device; ++i) {
+    size_t block_num = slice * num_devices * num_blocks_per_device +
+                       device * num_blocks_per_device + i;
+    size_t changed_num = transform_block_num(block_num, min_target, index_map);
+
+    api::memcpyAsync(&mem_buffer[changed_num * num_states_per_block],
+                     &buffer[i * num_states_per_block],
+                     num_states_per_block * sizeof(std::complex<T>),
+                     cudaMemcpyDeviceToHost, 0);
+  }
+}
+
+template <typename T>
+void QopImpl<T>::sync(std::complex<T> *buffer, size_t count,
+                      std::complex<T> *mem_buffer) {
   api::deviceSynchronize();
 #pragma omp barrier
 }
