@@ -46,25 +46,5 @@ class CustomBenchmarkTest(unittest.TestCase):
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y)
 
-#    def test_test9(self):
-#        state_snuqs = run_snuqs('qasm2/custom_benchmark/test9.qasm')
-#        state_qiskit = run_qiskit('qasm2/custom_benchmark/test9.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
-#
-#    def test_test11(self):
-#        state_snuqs = run_snuqs('qasm2/custom_benchmark/test11.qasm')
-#        state_qiskit = run_qiskit('qasm2/custom_benchmark/test11.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
-#
-#    def test_test13(self):
-#        state_snuqs = run_snuqs('qasm2/custom_benchmark/test13.qasm')
-#        state_qiskit = run_qiskit('qasm2/custom_benchmark/test13.qasm')
-#        for x, y in zip(state_snuqs, state_qiskit):
-#            self.assertAlmostEqual(x, y)
-
-
-
 if __name__ == '__main__':
     unittest.main()
