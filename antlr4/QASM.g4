@@ -2,6 +2,8 @@ grammar QASM;
 
 mainprogram 
 : version program
+| program
+| EOF
 ;
 
 version
@@ -14,10 +16,15 @@ program
 ;
 
 statement
-: declStatement
+: includeStatement
+| declStatement
 | qopStatement
 | ifStatement
 | barrierStatement
+;
+
+includeStatement
+: 'include' STRING ';'
 ;
 
 declStatement

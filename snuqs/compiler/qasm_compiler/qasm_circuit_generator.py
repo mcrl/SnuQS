@@ -12,6 +12,7 @@ from snuqs.circuit import UnaryOp, UnaryOpType, Parenthesis, Constant, Pi
 
 class QasmCircuitGenerator(QasmStage):
     def __init__(self, circuit: Circuit, symtab: QasmSymbolTable):
+        super().__init__()
         self.symtab = symtab
         self.circuit = circuit
 

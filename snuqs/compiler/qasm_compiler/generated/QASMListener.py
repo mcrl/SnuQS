@@ -44,6 +44,15 @@ class QASMListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by QASMParser#includeStatement.
+    def enterIncludeStatement(self, ctx:QASMParser.IncludeStatementContext):
+        pass
+
+    # Exit a parse tree produced by QASMParser#includeStatement.
+    def exitIncludeStatement(self, ctx:QASMParser.IncludeStatementContext):
+        pass
+
+
     # Enter a parse tree produced by QASMParser#declStatement.
     def enterDeclStatement(self, ctx:QASMParser.DeclStatementContext):
         pass

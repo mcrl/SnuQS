@@ -51,12 +51,9 @@ class BenchmarkTest(unittest.TestCase):
             np.random.rand(2 ** total_qubit)
         init = init / np.sqrt(np.sum(np.square(np.abs(init))))
         qc.initialize(init)
-        print("START")
 
         state_snuqs = run_snuqs(qc)
-        print("A DONE")
         state_qiskit = run_qiskit(qc)
-        print(" DONE")
         phase = state_snuqs[0] / state_qiskit[0]
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y * phase)

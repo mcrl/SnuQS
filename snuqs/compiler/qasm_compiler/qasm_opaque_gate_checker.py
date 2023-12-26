@@ -1,8 +1,7 @@
 from .generated.QASMParser import QASMParser
 from .qasm_stage import QasmStage
-from .qasm_scope import QasmScope
 from .qasm_symbol_table import QasmSymbolTable
-from .qasm_utils import explist_to_listexp, idlist_to_listid, arglist_to_listarg
+from .qasm_walker import QasmWalker
 
 OPAQUE_GATES = [
     'id',
@@ -49,6 +48,7 @@ OPAQUE_GATES = [
 
 class QasmOpaqueGateChecker(QasmStage):
     def __init__(self, symtab: QasmSymbolTable):
+        super().__init__()
         self.symtab = symtab
 
     # Enter a parse tree produced by QASMParser#opaqueStatement.

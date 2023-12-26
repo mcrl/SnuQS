@@ -6,7 +6,10 @@ from .qasm_symbol_table import QasmSymbolTable
 
 class QasmSemanticChecker(QasmStage):
     def __init__(self, symtab: QasmSymbolTable):
+        super().__init__()
         self.symtab = symtab
+        self.major = -1
+        self.minor = -1
 
     # Enter a parse tree produced by QASMParser#version.
     def enterVersion(self, ctx: QASMParser.VersionContext):
@@ -16,6 +19,9 @@ class QasmSemanticChecker(QasmStage):
         if major != 2 or minor != 0:
             raise NotImplementedError(
                 f"OPENQASM version must be 2.0: but {major}.{minor} given.")
+
+        self.major = major
+        self.minor = minor
 
     # Enter a parse tree produced by QASMParser#regDeclStatement.
     def enterRegDeclStatement(self, ctx: QASMParser.RegDeclStatementContext):
