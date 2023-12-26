@@ -1,18 +1,18 @@
-from .generated.QASMParser import QASMParser
-from .qasm_stage import QasmStage
-from .qasm_scope import QasmScope
-from .qasm_symbol_table import QasmSymbolTable
+from .generated.Qasm2Parser import Qasm2Parser
+from .qasm2_stage import Qasm2Stage
+from .qasm2_scope import Qasm2Scope
+from .qasm2_symbol_table import Qasm2SymbolTable
 
 
-class QasmSemanticChecker(QasmStage):
-    def __init__(self, symtab: QasmSymbolTable):
+class Qasm2SemanticChecker(Qasm2Stage):
+    def __init__(self, symtab: Qasm2SymbolTable):
         super().__init__()
         self.symtab = symtab
         self.major = -1
         self.minor = -1
 
-    # Enter a parse tree produced by QASMParser#version.
-    def enterVersion(self, ctx: QASMParser.VersionContext):
+    # Enter a parse tree produced by Qasm2Parser#version.
+    def enterVersion(self, ctx: Qasm2Parser.VersionContext):
         major, minor = ctx.REAL().getText().split('.')
         major, minor = int(major), int(minor)
 
@@ -23,8 +23,8 @@ class QasmSemanticChecker(QasmStage):
         self.major = major
         self.minor = minor
 
-    # Enter a parse tree produced by QASMParser#regDeclStatement.
-    def enterRegDeclStatement(self, ctx: QASMParser.RegDeclStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#regDeclStatement.
+    def enterRegDeclStatement(self, ctx: Qasm2Parser.RegDeclStatementContext):
         decl = ctx.getChild(0)
         symbol = decl.ID().getText()
         if self.symtab.contains(symbol):
@@ -34,54 +34,54 @@ class QasmSemanticChecker(QasmStage):
         if dim <= 0:
             raise ValueError(f"dimension {dim} <= 0.")
 
-    def enterQregDeclStatement(self, ctx: QASMParser.QregDeclStatementContext):
-        self.symtab.insert(ctx.ID().getText(), QasmSymbolTable.Type.QREG, ctx)
+    def enterQregDeclStatement(self, ctx: Qasm2Parser.QregDeclStatementContext):
+        self.symtab.insert(ctx.ID().getText(), Qasm2SymbolTable.Type.QREG, ctx)
 
-    # Enter a parse tree produced by QASMParser#cregDeclStatement.
-    def enterCregDeclStatement(self, ctx: QASMParser.CregDeclStatementContext):
-        self.symtab.insert(ctx.ID().getText(), QasmSymbolTable.Type.CREG, ctx)
+    # Enter a parse tree produced by Qasm2Parser#cregDeclStatement.
+    def enterCregDeclStatement(self, ctx: Qasm2Parser.CregDeclStatementContext):
+        self.symtab.insert(ctx.ID().getText(), Qasm2SymbolTable.Type.CREG, ctx)
 
-    # Enter a parse tree produced by QASMParser#gateDeclStatement.
-    def enterGateDeclStatement(self, ctx: QASMParser.GateDeclStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#gateDeclStatement.
+    def enterGateDeclStatement(self, ctx: Qasm2Parser.GateDeclStatementContext):
         decl = ctx.getChild(0)
 
         symbol = decl.ID().getText()
         if self.symtab.contains(symbol):
             raise LookupError(f"'{symbol}' already defined.")
 
-        self.scope = QasmScope()
+        self.scope = Qasm2Scope()
         for _id in decl.idlist().ID():
             symbol = _id.getText()
             if self.scope.contains(symbol):
                 raise LookupError(f"'{symbol}' is duplicated.")
-            self.scope.insert(symbol, QasmScope.Type.TARGET, decl)
+            self.scope.insert(symbol, Qasm2Scope.Type.TARGET, decl)
 
         if decl.paramlist():
             for _id in decl.paramlist().ID():
                 symbol = _id.getText()
                 if self.scope.contains(symbol):
                     raise LookupError(f"'{symbol}' is duplicated.")
-                self.scope.insert(symbol, QasmScope.Type.PARAM, decl)
+                self.scope.insert(symbol, Qasm2Scope.Type.PARAM, decl)
 
-    # Exit a parse tree produced by QASMParser#gateDeclStatement.
-    def exitGateDeclStatement(self, ctx: QASMParser.GateDeclStatementContext):
+    # Exit a parse tree produced by Qasm2Parser#gateDeclStatement.
+    def exitGateDeclStatement(self, ctx: Qasm2Parser.GateDeclStatementContext):
         decl = ctx.getChild(0)
         self.symtab.attach_scope(decl.ID().getText(), self.scope, decl)
 
-    # Enter a parse tree produced by QASMParser#opaqueStatement.
-    def enterOpaqueStatement(self, ctx: QASMParser.OpaqueStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#opaqueStatement.
+    def enterOpaqueStatement(self, ctx: Qasm2Parser.OpaqueStatementContext):
         self.symtab.insert(ctx.ID().getText(),
-                           QasmSymbolTable.Type.OPAQUE, ctx)
+                           Qasm2SymbolTable.Type.OPAQUE, ctx)
 
-    # Enter a parse tree produced by QASMParser#gateStatement.
-    def enterGateStatement(self, ctx: QASMParser.GateStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#gateStatement.
+    def enterGateStatement(self, ctx: Qasm2Parser.GateStatementContext):
         self.symtab.insert(ctx.ID().getText(),
-                           QasmSymbolTable.Type.GATE, ctx)
+                           Qasm2SymbolTable.Type.GATE, ctx)
 
-    # Enter a parse tree produced by QASMParser#gopUGate.
-    def enterGopUGate(self, ctx: QASMParser.GopUGateContext):
+    # Enter a parse tree produced by Qasm2Parser#gopUGate.
+    def enterGopUGate(self, ctx: Qasm2Parser.GopUGateContext):
         symbol = ctx.ID().getText()
-        if not self.scope.contains(symbol, QasmScope.Type.TARGET):
+        if not self.scope.contains(symbol, Qasm2Scope.Type.TARGET):
             raise LookupError(f"target '{symbol}' has not been defined.")
 
         num_exprs = len(ctx.explist().exp())
@@ -91,31 +91,31 @@ class QasmSemanticChecker(QasmStage):
         for exp in ctx.explist().exp():
             if exp.ID():
                 symbol = exp.ID().getText()
-                if not self.scope.contains(symbol, QasmScope.Type.PARAM):
+                if not self.scope.contains(symbol, Qasm2Scope.Type.PARAM):
                     raise LookupError(
                         f"parameter '{symbol}' has not been defined.")
 
-    # Enter a parse tree produced by QASMParser#gopCXGate.
-    def enterGopCXGate(self, ctx: QASMParser.GopCXGateContext):
+    # Enter a parse tree produced by Qasm2Parser#gopCXGate.
+    def enterGopCXGate(self, ctx: Qasm2Parser.GopCXGateContext):
         _id0, _id1 = ctx.ID()
 
         symbol0 = _id0.getText()
         symbol1 = _id1.getText()
 
-        if not self.scope.contains(symbol0, QasmScope.Type.TARGET):
+        if not self.scope.contains(symbol0, Qasm2Scope.Type.TARGET):
             raise LookupError(f"target '{symbol0}' has not been defined.")
 
-        if not self.scope.contains(symbol1, QasmScope.Type.TARGET):
+        if not self.scope.contains(symbol1, Qasm2Scope.Type.TARGET):
             raise LookupError(f"target '{symbol1}' has not been defined.")
 
         if symbol0 == symbol1:
             raise ValueError(f"duplicated target '{symbol0}' is not allowed")
 
-    # Enter a parse tree produced by QASMParser#gopBarrier.
-    def enterGopBarrier(self, ctx: QASMParser.GopBarrierContext):
+    # Enter a parse tree produced by Qasm2Parser#gopBarrier.
+    def enterGopBarrier(self, ctx: Qasm2Parser.GopBarrierContext):
         for _id in ctx.idlist().ID():
             symbol = _id.getText()
-            if not self.scope.contains(symbol, QasmScope.Type.TARGET):
+            if not self.scope.contains(symbol, Qasm2Scope.Type.TARGET):
                 raise LookupError(f"target '{symbol}' has not been defined.")
 
         symbols = [_id.getText() for _id in ctx.idlist().ID()]
@@ -125,11 +125,11 @@ class QasmSemanticChecker(QasmStage):
                 raise ValueError(
                     f"duplicated target '{symbols[i]}' is not allowed")
 
-    # Enter a parse tree produced by QASMParser#gopCustomGate.
-    def enterGopCustomGate(self, ctx: QASMParser.GopCustomGateContext):
+    # Enter a parse tree produced by Qasm2Parser#gopCustomGate.
+    def enterGopCustomGate(self, ctx: Qasm2Parser.GopCustomGateContext):
         symbol = ctx.ID().getText()
-        is_opaque = self.symtab.contains(symbol, QasmSymbolTable.Type.OPAQUE)
-        is_gate = self.symtab.contains(symbol, QasmSymbolTable.Type.GATE)
+        is_opaque = self.symtab.contains(symbol, Qasm2SymbolTable.Type.OPAQUE)
+        is_gate = self.symtab.contains(symbol, Qasm2SymbolTable.Type.GATE)
         if not (is_opaque or is_gate):
             raise LookupError(
                 f"gate (or opaque) '{symbol}' has not been defined.")
@@ -142,7 +142,7 @@ class QasmSemanticChecker(QasmStage):
 
         for _id in ctx.idlist().ID():
             symbol = _id.getText()
-            if not self.scope.contains(symbol, QasmScope.Type.TARGET):
+            if not self.scope.contains(symbol, Qasm2Scope.Type.TARGET):
                 raise LookupError(f"target '{symbol}' has not been defined.")
 
         symbols = [_id.getText() for _id in ctx.idlist().ID()]
@@ -165,18 +165,18 @@ class QasmSemanticChecker(QasmStage):
             for exp in ctx.explist().exp():
                 if exp.ID():
                     symbol = exp.ID().getText()
-                    if not self.scope.contains(symbol, QasmScope.Type.PARAM):
+                    if not self.scope.contains(symbol, Qasm2Scope.Type.PARAM):
                         raise LookupError(
                             f"parameter '{symbol}' has not been defined.")
 
-    # Enter a parse tree produced by QASMParser#gopReset.
-    def enterGopReset(self, ctx: QASMParser.GopResetContext):
+    # Enter a parse tree produced by Qasm2Parser#gopReset.
+    def enterGopReset(self, ctx: Qasm2Parser.GopResetContext):
         symbol = ctx.ID().getText()
-        if not self.scope.contains(symbol, QasmScope.Type.TARGET):
+        if not self.scope.contains(symbol, Qasm2Scope.Type.TARGET):
             raise LookupError(f"target '{symbol}' has not been defined.")
 
-    # Exit a parse tree produced by QASMParser#qopUGate.
-    def exitQopUGate(self, ctx: QASMParser.QopUGateContext):
+    # Exit a parse tree produced by Qasm2Parser#qopUGate.
+    def exitQopUGate(self, ctx: Qasm2Parser.QopUGateContext):
         num_exprs = len(ctx.explist().exp())
         if num_exprs != 3:
             raise ValueError(f"U needs 3 expressions but {num_exprs} given.")
@@ -184,12 +184,12 @@ class QasmSemanticChecker(QasmStage):
         for exp in ctx.explist().exp():
             if exp.ID():
                 symbol = exp.ID().getText()
-                if not self.symtab.contains(symbol, QasmSymbolTable.Type.CREG):
+                if not self.symtab.contains(symbol, Qasm2SymbolTable.Type.CREG):
                     raise LookupError(
                         f"creg '{symbol}' has not been defined.")
 
-    # Exit a parse tree produced by QASMParser#qopCXGate.
-    def exitQopCXGate(self, ctx: QASMParser.QopCXGateContext):
+    # Exit a parse tree produced by Qasm2Parser#qopCXGate.
+    def exitQopCXGate(self, ctx: Qasm2Parser.QopCXGateContext):
         symbols = [(qarg.ID().getText(), qarg.getText())
                    for qarg in ctx.qarg()]
         symbols = sorted(symbols)
@@ -202,8 +202,8 @@ class QasmSemanticChecker(QasmStage):
                 raise ValueError(
                     f"duplicated target '{symbols[i][1]}' is not allowed")
 
-    # Exit a parse tree produced by QASMParser#qopMeasure.
-    def exitQopMeasure(self, ctx: QASMParser.QopMeasureContext):
+    # Exit a parse tree produced by Qasm2Parser#qopMeasure.
+    def exitQopMeasure(self, ctx: Qasm2Parser.QopMeasureContext):
         if ctx.qarg().NNINTEGER():
             qdim = 1
         else:
@@ -218,14 +218,14 @@ class QasmSemanticChecker(QasmStage):
         if qdim != cdim:
             raise IndexError("measure dimension mismatch: {qdim} != {cdim}")
 
-    # Enter a parse tree produced by QASMParser#qopReset.
-    def exitQopReset(self, ctx: QASMParser.QopResetContext):
+    # Enter a parse tree produced by Qasm2Parser#qopReset.
+    def exitQopReset(self, ctx: Qasm2Parser.QopResetContext):
         pass
 
-    # Enter a parse tree produced by QASMParser#qopCustomGate.
-    def enterQopCustomGate(self, ctx: QASMParser.QopCustomGateContext):
+    # Enter a parse tree produced by Qasm2Parser#qopCustomGate.
+    def enterQopCustomGate(self, ctx: Qasm2Parser.QopCustomGateContext):
         symbol = ctx.ID().getText()
-        if not self.symtab.contains(symbol, QasmSymbolTable.Type.OPAQUE) and not self.symtab.contains(symbol, QasmSymbolTable.Type.GATE):
+        if not self.symtab.contains(symbol, Qasm2SymbolTable.Type.OPAQUE) and not self.symtab.contains(symbol, Qasm2SymbolTable.Type.GATE):
             raise LookupError(f"gate '{symbol}' has not been defined.")
 
         num_ids_given = len(ctx.arglist().qarg())
@@ -266,18 +266,18 @@ class QasmSemanticChecker(QasmStage):
                         exprs.append(exp.exp())
                 elif exp.ID():
                     symbol = exp.ID().getText()
-                    if not self.symtab.contains(symbol, QasmSymbolTable.Type.CREG):
+                    if not self.symtab.contains(symbol, Qasm2SymbolTable.Type.CREG):
                         raise LookupError(
                             f"parameter '{symbol}' has not been defined.")
 
-    # Enter a parse tree produced by QASMParser#ifStatement.
-    def enterIfStatement(self, ctx: QASMParser.IfStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#ifStatement.
+    def enterIfStatement(self, ctx: Qasm2Parser.IfStatementContext):
         symbol = ctx.ID().getText()
-        if not self.symtab.contains(symbol, QasmSymbolTable.Type.CREG):
+        if not self.symtab.contains(symbol, Qasm2SymbolTable.Type.CREG):
             raise LookupError(f"creg '{symbol}' has not been defined.")
 
-    # Enter a parse tree produced by QASMParser#barrierStatement.
-    def enterBarrierStatement(self, ctx: QASMParser.BarrierStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#barrierStatement.
+    def enterBarrierStatement(self, ctx: Qasm2Parser.BarrierStatementContext):
         symbols = [(qarg.ID().getText(), qarg.getText())
                    for qarg in ctx.arglist().qarg()]
         symbols = sorted(symbols)
@@ -290,11 +290,11 @@ class QasmSemanticChecker(QasmStage):
                 raise ValueError(
                     f"duplicated target '{symbols[i][1]}' is not allowed")
 
-    # Enter a parse tree produced by QASMParser#qarg.
-    def enterQarg(self, ctx: QASMParser.QargContext):
+    # Enter a parse tree produced by Qasm2Parser#qarg.
+    def enterQarg(self, ctx: Qasm2Parser.QargContext):
         symbol = ctx.ID().getText()
 
-        if not self.symtab.contains(symbol, QasmSymbolTable.Type.QREG):
+        if not self.symtab.contains(symbol, Qasm2SymbolTable.Type.QREG):
             raise LookupError(f"'qreg {symbol}' has not been defined.")
 
         if ctx.NNINTEGER():
@@ -305,11 +305,11 @@ class QasmSemanticChecker(QasmStage):
                 raise IndexError(
                     f"index {idx} must be less than dimension {dim}.")
 
-    # Enter a parse tree produced by QASMParser#carg.
-    def enterCarg(self, ctx: QASMParser.CargContext):
+    # Enter a parse tree produced by Qasm2Parser#carg.
+    def enterCarg(self, ctx: Qasm2Parser.CargContext):
         symbol = ctx.ID().getText()
 
-        if not self.symtab.contains(symbol, QasmSymbolTable.Type.CREG):
+        if not self.symtab.contains(symbol, Qasm2SymbolTable.Type.CREG):
             raise LookupError(f"'creg {symbol}' has not been defined.")
 
         if ctx.NNINTEGER():

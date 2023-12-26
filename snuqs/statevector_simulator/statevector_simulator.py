@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 
 import tempfile
 import qiskit
-from snuqs import QasmCompiler
+from snuqs import Qasm2Compiler
 
 
 class Initialize(qiskit.circuit.Gate):
@@ -53,7 +53,7 @@ class StatevectorSimulator:
 
         with tempfile.NamedTemporaryFile() as f:
             circ.qasm(filename=f.name)
-            compiler = QasmCompiler()
+            compiler = Qasm2Compiler()
             circ = compiler.compile(f.name)
             if first_init:
                 circ.prepend(first_init)

@@ -1,1 +1,1 @@
-from .qasm_compiler import QasmCompiler
+from .qasm2 import Qasm2Compiler

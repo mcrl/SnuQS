@@ -35,8 +35,8 @@ def run_qiskit(file_name):
 
 class LargeTest(unittest.TestCase):
     def test_q32_g50(self):
-        state_snuqs = run_snuqs('qasm/large/q32_g50.qasm')
-#        state_qiskit = run_qiskit('qasm/large/q32_g50.qasm')
+        state_snuqs = run_snuqs('qasm2/large/q32_g50.qasm')
+#        state_qiskit = run_qiskit('qasm2/large/q32_g50.qasm')
 #        random_indices = [random.randint(
 #            0, len(state_qiskit)-1) for _ in range(1000)]
 #        for i in random_indices:
@@ -44,8 +44,8 @@ class LargeTest(unittest.TestCase):
 #            self.assertAlmostEqual(x, y)
 
 #    def test_q34_g50(self):
-#        state_snuqs = run_snuqs('qasm/large/q34_g50.qasm')
-#        state_qiskit = run_qiskit('qasm/large/q34_g50.qasm')
+#        state_snuqs = run_snuqs('qasm2/large/q34_g50.qasm')
+#        state_qiskit = run_qiskit('qasm2/large/q34_g50.qasm')
 #        random_indices = [random.randint(
 #            0, len(state_qiskit)-1) for _ in range(1000)]
 #        for i in random_indices:
@@ -53,8 +53,8 @@ class LargeTest(unittest.TestCase):
 #            self.assertAlmostEqual(x, y)
 
 #    def test_q28_g300(self):
-#        state_snuqs = run_snuqs('qasm/large/q28_g300.qasm')
-#        state_qiskit = run_qiskit('qasm/large/q28_g300.qasm')
+#        state_snuqs = run_snuqs('qasm2/large/q28_g300.qasm')
+#        state_qiskit = run_qiskit('qasm2/large/q28_g300.qasm')
 #        random_indices = [random.randint(
 #            0, len(state_qiskit)-1) for _ in range(1000)]
 #        for i in random_indices:
@@ -62,8 +62,8 @@ class LargeTest(unittest.TestCase):
 #            self.assertAlmostEqual(x, y)
 #
 #    def test_q30_g300(self):
-#        state_snuqs = run_snuqs('qasm/large/q30_g300.qasm')
-#        state_qiskit = run_qiskit('qasm/large/q30_g300.qasm')
+#        state_snuqs = run_snuqs('qasm2/large/q30_g300.qasm')
+#        state_qiskit = run_qiskit('qasm2/large/q30_g300.qasm')
 #        random_indices = [random.randint(
 #            0, len(state_qiskit)-1) for _ in range(1000)]
 #        for i in random_indices:
@@ -71,8 +71,8 @@ class LargeTest(unittest.TestCase):
 #            self.assertAlmostEqual(x, y)
 #
 #    def test_q32_g300(self):
-#        state_snuqs = run_snuqs('qasm/large/q32_g300.qasm')
-#        state_qiskit = run_qiskit('qasm/large/q32_g300.qasm')
+#        state_snuqs = run_snuqs('qasm2/large/q32_g300.qasm')
+#        state_qiskit = run_qiskit('qasm2/large/q32_g300.qasm')
 #        random_indices = [random.randint(
 #            0, len(state_qiskit)-1) for _ in range(1000)]
 #        for i in random_indices:

@@ -1,7 +1,7 @@
-from .generated.QASMParser import QASMParser
-from .qasm_stage import QasmStage
-from .qasm_symbol_table import QasmSymbolTable
-from .qasm_walker import QasmWalker
+from .generated.Qasm2Parser import Qasm2Parser
+from .qasm2_stage import Qasm2Stage
+from .qasm2_symbol_table import Qasm2SymbolTable
+from .qasm2_walker import Qasm2Walker
 
 OPAQUE_GATES = [
     'id',
@@ -46,13 +46,13 @@ OPAQUE_GATES = [
 ]
 
 
-class QasmOpaqueGateChecker(QasmStage):
-    def __init__(self, symtab: QasmSymbolTable):
+class Qasm2OpaqueGateChecker(Qasm2Stage):
+    def __init__(self, symtab: Qasm2SymbolTable):
         super().__init__()
         self.symtab = symtab
 
-    # Enter a parse tree produced by QASMParser#opaqueStatement.
-    def enterOpaqueStatement(self, ctx: QASMParser.OpaqueStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#opaqueStatement.
+    def enterOpaqueStatement(self, ctx: Qasm2Parser.OpaqueStatementContext):
         symbol = ctx.ID().getText()
         if symbol not in OPAQUE_GATES:
             raise LookupError(f"illegal opaque gate {symbol}")

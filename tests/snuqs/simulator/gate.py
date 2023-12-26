@@ -1,5 +1,5 @@
 import unittest
-from snuqs import QasmCompiler, StatevectorSimulator
+from snuqs import Qasm2Compiler, StatevectorSimulator
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -12,7 +12,7 @@ import warnings
 
 
 def run_snuqs(file_name):
-    compiler = QasmCompiler()
+    compiler = Qasm2Compiler()
     circ = compiler.compile(file_name)
     sim = StatevectorSimulator()
     result = sim.run(circ)
@@ -35,32 +35,32 @@ def run_qiskit(file_name):
 
 class GateTest(unittest.TestCase):
     def test_rccx(self):
-        state_snuqs = run_snuqs('qasm/gate/rccx.qasm')
-        state_qiskit = run_qiskit('qasm/gate/rccx.qasm')
+        state_snuqs = run_snuqs('qasm2/gate/rccx.qasm')
+        state_qiskit = run_qiskit('qasm2/gate/rccx.qasm')
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y)
 
     def test_rc3x(self):
-        state_snuqs = run_snuqs('qasm/gate/rc3x.qasm')
-        state_qiskit = run_qiskit('qasm/gate/rc3x.qasm')
+        state_snuqs = run_snuqs('qasm2/gate/rc3x.qasm')
+        state_qiskit = run_qiskit('qasm2/gate/rc3x.qasm')
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y)
 
     def test_c3x(self):
-        state_snuqs = run_snuqs('qasm/gate/c3x.qasm')
-        state_qiskit = run_qiskit('qasm/gate/c3x.qasm')
+        state_snuqs = run_snuqs('qasm2/gate/c3x.qasm')
+        state_qiskit = run_qiskit('qasm2/gate/c3x.qasm')
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y)
 
     def test_c3sqrtx(self):
-        state_snuqs = run_snuqs('qasm/gate/c3sqrtx.qasm')
-        state_qiskit = run_qiskit('qasm/gate/c3sqrtx.qasm')
+        state_snuqs = run_snuqs('qasm2/gate/c3sqrtx.qasm')
+        state_qiskit = run_qiskit('qasm2/gate/c3sqrtx.qasm')
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y)
 
     def test_c4x(self):
-        state_snuqs = run_snuqs('qasm/gate/c4x.qasm')
-        state_qiskit = run_qiskit('qasm/gate/c4x.qasm')
+        state_snuqs = run_snuqs('qasm2/gate/c4x.qasm')
+        state_qiskit = run_qiskit('qasm2/gate/c4x.qasm')
         for x, y in zip(state_snuqs, state_qiskit):
             self.assertAlmostEqual(x, y)
 

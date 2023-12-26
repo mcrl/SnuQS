@@ -1,6 +1,6 @@
-from .generated.QASMParser import QASMParser
-from .qasm_stage import QasmStage
-from .qasm_symbol_table import QasmSymbolTable
+from .generated.Qasm2Parser import Qasm2Parser
+from .qasm2_stage import Qasm2Stage
+from .qasm2_symbol_table import Qasm2SymbolTable
 from typing import Dict
 
 from snuqs.circuit import Circuit, Qgate
@@ -10,15 +10,15 @@ from snuqs.circuit import Parameter, Identifier, BinOp, BinOpType, NegOp
 from snuqs.circuit import UnaryOp, UnaryOpType, Parenthesis, Constant, Pi
 
 
-class QasmCircuitGenerator(QasmStage):
-    def __init__(self, circuit: Circuit, symtab: QasmSymbolTable):
+class Qasm2CircuitGenerator(Qasm2Stage):
+    def __init__(self, circuit: Circuit, symtab: Qasm2SymbolTable):
         super().__init__()
         self.symtab = symtab
         self.circuit = circuit
 
     def binOp(self, op: str,
-              expr0: QASMParser.ExpContext,
-              expr1: QASMParser.ExpContext,
+              expr0: Qasm2Parser.ExpContext,
+              expr1: Qasm2Parser.ExpContext,
               param_map: Dict[str, Parameter]
               ):
         if op == '+':
@@ -40,7 +40,7 @@ class QasmCircuitGenerator(QasmStage):
 
     def unaryOp(self,
                 op: str,
-                expr: QASMParser.ExpContext,
+                expr: Qasm2Parser.ExpContext,
                 param_map: Dict[str, Parameter]):
         if op == 'sin':
             return UnaryOp(UnaryOpType.SIN,
@@ -61,7 +61,7 @@ class QasmCircuitGenerator(QasmStage):
             return UnaryOp(UnaryOpType.SQRT,
                            self.expAsParameter(expr, param_map))
 
-    def expAsParameter(self, exp: QASMParser.ExpContext,
+    def expAsParameter(self, exp: Qasm2Parser.ExpContext,
                        param_map: Dict[str, Parameter]):
         if exp.binop():
             return self.binOp(exp.binop().getText(),
@@ -100,7 +100,7 @@ class QasmCircuitGenerator(QasmStage):
         else:
             return Pi()
 
-    def createQarg(self, ctx: QASMParser.QargContext):
+    def createQarg(self, ctx: Qasm2Parser.QargContext):
         qreg = self.qreg_map[ctx.ID().getText()]
         if ctx.NNINTEGER():
             index = int(ctx.NNINTEGER().getText())
@@ -109,7 +109,7 @@ class QasmCircuitGenerator(QasmStage):
             qarg = Qarg(qreg)
         return qarg
 
-    def createCarg(self, ctx: QASMParser.CargContext):
+    def createCarg(self, ctx: Qasm2Parser.CargContext):
         creg = self.creg_map[ctx.ID().getText()]
         if ctx.NNINTEGER():
             index = int(ctx.NNINTEGER().getText())
@@ -119,7 +119,7 @@ class QasmCircuitGenerator(QasmStage):
         return carg
 
     def createGop(self,
-                  ctx: QASMParser.GopContext,
+                  ctx: Qasm2Parser.GopContext,
                   qubit_map: Dict[str, Qreg],
                   param_map: Dict[str, Parameter]
                   ):
@@ -176,7 +176,7 @@ class QasmCircuitGenerator(QasmStage):
             qreg = qubit_map[ctx.gopReset().ID().getText()]
             return Reset([qreg])
 
-    def createCustomGate(self, ctx: QASMParser.QopCustomGateContext):
+    def createCustomGate(self, ctx: Qasm2Parser.QopCustomGateContext):
         symbol = ctx.ID().getText()
         qargs = [self.createQarg(qarg) for qarg in ctx.arglist().qarg()]
         params = []
@@ -207,7 +207,7 @@ class QasmCircuitGenerator(QasmStage):
 
             return Custom(symbol, gops, qargs, params)
 
-    def createQop(self, ctx: QASMParser.QopStatementContext):
+    def createQop(self, ctx: Qasm2Parser.QopStatementContext):
         if ctx.qopUGate():
             qarg = self.createQarg(ctx.qopUGate().qarg())
             params = [self.expAsParameter(exp, {})
@@ -227,42 +227,42 @@ class QasmCircuitGenerator(QasmStage):
         elif ctx.qopCustomGate():
             return self.createCustomGate(ctx.qopCustomGate())
 
-    # Enter a parse tree produced by QASMParser#mainprogram.
-    def enterMainprogram(self, ctx: QASMParser.MainprogramContext):
+    # Enter a parse tree produced by Qasm2Parser#mainprogram.
+    def enterMainprogram(self, ctx: Qasm2Parser.MainprogramContext):
         self.qreg_map = {}
         self.creg_map = {}
         self.gate_map = {}
         self.opaque_map = {}
         for symbol, (typ, ctx) in self.symtab.items():
-            if typ == QasmSymbolTable.Type.QREG:
+            if typ == Qasm2SymbolTable.Type.QREG:
                 dim = int(ctx.NNINTEGER().getText())
                 qreg = Qreg(symbol, dim)
                 self.qreg_map[symbol] = qreg
                 self.circuit.append_qreg(qreg)
-            elif typ == QasmSymbolTable.Type.CREG:
+            elif typ == Qasm2SymbolTable.Type.CREG:
                 dim = int(ctx.NNINTEGER().getText())
                 creg = Creg(symbol, dim)
                 self.creg_map[symbol] = creg
                 self.circuit.append_creg(creg)
-            elif typ == QasmSymbolTable.Type.GATE:
+            elif typ == Qasm2SymbolTable.Type.GATE:
                 self.gate_map[symbol] = ctx
-            elif typ == QasmSymbolTable.Type.OPAQUE:
+            elif typ == Qasm2SymbolTable.Type.OPAQUE:
                 self.opaque_map[symbol] = ctx
             else:
                 raise ValueError(
                     f"unknown symbol {symbol} in the symbol table.")
 
-    # Exit a parse tree produced by QASMParser#mainprogram.
-    def exitMainprogram(self, ctx: QASMParser.MainprogramContext):
+    # Exit a parse tree produced by Qasm2Parser#mainprogram.
+    def exitMainprogram(self, ctx: Qasm2Parser.MainprogramContext):
         pass
 
-    # Enter a parse tree produced by QASMParser#qopStatement.
-    def enterQopStatement(self, ctx: QASMParser.QopStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#qopStatement.
+    def enterQopStatement(self, ctx: Qasm2Parser.QopStatementContext):
         qop = self.createQop(ctx)
         self.circuit.append(qop)
 
-    # Enter a parse tree produced by QASMParser#ifStatement.
-    def enterIfStatement(self, ctx: QASMParser.IfStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#ifStatement.
+    def enterIfStatement(self, ctx: Qasm2Parser.IfStatementContext):
         creg = self.creg_map[ctx.ID().getText()]
         value = int(ctx.NNINTEGER().getText())
 
@@ -274,11 +274,11 @@ class QasmCircuitGenerator(QasmStage):
         ctx.getChildren = lambda: []
         return None
 
-    # Exit a parse tree produced by QASMParser#ifStatement.
-    def exitIfStatement(self, ctx: QASMParser.IfStatementContext):
+    # Exit a parse tree produced by Qasm2Parser#ifStatement.
+    def exitIfStatement(self, ctx: Qasm2Parser.IfStatementContext):
         ctx.getChildren = self.getChildren
 
-    # Enter a parse tree produced by QASMParser#barrierStatement.
-    def enterBarrierStatement(self, ctx: QASMParser.BarrierStatementContext):
+    # Enter a parse tree produced by Qasm2Parser#barrierStatement.
+    def enterBarrierStatement(self, ctx: Qasm2Parser.BarrierStatementContext):
         qargs = [self.createQarg(qarg) for qarg in ctx.arglist().qarg()]
         self.circuit.append(Barrier(qargs))

@@ -1,4 +1,4 @@
-grammar QASM;
+grammar Qasm2;
 
 mainprogram 
 : version program

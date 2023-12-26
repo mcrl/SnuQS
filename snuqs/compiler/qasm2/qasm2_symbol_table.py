@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Optional
-from .qasm_scope import QasmScope
+from .qasm2_scope import Qasm2Scope
 
 
-class QasmSymbolTable:
+class Qasm2SymbolTable:
     class Type(Enum):
         QREG = 1
         CREG = 2
@@ -34,5 +34,5 @@ class QasmSymbolTable:
     def items(self):
         return self.sym_dict.items()
 
-    def attach_scope(self, sym: str, scope: QasmScope, ctx: any):
+    def attach_scope(self, sym: str, scope: Qasm2Scope, ctx: any):
         self.scope_dict[sym] = (scope, ctx)

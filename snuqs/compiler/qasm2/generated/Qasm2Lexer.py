@@ -1,4 +1,4 @@
-# Generated from QASM.g4 by ANTLR 4.13.1
+# Generated from Qasm2.g4 by ANTLR 4.13.1
 from antlr4 import *
 from io import StringIO
 import sys
@@ -131,7 +131,7 @@ def serializedATN():
         282,285,290,297,307,318,1,6,0,0
     ]
 
-class QASMLexer(Lexer):
+class Qasm2Lexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -203,7 +203,7 @@ class QASMLexer(Lexer):
                   "T__32", "T__33", "ID", "NNINTEGER", "REAL", "STRING", 
                   "Whitespace", "Newline", "LineComment", "BlockComment" ]
 
-    grammarFileName = "QASM.g4"
+    grammarFileName = "Qasm2.g4"
 
     def __init__(self, input=None, output:TextIO = sys.stdout):
         super().__init__(input, output)

@@ -1,4 +1,4 @@
-# Generated from QASM.g4 by ANTLR 4.13.1
+# Generated from Qasm2.g4 by ANTLR 4.13.1
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -162,9 +162,9 @@ def serializedATN():
         355,358,365,372,380,383,403,411,423
     ]
 
-class QASMParser ( Parser ):
+class Qasm2Parser ( Parser ):
 
-    grammarFileName = "QASM.g4"
+    grammarFileName = "Qasm2.g4"
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -302,18 +302,18 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def version(self):
-            return self.getTypedRuleContext(QASMParser.VersionContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.VersionContext,0)
 
 
         def program(self):
-            return self.getTypedRuleContext(QASMParser.ProgramContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ProgramContext,0)
 
 
         def EOF(self):
-            return self.getToken(QASMParser.EOF, 0)
+            return self.getToken(Qasm2Parser.EOF, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_mainprogram
+            return Qasm2Parser.RULE_mainprogram
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMainprogram" ):
@@ -328,7 +328,7 @@ class QASMParser ( Parser ):
 
     def mainprogram(self):
 
-        localctx = QASMParser.MainprogramContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.MainprogramContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_mainprogram)
         try:
             self.state = 83
@@ -349,7 +349,7 @@ class QASMParser ( Parser ):
             elif token in [-1]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 82
-                self.match(QASMParser.EOF)
+                self.match(Qasm2Parser.EOF)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -371,10 +371,10 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def REAL(self):
-            return self.getToken(QASMParser.REAL, 0)
+            return self.getToken(Qasm2Parser.REAL, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_version
+            return Qasm2Parser.RULE_version
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterVersion" ):
@@ -389,16 +389,16 @@ class QASMParser ( Parser ):
 
     def version(self):
 
-        localctx = QASMParser.VersionContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.VersionContext(self, self._ctx, self.state)
         self.enterRule(localctx, 2, self.RULE_version)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 85
-            self.match(QASMParser.T__0)
+            self.match(Qasm2Parser.T__0)
             self.state = 86
-            self.match(QASMParser.REAL)
+            self.match(Qasm2Parser.REAL)
             self.state = 87
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -416,15 +416,15 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def statement(self):
-            return self.getTypedRuleContext(QASMParser.StatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.StatementContext,0)
 
 
         def program(self):
-            return self.getTypedRuleContext(QASMParser.ProgramContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ProgramContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_program
+            return Qasm2Parser.RULE_program
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterProgram" ):
@@ -439,7 +439,7 @@ class QASMParser ( Parser ):
     def program(self, _p:int=0):
         _parentctx = self._ctx
         _parentState = self.state
-        localctx = QASMParser.ProgramContext(self, self._ctx, _parentState)
+        localctx = Qasm2Parser.ProgramContext(self, self._ctx, _parentState)
         _prevctx = localctx
         _startState = 4
         self.enterRecursionRule(localctx, 4, self.RULE_program, _p)
@@ -456,7 +456,7 @@ class QASMParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    localctx = QASMParser.ProgramContext(self, _parentctx, _parentState)
+                    localctx = Qasm2Parser.ProgramContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_program)
                     self.state = 92
                     if not self.precpred(self._ctx, 1):
@@ -485,27 +485,27 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def includeStatement(self):
-            return self.getTypedRuleContext(QASMParser.IncludeStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.IncludeStatementContext,0)
 
 
         def declStatement(self):
-            return self.getTypedRuleContext(QASMParser.DeclStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.DeclStatementContext,0)
 
 
         def qopStatement(self):
-            return self.getTypedRuleContext(QASMParser.QopStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopStatementContext,0)
 
 
         def ifStatement(self):
-            return self.getTypedRuleContext(QASMParser.IfStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.IfStatementContext,0)
 
 
         def barrierStatement(self):
-            return self.getTypedRuleContext(QASMParser.BarrierStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.BarrierStatementContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_statement
+            return Qasm2Parser.RULE_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterStatement" ):
@@ -520,7 +520,7 @@ class QASMParser ( Parser ):
 
     def statement(self):
 
-        localctx = QASMParser.StatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.StatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_statement)
         try:
             self.state = 104
@@ -571,10 +571,10 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def STRING(self):
-            return self.getToken(QASMParser.STRING, 0)
+            return self.getToken(Qasm2Parser.STRING, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_includeStatement
+            return Qasm2Parser.RULE_includeStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterIncludeStatement" ):
@@ -589,16 +589,16 @@ class QASMParser ( Parser ):
 
     def includeStatement(self):
 
-        localctx = QASMParser.IncludeStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.IncludeStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 8, self.RULE_includeStatement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 106
-            self.match(QASMParser.T__2)
+            self.match(Qasm2Parser.T__2)
             self.state = 107
-            self.match(QASMParser.STRING)
+            self.match(Qasm2Parser.STRING)
             self.state = 108
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -616,15 +616,15 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def regDeclStatement(self):
-            return self.getTypedRuleContext(QASMParser.RegDeclStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.RegDeclStatementContext,0)
 
 
         def gateDeclStatement(self):
-            return self.getTypedRuleContext(QASMParser.GateDeclStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GateDeclStatementContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_declStatement
+            return Qasm2Parser.RULE_declStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterDeclStatement" ):
@@ -639,7 +639,7 @@ class QASMParser ( Parser ):
 
     def declStatement(self):
 
-        localctx = QASMParser.DeclStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.DeclStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_declStatement)
         try:
             self.state = 112
@@ -675,15 +675,15 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def qregDeclStatement(self):
-            return self.getTypedRuleContext(QASMParser.QregDeclStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QregDeclStatementContext,0)
 
 
         def cregDeclStatement(self):
-            return self.getTypedRuleContext(QASMParser.CregDeclStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.CregDeclStatementContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_regDeclStatement
+            return Qasm2Parser.RULE_regDeclStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterRegDeclStatement" ):
@@ -698,7 +698,7 @@ class QASMParser ( Parser ):
 
     def regDeclStatement(self):
 
-        localctx = QASMParser.RegDeclStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.RegDeclStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_regDeclStatement)
         try:
             self.state = 116
@@ -734,13 +734,13 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def NNINTEGER(self):
-            return self.getToken(QASMParser.NNINTEGER, 0)
+            return self.getToken(Qasm2Parser.NNINTEGER, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qregDeclStatement
+            return Qasm2Parser.RULE_qregDeclStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQregDeclStatement" ):
@@ -755,22 +755,22 @@ class QASMParser ( Parser ):
 
     def qregDeclStatement(self):
 
-        localctx = QASMParser.QregDeclStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QregDeclStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_qregDeclStatement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 118
-            self.match(QASMParser.T__3)
+            self.match(Qasm2Parser.T__3)
             self.state = 119
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 120
-            self.match(QASMParser.T__4)
+            self.match(Qasm2Parser.T__4)
             self.state = 121
-            self.match(QASMParser.NNINTEGER)
+            self.match(Qasm2Parser.NNINTEGER)
             self.state = 122
-            self.match(QASMParser.T__5)
+            self.match(Qasm2Parser.T__5)
             self.state = 123
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -788,13 +788,13 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def NNINTEGER(self):
-            return self.getToken(QASMParser.NNINTEGER, 0)
+            return self.getToken(Qasm2Parser.NNINTEGER, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_cregDeclStatement
+            return Qasm2Parser.RULE_cregDeclStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCregDeclStatement" ):
@@ -809,22 +809,22 @@ class QASMParser ( Parser ):
 
     def cregDeclStatement(self):
 
-        localctx = QASMParser.CregDeclStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.CregDeclStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 16, self.RULE_cregDeclStatement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 125
-            self.match(QASMParser.T__6)
+            self.match(Qasm2Parser.T__6)
             self.state = 126
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 127
-            self.match(QASMParser.T__4)
+            self.match(Qasm2Parser.T__4)
             self.state = 128
-            self.match(QASMParser.NNINTEGER)
+            self.match(Qasm2Parser.NNINTEGER)
             self.state = 129
-            self.match(QASMParser.T__5)
+            self.match(Qasm2Parser.T__5)
             self.state = 130
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -842,15 +842,15 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def opaqueStatement(self):
-            return self.getTypedRuleContext(QASMParser.OpaqueStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.OpaqueStatementContext,0)
 
 
         def gateStatement(self):
-            return self.getTypedRuleContext(QASMParser.GateStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GateStatementContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gateDeclStatement
+            return Qasm2Parser.RULE_gateDeclStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGateDeclStatement" ):
@@ -865,7 +865,7 @@ class QASMParser ( Parser ):
 
     def gateDeclStatement(self):
 
-        localctx = QASMParser.GateDeclStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GateDeclStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 18, self.RULE_gateDeclStatement)
         try:
             self.state = 134
@@ -901,18 +901,18 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def idlist(self):
-            return self.getTypedRuleContext(QASMParser.IdlistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.IdlistContext,0)
 
 
         def paramlist(self):
-            return self.getTypedRuleContext(QASMParser.ParamlistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ParamlistContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_opaqueStatement
+            return Qasm2Parser.RULE_opaqueStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterOpaqueStatement" ):
@@ -927,7 +927,7 @@ class QASMParser ( Parser ):
 
     def opaqueStatement(self):
 
-        localctx = QASMParser.OpaqueStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.OpaqueStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 20, self.RULE_opaqueStatement)
         try:
             self.state = 156
@@ -936,47 +936,47 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 136
-                self.match(QASMParser.T__7)
+                self.match(Qasm2Parser.T__7)
                 self.state = 137
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 138
                 self.idlist()
                 self.state = 139
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 141
-                self.match(QASMParser.T__7)
+                self.match(Qasm2Parser.T__7)
                 self.state = 142
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 143
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 144
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 145
                 self.idlist()
                 self.state = 146
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 148
-                self.match(QASMParser.T__7)
+                self.match(Qasm2Parser.T__7)
                 self.state = 149
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 150
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 151
                 self.paramlist()
                 self.state = 152
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 153
                 self.idlist()
                 self.state = 154
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
 
@@ -997,22 +997,22 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def idlist(self):
-            return self.getTypedRuleContext(QASMParser.IdlistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.IdlistContext,0)
 
 
         def paramlist(self):
-            return self.getTypedRuleContext(QASMParser.ParamlistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ParamlistContext,0)
 
 
         def goplist(self):
-            return self.getTypedRuleContext(QASMParser.GoplistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GoplistContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gateStatement
+            return Qasm2Parser.RULE_gateStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGateStatement" ):
@@ -1027,7 +1027,7 @@ class QASMParser ( Parser ):
 
     def gateStatement(self):
 
-        localctx = QASMParser.GateStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GateStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 22, self.RULE_gateStatement)
         try:
             self.state = 207
@@ -1036,111 +1036,111 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 158
-                self.match(QASMParser.T__10)
+                self.match(Qasm2Parser.T__10)
                 self.state = 159
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 160
                 self.idlist()
                 self.state = 161
-                self.match(QASMParser.T__11)
+                self.match(Qasm2Parser.T__11)
                 self.state = 162
-                self.match(QASMParser.T__12)
+                self.match(Qasm2Parser.T__12)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 164
-                self.match(QASMParser.T__10)
+                self.match(Qasm2Parser.T__10)
                 self.state = 165
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 166
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 167
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 168
                 self.idlist()
                 self.state = 169
-                self.match(QASMParser.T__11)
+                self.match(Qasm2Parser.T__11)
                 self.state = 170
-                self.match(QASMParser.T__12)
+                self.match(Qasm2Parser.T__12)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 172
-                self.match(QASMParser.T__10)
+                self.match(Qasm2Parser.T__10)
                 self.state = 173
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 174
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 175
                 self.paramlist()
                 self.state = 176
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 177
                 self.idlist()
                 self.state = 178
-                self.match(QASMParser.T__11)
+                self.match(Qasm2Parser.T__11)
                 self.state = 179
-                self.match(QASMParser.T__12)
+                self.match(Qasm2Parser.T__12)
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 181
-                self.match(QASMParser.T__10)
+                self.match(Qasm2Parser.T__10)
                 self.state = 182
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 183
                 self.idlist()
                 self.state = 184
-                self.match(QASMParser.T__11)
+                self.match(Qasm2Parser.T__11)
                 self.state = 185
                 self.goplist()
                 self.state = 186
-                self.match(QASMParser.T__12)
+                self.match(Qasm2Parser.T__12)
                 pass
 
             elif la_ == 5:
                 self.enterOuterAlt(localctx, 5)
                 self.state = 188
-                self.match(QASMParser.T__10)
+                self.match(Qasm2Parser.T__10)
                 self.state = 189
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 190
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 191
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 192
                 self.idlist()
                 self.state = 193
-                self.match(QASMParser.T__11)
+                self.match(Qasm2Parser.T__11)
                 self.state = 194
                 self.goplist()
                 self.state = 195
-                self.match(QASMParser.T__12)
+                self.match(Qasm2Parser.T__12)
                 pass
 
             elif la_ == 6:
                 self.enterOuterAlt(localctx, 6)
                 self.state = 197
-                self.match(QASMParser.T__10)
+                self.match(Qasm2Parser.T__10)
                 self.state = 198
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 199
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 200
                 self.paramlist()
                 self.state = 201
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 202
                 self.idlist()
                 self.state = 203
-                self.match(QASMParser.T__11)
+                self.match(Qasm2Parser.T__11)
                 self.state = 204
                 self.goplist()
                 self.state = 205
-                self.match(QASMParser.T__12)
+                self.match(Qasm2Parser.T__12)
                 pass
 
 
@@ -1162,13 +1162,13 @@ class QASMParser ( Parser ):
 
         def gop(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(QASMParser.GopContext)
+                return self.getTypedRuleContexts(Qasm2Parser.GopContext)
             else:
-                return self.getTypedRuleContext(QASMParser.GopContext,i)
+                return self.getTypedRuleContext(Qasm2Parser.GopContext,i)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_goplist
+            return Qasm2Parser.RULE_goplist
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGoplist" ):
@@ -1183,7 +1183,7 @@ class QASMParser ( Parser ):
 
     def goplist(self):
 
-        localctx = QASMParser.GoplistContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GoplistContext(self, self._ctx, self.state)
         self.enterRule(localctx, 24, self.RULE_goplist)
         self._la = 0 # Token type
         try:
@@ -1230,27 +1230,27 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def gopUGate(self):
-            return self.getTypedRuleContext(QASMParser.GopUGateContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GopUGateContext,0)
 
 
         def gopCXGate(self):
-            return self.getTypedRuleContext(QASMParser.GopCXGateContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GopCXGateContext,0)
 
 
         def gopBarrier(self):
-            return self.getTypedRuleContext(QASMParser.GopBarrierContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GopBarrierContext,0)
 
 
         def gopCustomGate(self):
-            return self.getTypedRuleContext(QASMParser.GopCustomGateContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GopCustomGateContext,0)
 
 
         def gopReset(self):
-            return self.getTypedRuleContext(QASMParser.GopResetContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.GopResetContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gop
+            return Qasm2Parser.RULE_gop
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGop" ):
@@ -1265,7 +1265,7 @@ class QASMParser ( Parser ):
 
     def gop(self):
 
-        localctx = QASMParser.GopContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GopContext(self, self._ctx, self.state)
         self.enterRule(localctx, 26, self.RULE_gop)
         try:
             self.state = 224
@@ -1316,14 +1316,14 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def explist(self):
-            return self.getTypedRuleContext(QASMParser.ExplistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ExplistContext,0)
 
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gopUGate
+            return Qasm2Parser.RULE_gopUGate
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGopUGate" ):
@@ -1338,22 +1338,22 @@ class QASMParser ( Parser ):
 
     def gopUGate(self):
 
-        localctx = QASMParser.GopUGateContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GopUGateContext(self, self._ctx, self.state)
         self.enterRule(localctx, 28, self.RULE_gopUGate)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 226
-            self.match(QASMParser.T__13)
+            self.match(Qasm2Parser.T__13)
             self.state = 227
-            self.match(QASMParser.T__8)
+            self.match(Qasm2Parser.T__8)
             self.state = 228
             self.explist()
             self.state = 229
-            self.match(QASMParser.T__9)
+            self.match(Qasm2Parser.T__9)
             self.state = 230
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 231
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1372,12 +1372,12 @@ class QASMParser ( Parser ):
 
         def ID(self, i:int=None):
             if i is None:
-                return self.getTokens(QASMParser.ID)
+                return self.getTokens(Qasm2Parser.ID)
             else:
-                return self.getToken(QASMParser.ID, i)
+                return self.getToken(Qasm2Parser.ID, i)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gopCXGate
+            return Qasm2Parser.RULE_gopCXGate
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGopCXGate" ):
@@ -1392,20 +1392,20 @@ class QASMParser ( Parser ):
 
     def gopCXGate(self):
 
-        localctx = QASMParser.GopCXGateContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GopCXGateContext(self, self._ctx, self.state)
         self.enterRule(localctx, 30, self.RULE_gopCXGate)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 233
-            self.match(QASMParser.T__14)
+            self.match(Qasm2Parser.T__14)
             self.state = 234
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 235
-            self.match(QASMParser.T__15)
+            self.match(Qasm2Parser.T__15)
             self.state = 236
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 237
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1423,11 +1423,11 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def idlist(self):
-            return self.getTypedRuleContext(QASMParser.IdlistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.IdlistContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gopBarrier
+            return Qasm2Parser.RULE_gopBarrier
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGopBarrier" ):
@@ -1442,16 +1442,16 @@ class QASMParser ( Parser ):
 
     def gopBarrier(self):
 
-        localctx = QASMParser.GopBarrierContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GopBarrierContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_gopBarrier)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 239
-            self.match(QASMParser.T__16)
+            self.match(Qasm2Parser.T__16)
             self.state = 240
             self.idlist()
             self.state = 241
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1469,18 +1469,18 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def idlist(self):
-            return self.getTypedRuleContext(QASMParser.IdlistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.IdlistContext,0)
 
 
         def explist(self):
-            return self.getTypedRuleContext(QASMParser.ExplistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ExplistContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gopCustomGate
+            return Qasm2Parser.RULE_gopCustomGate
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGopCustomGate" ):
@@ -1495,7 +1495,7 @@ class QASMParser ( Parser ):
 
     def gopCustomGate(self):
 
-        localctx = QASMParser.GopCustomGateContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GopCustomGateContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_gopCustomGate)
         try:
             self.state = 260
@@ -1504,41 +1504,41 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 243
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 244
                 self.idlist()
                 self.state = 245
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 247
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 248
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 249
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 250
                 self.idlist()
                 self.state = 251
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 253
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 254
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 255
                 self.explist()
                 self.state = 256
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 257
                 self.idlist()
                 self.state = 258
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
 
@@ -1559,10 +1559,10 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_gopReset
+            return Qasm2Parser.RULE_gopReset
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGopReset" ):
@@ -1577,16 +1577,16 @@ class QASMParser ( Parser ):
 
     def gopReset(self):
 
-        localctx = QASMParser.GopResetContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.GopResetContext(self, self._ctx, self.state)
         self.enterRule(localctx, 36, self.RULE_gopReset)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 262
-            self.match(QASMParser.T__17)
+            self.match(Qasm2Parser.T__17)
             self.state = 263
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 264
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1605,12 +1605,12 @@ class QASMParser ( Parser ):
 
         def ID(self, i:int=None):
             if i is None:
-                return self.getTokens(QASMParser.ID)
+                return self.getTokens(Qasm2Parser.ID)
             else:
-                return self.getToken(QASMParser.ID, i)
+                return self.getToken(Qasm2Parser.ID, i)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_idlist
+            return Qasm2Parser.RULE_idlist
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterIdlist" ):
@@ -1625,7 +1625,7 @@ class QASMParser ( Parser ):
 
     def idlist(self):
 
-        localctx = QASMParser.IdlistContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.IdlistContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_idlist)
         self._la = 0 # Token type
         try:
@@ -1635,21 +1635,21 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 266
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 267
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 272
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while _la==16:
                     self.state = 268
-                    self.match(QASMParser.T__15)
+                    self.match(Qasm2Parser.T__15)
                     self.state = 269
-                    self.match(QASMParser.ID)
+                    self.match(Qasm2Parser.ID)
                     self.state = 274
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
@@ -1675,12 +1675,12 @@ class QASMParser ( Parser ):
 
         def ID(self, i:int=None):
             if i is None:
-                return self.getTokens(QASMParser.ID)
+                return self.getTokens(Qasm2Parser.ID)
             else:
-                return self.getToken(QASMParser.ID, i)
+                return self.getToken(Qasm2Parser.ID, i)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_paramlist
+            return Qasm2Parser.RULE_paramlist
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterParamlist" ):
@@ -1695,7 +1695,7 @@ class QASMParser ( Parser ):
 
     def paramlist(self):
 
-        localctx = QASMParser.ParamlistContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.ParamlistContext(self, self._ctx, self.state)
         self.enterRule(localctx, 40, self.RULE_paramlist)
         self._la = 0 # Token type
         try:
@@ -1705,21 +1705,21 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 277
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 278
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 283
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while _la==16:
                     self.state = 279
-                    self.match(QASMParser.T__15)
+                    self.match(Qasm2Parser.T__15)
                     self.state = 280
-                    self.match(QASMParser.ID)
+                    self.match(Qasm2Parser.ID)
                     self.state = 285
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
@@ -1744,27 +1744,27 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def qopUGate(self):
-            return self.getTypedRuleContext(QASMParser.QopUGateContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopUGateContext,0)
 
 
         def qopCXGate(self):
-            return self.getTypedRuleContext(QASMParser.QopCXGateContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopCXGateContext,0)
 
 
         def qopMeasure(self):
-            return self.getTypedRuleContext(QASMParser.QopMeasureContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopMeasureContext,0)
 
 
         def qopReset(self):
-            return self.getTypedRuleContext(QASMParser.QopResetContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopResetContext,0)
 
 
         def qopCustomGate(self):
-            return self.getTypedRuleContext(QASMParser.QopCustomGateContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopCustomGateContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qopStatement
+            return Qasm2Parser.RULE_qopStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQopStatement" ):
@@ -1779,7 +1779,7 @@ class QASMParser ( Parser ):
 
     def qopStatement(self):
 
-        localctx = QASMParser.QopStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QopStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 42, self.RULE_qopStatement)
         try:
             self.state = 293
@@ -1830,15 +1830,15 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def explist(self):
-            return self.getTypedRuleContext(QASMParser.ExplistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ExplistContext,0)
 
 
         def qarg(self):
-            return self.getTypedRuleContext(QASMParser.QargContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QargContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qopUGate
+            return Qasm2Parser.RULE_qopUGate
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQopUGate" ):
@@ -1853,22 +1853,22 @@ class QASMParser ( Parser ):
 
     def qopUGate(self):
 
-        localctx = QASMParser.QopUGateContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QopUGateContext(self, self._ctx, self.state)
         self.enterRule(localctx, 44, self.RULE_qopUGate)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 295
-            self.match(QASMParser.T__13)
+            self.match(Qasm2Parser.T__13)
             self.state = 296
-            self.match(QASMParser.T__8)
+            self.match(Qasm2Parser.T__8)
             self.state = 297
             self.explist()
             self.state = 298
-            self.match(QASMParser.T__9)
+            self.match(Qasm2Parser.T__9)
             self.state = 299
             self.qarg()
             self.state = 300
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1887,13 +1887,13 @@ class QASMParser ( Parser ):
 
         def qarg(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(QASMParser.QargContext)
+                return self.getTypedRuleContexts(Qasm2Parser.QargContext)
             else:
-                return self.getTypedRuleContext(QASMParser.QargContext,i)
+                return self.getTypedRuleContext(Qasm2Parser.QargContext,i)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qopCXGate
+            return Qasm2Parser.RULE_qopCXGate
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQopCXGate" ):
@@ -1908,20 +1908,20 @@ class QASMParser ( Parser ):
 
     def qopCXGate(self):
 
-        localctx = QASMParser.QopCXGateContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QopCXGateContext(self, self._ctx, self.state)
         self.enterRule(localctx, 46, self.RULE_qopCXGate)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 302
-            self.match(QASMParser.T__14)
+            self.match(Qasm2Parser.T__14)
             self.state = 303
             self.qarg()
             self.state = 304
-            self.match(QASMParser.T__15)
+            self.match(Qasm2Parser.T__15)
             self.state = 305
             self.qarg()
             self.state = 306
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1939,15 +1939,15 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def qarg(self):
-            return self.getTypedRuleContext(QASMParser.QargContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QargContext,0)
 
 
         def carg(self):
-            return self.getTypedRuleContext(QASMParser.CargContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.CargContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qopMeasure
+            return Qasm2Parser.RULE_qopMeasure
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQopMeasure" ):
@@ -1962,20 +1962,20 @@ class QASMParser ( Parser ):
 
     def qopMeasure(self):
 
-        localctx = QASMParser.QopMeasureContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QopMeasureContext(self, self._ctx, self.state)
         self.enterRule(localctx, 48, self.RULE_qopMeasure)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 308
-            self.match(QASMParser.T__18)
+            self.match(Qasm2Parser.T__18)
             self.state = 309
             self.qarg()
             self.state = 310
-            self.match(QASMParser.T__19)
+            self.match(Qasm2Parser.T__19)
             self.state = 311
             self.carg()
             self.state = 312
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1993,11 +1993,11 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def qarg(self):
-            return self.getTypedRuleContext(QASMParser.QargContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QargContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qopReset
+            return Qasm2Parser.RULE_qopReset
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQopReset" ):
@@ -2012,16 +2012,16 @@ class QASMParser ( Parser ):
 
     def qopReset(self):
 
-        localctx = QASMParser.QopResetContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QopResetContext(self, self._ctx, self.state)
         self.enterRule(localctx, 50, self.RULE_qopReset)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 314
-            self.match(QASMParser.T__17)
+            self.match(Qasm2Parser.T__17)
             self.state = 315
             self.qarg()
             self.state = 316
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2039,18 +2039,18 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def arglist(self):
-            return self.getTypedRuleContext(QASMParser.ArglistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ArglistContext,0)
 
 
         def explist(self):
-            return self.getTypedRuleContext(QASMParser.ExplistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ExplistContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qopCustomGate
+            return Qasm2Parser.RULE_qopCustomGate
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQopCustomGate" ):
@@ -2065,7 +2065,7 @@ class QASMParser ( Parser ):
 
     def qopCustomGate(self):
 
-        localctx = QASMParser.QopCustomGateContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QopCustomGateContext(self, self._ctx, self.state)
         self.enterRule(localctx, 52, self.RULE_qopCustomGate)
         try:
             self.state = 335
@@ -2074,41 +2074,41 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 318
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 319
                 self.arglist()
                 self.state = 320
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 322
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 323
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 324
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 325
                 self.arglist()
                 self.state = 326
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 328
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 329
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 330
                 self.explist()
                 self.state = 331
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 self.state = 332
                 self.arglist()
                 self.state = 333
-                self.match(QASMParser.T__1)
+                self.match(Qasm2Parser.T__1)
                 pass
 
 
@@ -2129,17 +2129,17 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def NNINTEGER(self):
-            return self.getToken(QASMParser.NNINTEGER, 0)
+            return self.getToken(Qasm2Parser.NNINTEGER, 0)
 
         def qopStatement(self):
-            return self.getTypedRuleContext(QASMParser.QopStatementContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.QopStatementContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_ifStatement
+            return Qasm2Parser.RULE_ifStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterIfStatement" ):
@@ -2154,22 +2154,22 @@ class QASMParser ( Parser ):
 
     def ifStatement(self):
 
-        localctx = QASMParser.IfStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.IfStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 54, self.RULE_ifStatement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 337
-            self.match(QASMParser.T__20)
+            self.match(Qasm2Parser.T__20)
             self.state = 338
-            self.match(QASMParser.T__8)
+            self.match(Qasm2Parser.T__8)
             self.state = 339
-            self.match(QASMParser.ID)
+            self.match(Qasm2Parser.ID)
             self.state = 340
-            self.match(QASMParser.T__21)
+            self.match(Qasm2Parser.T__21)
             self.state = 341
-            self.match(QASMParser.NNINTEGER)
+            self.match(Qasm2Parser.NNINTEGER)
             self.state = 342
-            self.match(QASMParser.T__9)
+            self.match(Qasm2Parser.T__9)
             self.state = 343
             self.qopStatement()
         except RecognitionException as re:
@@ -2189,11 +2189,11 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def arglist(self):
-            return self.getTypedRuleContext(QASMParser.ArglistContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ArglistContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_barrierStatement
+            return Qasm2Parser.RULE_barrierStatement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterBarrierStatement" ):
@@ -2208,16 +2208,16 @@ class QASMParser ( Parser ):
 
     def barrierStatement(self):
 
-        localctx = QASMParser.BarrierStatementContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.BarrierStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 56, self.RULE_barrierStatement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 345
-            self.match(QASMParser.T__16)
+            self.match(Qasm2Parser.T__16)
             self.state = 346
             self.arglist()
             self.state = 347
-            self.match(QASMParser.T__1)
+            self.match(Qasm2Parser.T__1)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2236,13 +2236,13 @@ class QASMParser ( Parser ):
 
         def qarg(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(QASMParser.QargContext)
+                return self.getTypedRuleContexts(Qasm2Parser.QargContext)
             else:
-                return self.getTypedRuleContext(QASMParser.QargContext,i)
+                return self.getTypedRuleContext(Qasm2Parser.QargContext,i)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_arglist
+            return Qasm2Parser.RULE_arglist
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterArglist" ):
@@ -2257,7 +2257,7 @@ class QASMParser ( Parser ):
 
     def arglist(self):
 
-        localctx = QASMParser.ArglistContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.ArglistContext(self, self._ctx, self.state)
         self.enterRule(localctx, 58, self.RULE_arglist)
         self._la = 0 # Token type
         try:
@@ -2279,7 +2279,7 @@ class QASMParser ( Parser ):
                 _la = self._input.LA(1)
                 while _la==16:
                     self.state = 351
-                    self.match(QASMParser.T__15)
+                    self.match(Qasm2Parser.T__15)
                     self.state = 352
                     self.qarg()
                     self.state = 357
@@ -2306,13 +2306,13 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def NNINTEGER(self):
-            return self.getToken(QASMParser.NNINTEGER, 0)
+            return self.getToken(Qasm2Parser.NNINTEGER, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_qarg
+            return Qasm2Parser.RULE_qarg
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterQarg" ):
@@ -2327,7 +2327,7 @@ class QASMParser ( Parser ):
 
     def qarg(self):
 
-        localctx = QASMParser.QargContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.QargContext(self, self._ctx, self.state)
         self.enterRule(localctx, 60, self.RULE_qarg)
         try:
             self.state = 365
@@ -2336,19 +2336,19 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 360
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 361
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 362
-                self.match(QASMParser.T__4)
+                self.match(Qasm2Parser.T__4)
                 self.state = 363
-                self.match(QASMParser.NNINTEGER)
+                self.match(Qasm2Parser.NNINTEGER)
                 self.state = 364
-                self.match(QASMParser.T__5)
+                self.match(Qasm2Parser.T__5)
                 pass
 
 
@@ -2369,13 +2369,13 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def NNINTEGER(self):
-            return self.getToken(QASMParser.NNINTEGER, 0)
+            return self.getToken(Qasm2Parser.NNINTEGER, 0)
 
         def getRuleIndex(self):
-            return QASMParser.RULE_carg
+            return Qasm2Parser.RULE_carg
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCarg" ):
@@ -2390,7 +2390,7 @@ class QASMParser ( Parser ):
 
     def carg(self):
 
-        localctx = QASMParser.CargContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.CargContext(self, self._ctx, self.state)
         self.enterRule(localctx, 62, self.RULE_carg)
         try:
             self.state = 372
@@ -2399,19 +2399,19 @@ class QASMParser ( Parser ):
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 367
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 368
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 self.state = 369
-                self.match(QASMParser.T__4)
+                self.match(Qasm2Parser.T__4)
                 self.state = 370
-                self.match(QASMParser.NNINTEGER)
+                self.match(Qasm2Parser.NNINTEGER)
                 self.state = 371
-                self.match(QASMParser.T__5)
+                self.match(Qasm2Parser.T__5)
                 pass
 
 
@@ -2433,13 +2433,13 @@ class QASMParser ( Parser ):
 
         def exp(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(QASMParser.ExpContext)
+                return self.getTypedRuleContexts(Qasm2Parser.ExpContext)
             else:
-                return self.getTypedRuleContext(QASMParser.ExpContext,i)
+                return self.getTypedRuleContext(Qasm2Parser.ExpContext,i)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_explist
+            return Qasm2Parser.RULE_explist
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExplist" ):
@@ -2454,7 +2454,7 @@ class QASMParser ( Parser ):
 
     def explist(self):
 
-        localctx = QASMParser.ExplistContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.ExplistContext(self, self._ctx, self.state)
         self.enterRule(localctx, 64, self.RULE_explist)
         self._la = 0 # Token type
         try:
@@ -2476,7 +2476,7 @@ class QASMParser ( Parser ):
                 _la = self._input.LA(1)
                 while _la==16:
                     self.state = 376
-                    self.match(QASMParser.T__15)
+                    self.match(Qasm2Parser.T__15)
                     self.state = 377
                     self.exp(0)
                     self.state = 382
@@ -2503,39 +2503,39 @@ class QASMParser ( Parser ):
             self.parser = parser
 
         def REAL(self):
-            return self.getToken(QASMParser.REAL, 0)
+            return self.getToken(Qasm2Parser.REAL, 0)
 
         def NNINTEGER(self):
-            return self.getToken(QASMParser.NNINTEGER, 0)
+            return self.getToken(Qasm2Parser.NNINTEGER, 0)
 
         def ID(self):
-            return self.getToken(QASMParser.ID, 0)
+            return self.getToken(Qasm2Parser.ID, 0)
 
         def complex_(self):
-            return self.getTypedRuleContext(QASMParser.ComplexContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.ComplexContext,0)
 
 
         def negop(self):
-            return self.getTypedRuleContext(QASMParser.NegopContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.NegopContext,0)
 
 
         def exp(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(QASMParser.ExpContext)
+                return self.getTypedRuleContexts(Qasm2Parser.ExpContext)
             else:
-                return self.getTypedRuleContext(QASMParser.ExpContext,i)
+                return self.getTypedRuleContext(Qasm2Parser.ExpContext,i)
 
 
         def unaryop(self):
-            return self.getTypedRuleContext(QASMParser.UnaryopContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.UnaryopContext,0)
 
 
         def binop(self):
-            return self.getTypedRuleContext(QASMParser.BinopContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.BinopContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_exp
+            return Qasm2Parser.RULE_exp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExp" ):
@@ -2550,7 +2550,7 @@ class QASMParser ( Parser ):
     def exp(self, _p:int=0):
         _parentctx = self._ctx
         _parentState = self.state
-        localctx = QASMParser.ExpContext(self, self._ctx, _parentState)
+        localctx = Qasm2Parser.ExpContext(self, self._ctx, _parentState)
         _prevctx = localctx
         _startState = 66
         self.enterRecursionRule(localctx, 66, self.RULE_exp, _p)
@@ -2561,17 +2561,17 @@ class QASMParser ( Parser ):
             la_ = self._interp.adaptivePredict(self._input,24,self._ctx)
             if la_ == 1:
                 self.state = 386
-                self.match(QASMParser.REAL)
+                self.match(Qasm2Parser.REAL)
                 pass
 
             elif la_ == 2:
                 self.state = 387
-                self.match(QASMParser.NNINTEGER)
+                self.match(Qasm2Parser.NNINTEGER)
                 pass
 
             elif la_ == 3:
                 self.state = 388
-                self.match(QASMParser.ID)
+                self.match(Qasm2Parser.ID)
                 pass
 
             elif la_ == 4:
@@ -2590,25 +2590,25 @@ class QASMParser ( Parser ):
                 self.state = 393
                 self.unaryop()
                 self.state = 394
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 395
                 self.exp(0)
                 self.state = 396
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 pass
 
             elif la_ == 7:
                 self.state = 398
-                self.match(QASMParser.T__8)
+                self.match(Qasm2Parser.T__8)
                 self.state = 399
                 self.exp(0)
                 self.state = 400
-                self.match(QASMParser.T__9)
+                self.match(Qasm2Parser.T__9)
                 pass
 
             elif la_ == 8:
                 self.state = 402
-                self.match(QASMParser.T__22)
+                self.match(Qasm2Parser.T__22)
                 pass
 
 
@@ -2621,7 +2621,7 @@ class QASMParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    localctx = QASMParser.ExpContext(self, _parentctx, _parentState)
+                    localctx = Qasm2Parser.ExpContext(self, _parentctx, _parentState)
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_exp)
                     self.state = 405
                     if not self.precpred(self._ctx, 5):
@@ -2653,16 +2653,16 @@ class QASMParser ( Parser ):
 
         def REAL(self, i:int=None):
             if i is None:
-                return self.getTokens(QASMParser.REAL)
+                return self.getTokens(Qasm2Parser.REAL)
             else:
-                return self.getToken(QASMParser.REAL, i)
+                return self.getToken(Qasm2Parser.REAL, i)
 
         def addsub(self):
-            return self.getTypedRuleContext(QASMParser.AddsubContext,0)
+            return self.getTypedRuleContext(Qasm2Parser.AddsubContext,0)
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_complex
+            return Qasm2Parser.RULE_complex
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterComplex" ):
@@ -2677,7 +2677,7 @@ class QASMParser ( Parser ):
 
     def complex_(self):
 
-        localctx = QASMParser.ComplexContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.ComplexContext(self, self._ctx, self.state)
         self.enterRule(localctx, 68, self.RULE_complex)
         try:
             self.state = 423
@@ -2686,22 +2686,22 @@ class QASMParser ( Parser ):
             if token in [37]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 414
-                self.match(QASMParser.REAL)
+                self.match(Qasm2Parser.REAL)
                 self.state = 415
                 self.addsub()
                 self.state = 416
-                self.match(QASMParser.REAL)
+                self.match(Qasm2Parser.REAL)
                 self.state = 417
-                self.match(QASMParser.T__23)
+                self.match(Qasm2Parser.T__23)
                 pass
             elif token in [25, 26]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 419
                 self.addsub()
                 self.state = 420
-                self.match(QASMParser.REAL)
+                self.match(Qasm2Parser.REAL)
                 self.state = 421
-                self.match(QASMParser.T__23)
+                self.match(Qasm2Parser.T__23)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -2724,7 +2724,7 @@ class QASMParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_addsub
+            return Qasm2Parser.RULE_addsub
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAddsub" ):
@@ -2739,7 +2739,7 @@ class QASMParser ( Parser ):
 
     def addsub(self):
 
-        localctx = QASMParser.AddsubContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.AddsubContext(self, self._ctx, self.state)
         self.enterRule(localctx, 70, self.RULE_addsub)
         self._la = 0 # Token type
         try:
@@ -2769,7 +2769,7 @@ class QASMParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_binop
+            return Qasm2Parser.RULE_binop
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterBinop" ):
@@ -2784,7 +2784,7 @@ class QASMParser ( Parser ):
 
     def binop(self):
 
-        localctx = QASMParser.BinopContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.BinopContext(self, self._ctx, self.state)
         self.enterRule(localctx, 72, self.RULE_binop)
         self._la = 0 # Token type
         try:
@@ -2814,7 +2814,7 @@ class QASMParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_negop
+            return Qasm2Parser.RULE_negop
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterNegop" ):
@@ -2829,12 +2829,12 @@ class QASMParser ( Parser ):
 
     def negop(self):
 
-        localctx = QASMParser.NegopContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.NegopContext(self, self._ctx, self.state)
         self.enterRule(localctx, 74, self.RULE_negop)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 429
-            self.match(QASMParser.T__25)
+            self.match(Qasm2Parser.T__25)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2853,7 +2853,7 @@ class QASMParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return QASMParser.RULE_unaryop
+            return Qasm2Parser.RULE_unaryop
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterUnaryop" ):
@@ -2868,7 +2868,7 @@ class QASMParser ( Parser ):
 
     def unaryop(self):
 
-        localctx = QASMParser.UnaryopContext(self, self._ctx, self.state)
+        localctx = Qasm2Parser.UnaryopContext(self, self._ctx, self.state)
         self.enterRule(localctx, 76, self.RULE_unaryop)
         self._la = 0 # Token type
         try:

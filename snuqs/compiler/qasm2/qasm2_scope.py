@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 
-class QasmScope:
+class Qasm2Scope:
     class Type(Enum):
         TARGET = 5
         PARAM = 6
