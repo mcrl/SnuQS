@@ -1,5 +1,5 @@
 # SnuQS
-Working on updates for AWS cluster supports with Amazon bracket.
+For we are working on updates for AWS cluster supports with Amazon bracket.
 
 ## Prerequisite
 - Any distribution of MPI (e.g., OpenMPI, MPICH, MVAPICH)
