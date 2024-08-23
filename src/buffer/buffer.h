@@ -13,6 +13,7 @@ public:
   virtual std::complex<T> *ptr() = 0;
   virtual std::complex<T> __getitem__(size_t key) = 0;
   virtual void __setitem__(size_t key, std::complex<T> val) = 0;
+  virtual size_t __len__() = 0;
 };
 
 template <typename T> class MemoryBuffer : public Buffer<T> {
@@ -23,7 +24,7 @@ public:
   virtual std::complex<T> *ptr() override;
   virtual std::complex<T> __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, std::complex<T> val) override;
-  size_t count() const;
+  virtual size_t __len__() override;
 
 private:
   bool pinned_;
@@ -38,6 +39,7 @@ public:
   virtual std::complex<T> *ptr() override;
   virtual std::complex<T> __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, std::complex<T> val) override;
+  virtual size_t __len__() override;
 
   void read(void *buf, size_t count, size_t offset);
   void write(void *buf, size_t count, size_t offset);
@@ -58,6 +60,7 @@ public:
   virtual std::complex<T> *ptr() override;
   virtual std::complex<T> __getitem__(size_t key) override;
   virtual void __setitem__(size_t key, std::complex<T> val) override;
+  virtual size_t __len__() override;
 
   void read(void *buf, size_t count, size_t offset);
   void write(void *buf, size_t count, size_t offset);

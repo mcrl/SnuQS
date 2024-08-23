@@ -1,9 +1,17 @@
 import os
 import pathlib
-from glob import glob
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext as build_ext_orig
+
+install_requires = [
+    'antlr4-python3-runtime==4.13.1',
+    'pybind11==2.12.0',
+    'numpy==1.26.4',
+    'qiskit==1.0.2',
+    'pyyaml==6.0.1',
+    'cmake==3.29.0',
+]
 
 
 class CMakeExtension(Extension):
@@ -50,29 +58,18 @@ class CMakeBuildExt(build_ext_orig):
             os.chdir(str(cwd))
 
 
-setup_requires = [
-]
-
-install_requires = [
-]
-
-dependency_links = [
-]
-
 setup(
     name='snuqs',
-    version='2.0',
-    description='SnuQS',
+    version='1.1',
+    description='Python interface for quantum circuit simulator SnuQS',
     author='Daeyoung Park',
     author_email='dypshong@gmail.com',
     packages=find_packages(),
-    package_data={
-        "snuqs": ["*.inc"],
-    },
     include_package_data=True,
     install_requires=install_requires,
-    setup_requires=setup_requires,
-    dependency_links=dependency_links,
+    package_data={
+        "": ["*.inc"],
+    },
     ext_modules=[
         CMakeExtension('snuqs.python'),
     ],

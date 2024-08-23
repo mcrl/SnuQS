@@ -28,10 +28,6 @@ std::shared_ptr<Qreg> Circuit::getQregForIndex(size_t index) const {
 }
 
 void Circuit::append(std::shared_ptr<Qop> qop) { qops_.push_back(qop); }
-void Circuit::prepend(std::shared_ptr<Qop> qop) {
-  qops_.insert(qops_.begin(), qop);
-}
-
 std::string Circuit::__repr__() {
 
   std::ostringstream s;

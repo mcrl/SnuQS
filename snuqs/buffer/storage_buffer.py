@@ -21,3 +21,6 @@ class StorageBuffer(Buffer):
             raise NotImplementedError("slice is not supported")
         else:
             return self.impl.__setitem__(key, val)
+
+    def __len__(self):
+        return self.impl.__len__()

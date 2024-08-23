@@ -37,6 +37,11 @@ void CudaBuffer<T>::__setitem__(size_t key, std::complex<T> val) {
 }
 
 template <typename T>
+size_t CudaBuffer<T>::__len__() {
+    return count_;
+}
+
+template <typename T>
 void CudaBuffer<T>::read(void *buf, size_t count, size_t offset) {
     api::memcpy(buf, &buf_[offset], sizeof(std::complex<T>) * count,
              cudaMemcpyDeviceToHost);
@@ -49,7 +54,7 @@ void CudaBuffer<T>::write(void *buf, size_t count, size_t offset) {
 }
 
 template class CudaBuffer<double>;
-//template class CudaBuffer<float>;
+template class CudaBuffer<float>;
 
 } // namespace cuda
 } // namespace snuqs

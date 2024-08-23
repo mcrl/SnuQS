@@ -136,8 +136,6 @@ enum class QgateType {
   CU = 34,
   CCX = 35,
   CSWAP = 36,
-
-  INITIALIZE = 37,
 };
 
 class Qgate : public Qop {
@@ -524,16 +522,6 @@ public:
   virtual std::shared_ptr<Qop> clone() const override;
 };
 
-class INITIALIZE : public Qgate {
-public:
-  INITIALIZE(const std::vector<std::complex<double>> &params);
-  virtual size_t numQargs() const override;
-  virtual size_t numParams() const override;
-  virtual std::shared_ptr<Qop> clone() const override;
-
-  std::vector<std::complex<double>> init_params_;
-};
-
 class InitZeroState : public Qop {
 public:
   InitZeroState();
@@ -552,7 +540,8 @@ class MemcpyH2D : public Qop {
 public:
   MemcpyH2D();
   MemcpyH2D(std::map<Qarg, Qarg> qarg_map_);
-  MemcpyH2D(std::map<Qarg, Qarg> qarg_map_, size_t slice);
+  MemcpyH2D(std::map<Qarg, Qarg> qarg_map_,
+            size_t slice);
   virtual std::string __repr__() const override;
   virtual std::shared_ptr<Qop> clone() const override;
   std::map<Qarg, Qarg> qarg_map_;
@@ -563,7 +552,8 @@ class MemcpyD2H : public Qop {
 public:
   MemcpyD2H();
   MemcpyD2H(std::map<Qarg, Qarg> qarg_map_);
-  MemcpyD2H(std::map<Qarg, Qarg> qarg_map_, size_t slice);
+  MemcpyD2H(std::map<Qarg, Qarg> qarg_map_,
+            size_t slice);
   virtual std::string __repr__() const override;
   virtual std::shared_ptr<Qop> clone() const override;
 

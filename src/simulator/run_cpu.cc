@@ -3,7 +3,7 @@
 #include "simulator/executor.h"
 #include "simulator/qop_impl.h"
 #include "simulator/run.h"
-#include "transpile/transpile.h"
+#include "simulator/transpile.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -64,8 +64,8 @@ std::shared_ptr<Buffer<T>> runCPU(Circuit &_circ, size_t mem_per_device) {
   return mem_buffer;
 }
 
-//template std::shared_ptr<Buffer<float>> runCPU<float>(Circuit &circ,
-//                                                      size_t mem_per_device);
+template std::shared_ptr<Buffer<float>> runCPU<float>(Circuit &circ,
+                                                      size_t mem_per_device);
 template std::shared_ptr<Buffer<double>> runCPU<double>(Circuit &circ,
                                                         size_t mem_per_device);
 } // namespace cuda

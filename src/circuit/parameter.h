@@ -2,7 +2,6 @@
 #define __PARAMETER_H__
 
 #include "circuit/arg.h"
-#include <complex>
 #include <memory>
 
 namespace snuqs {
@@ -10,13 +9,13 @@ namespace snuqs {
 class Parameter {
 public:
   Parameter(){};
-  virtual std::complex<double> eval() const { return 0.0; };
+  virtual double eval() const { return 0.0; };
 };
 
 class Identifier : public Parameter {
 public:
   Identifier(const Creg &creg);
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 
   const Creg &creg_;
 };
@@ -32,7 +31,7 @@ class BinOp : public Parameter {
 public:
   BinOp(BinOpType op, std::shared_ptr<Parameter> param0,
         std::shared_ptr<Parameter> param1);
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 
   BinOpType op_;
   std::shared_ptr<Parameter> param0_;
@@ -42,7 +41,7 @@ public:
 class NegOp : public Parameter {
 public:
   NegOp(std::shared_ptr<Parameter> param);
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 
   std::shared_ptr<Parameter> param_;
 };
@@ -59,7 +58,7 @@ enum class UnaryOpType {
 class UnaryOp : public Parameter {
 public:
   UnaryOp(UnaryOpType op, std::shared_ptr<Parameter> param);
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 
   UnaryOpType op_;
   std::shared_ptr<Parameter> param_;
@@ -68,7 +67,7 @@ public:
 class Parenthesis : public Parameter {
 public:
   Parenthesis(std::shared_ptr<Parameter> param);
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 
   std::shared_ptr<Parameter> param_;
 };
@@ -76,16 +75,15 @@ public:
 class Constant : public Parameter {
 public:
   Constant(double value);
-  Constant(std::complex<double> value);
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 
-  std::complex<double> value_;
+  double value_;
 };
 
 class Pi : public Constant {
 public:
   Pi();
-  virtual std::complex<double> eval() const override;
+  virtual double eval() const override;
 };
 
 } // namespace snuqs

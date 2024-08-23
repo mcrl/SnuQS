@@ -11,3 +11,7 @@ class Buffer(metaclass=ABCMeta):
     @ abstractmethod
     def __setitem__(self, key: Union[int, slice], val: complex):
         pass
+
+    @ abstractmethod
+    def __len__(self):
+        pass

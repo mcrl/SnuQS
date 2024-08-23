@@ -4,7 +4,6 @@
 #include "circuit/qop.h"
 #include "circuit/reg.h"
 #include "simulator/statevector_simulator.h"
-#include <complex>
 #include <pybind11/complex.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -20,27 +19,19 @@ PYBIND11_MODULE(_C, m) {
   py::class_<snuqs::Buffer<double>, std::shared_ptr<snuqs::Buffer<double>>>(
       m, "Buffer");
   py::class_<snuqs::MemoryBuffer<double>, snuqs::Buffer<double>,
-             std::shared_ptr<snuqs::MemoryBuffer<double>>>(
-      m, "MemoryBuffer", py::buffer_protocol())
+             std::shared_ptr<snuqs::MemoryBuffer<double>>>(m, "MemoryBuffer")
       .def(py::init<size_t>())
       .def(py::init<size_t, bool>())
       .def("__getitem__", &snuqs::MemoryBuffer<double>::__getitem__)
       .def("__setitem__", &snuqs::MemoryBuffer<double>::__setitem__)
-      .def_buffer([](snuqs::MemoryBuffer<double> &m) -> py::buffer_info {
-        return py::buffer_info(
-            m.ptr(),                      /* Pointer to buffer */
-            sizeof(std::complex<double>), /* Size of one scalar */
-            py::format_descriptor<std::complex<double>>::format(), /* Python
-                                                       struct-style format
-                                                       descriptor */
-            1, {m.count()}, {sizeof(std::complex<double>)});
-      });
+      .def("__len__", &snuqs::MemoryBuffer<double>::__len__);
 
   py::class_<snuqs::StorageBuffer<double>, snuqs::Buffer<double>,
              std::shared_ptr<snuqs::StorageBuffer<double>>>(m, "StorageBuffer")
       .def(py::init<size_t, std::vector<std::string>>())
       .def("__getitem__", &snuqs::StorageBuffer<double>::__getitem__)
-      .def("__setitem__", &snuqs::StorageBuffer<double>::__setitem__);
+      .def("__setitem__", &snuqs::StorageBuffer<double>::__setitem__)
+      .def("__len__", &snuqs::StorageBuffer<double>::__len__);
 
   //
   // Reg
@@ -125,7 +116,6 @@ PYBIND11_MODULE(_C, m) {
   py::class_<snuqs::Constant, snuqs::Parameter,
              std::shared_ptr<snuqs::Constant>>(m, "Constant")
       .def(py::init<double>())
-      .def(py::init<std::complex<double>>())
       .def("eval", &snuqs::Constant::eval);
 
   py::class_<snuqs::Pi, snuqs::Constant, std::shared_ptr<snuqs::Pi>>(m, "Pi")
@@ -140,7 +130,6 @@ PYBIND11_MODULE(_C, m) {
       .def("append_qreg", &snuqs::Circuit::append_qreg)
       .def("append_creg", &snuqs::Circuit::append_creg)
       .def("append", &snuqs::Circuit::append)
-      .def("prepend", &snuqs::Circuit::prepend)
       .def("name", &snuqs::Circuit::name)
       .def("__repr__", &snuqs::Circuit::__repr__);
 
@@ -488,10 +477,4 @@ PYBIND11_MODULE(_C, m) {
                     std::vector<std::shared_ptr<snuqs::Parameter>>>())
       .def("numQargs", &snuqs::CSWAP::numQargs)
       .def("numParams", &snuqs::CSWAP::numParams);
-
-  py::class_<snuqs::INITIALIZE, snuqs::Qgate,
-             std::shared_ptr<snuqs::INITIALIZE>>(m, "INITIALIZE")
-      .def(py::init<const std::vector<std::complex<double>>&>())
-      .def("numQargs", &snuqs::INITIALIZE::numQargs)
-      .def("numParams", &snuqs::INITIALIZE::numParams);
 }

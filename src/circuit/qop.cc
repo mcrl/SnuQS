@@ -97,6 +97,7 @@ Custom::Custom(const std::string &name, std::vector<std::shared_ptr<Qop>> qops,
 std::vector<std::shared_ptr<Qop>> Custom::qops() { return qops_; }
 std::string Custom::__repr__() const {
   std::ostringstream s;
+  s << name_;
 
   if (params_.size() > 0) {
     s << "(";
@@ -111,9 +112,9 @@ std::string Custom::__repr__() const {
     s << q->__repr__() << ", ";
   }
   s << "\n";
-  //  for (auto &op : qops_) {
-  //    s << op->__repr__() << "\n";
-  //  }
+    for (auto &op : qops_) {
+      s << "\t" << op->__repr__() << "\n";
+    }
 
   return s.str();
 }
@@ -202,9 +203,6 @@ static std::string qgateTypeToString(QgateType type) {
     return "CCX";
   case QgateType::CSWAP:
     return "CSWAP";
-
-  case QgateType::INITIALIZE:
-    return "INITIALIZE";
   }
   CANNOT_BE_HERE();
   return "INVALID";
@@ -634,14 +632,6 @@ size_t CSWAP::numQargs() const { return 3; }
 size_t CSWAP::numParams() const { return 0; }
 std::shared_ptr<Qop> CSWAP::clone() const {
   return std::make_shared<CSWAP>(qargs_, params_);
-}
-
-INITIALIZE::INITIALIZE(const std::vector<std::complex<double>> &params)
-    : Qgate(QgateType::INITIALIZE, {}, {}), init_params_(params) {}
-size_t INITIALIZE::numQargs() const { return 3; }
-size_t INITIALIZE::numParams() const { return 0; }
-std::shared_ptr<Qop> INITIALIZE::clone() const {
-  return std::make_shared<INITIALIZE>(init_params_);
 }
 
 InitZeroState::InitZeroState() : Qop(QopType::INIT_ZERO_STATE, {}) {}

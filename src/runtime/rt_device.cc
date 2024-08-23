@@ -10,12 +10,9 @@
 
 #include <cuda_runtime.h>
 
-#include "spdlog/spdlog.h"
 
 static inline void check_cuda(cudaError_t error, const char *file, int line) {
   if (error != cudaSuccess) {
-    spdlog::error("[{}:{}] CUDA Error: {}", file, line,
-                  cudaGetErrorString(error));
     std::exit(EXIT_FAILURE);
   }
 }

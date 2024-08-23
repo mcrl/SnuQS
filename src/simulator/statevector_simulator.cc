@@ -72,7 +72,7 @@ std::shared_ptr<Buffer<T>> StatevectorSimulator<T>::run(Circuit &circ) {
   }
 }
 
-//template class StatevectorSimulator<float>;
+template class StatevectorSimulator<float>;
 template class StatevectorSimulator<double>;
 
 } // namespace snuqs
