@@ -4,3 +4,6 @@
 [submodule "amazon-braket-default-simulator-python"]
 	path = amazon-braket-default-simulator-python
 	url = https://github.com/amazon-braket/amazon-braket-default-simulator-python
+[submodule "amazon-braket-schemas-python"]
+	path = amazon-braket-schemas-python
+	url = https://github.com/amazon-braket/amazon-braket-schemas-python

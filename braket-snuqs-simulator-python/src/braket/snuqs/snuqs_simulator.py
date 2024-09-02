@@ -179,5 +179,6 @@ class SnuQSStateVectorSimulator(SnuQSBaseSimulator):
         )
 
     def run(self, ir, *args, **kwargs):
-        print(ir)
+        for i in ir.instructions:
+            print(type(i), i)
         raise NotImplementedError("Not Implemented")
