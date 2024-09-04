@@ -1,5 +1,11 @@
 # SnuQS
-For we are working on updates for AWS cluster supports with Amazon bracket.
+
+For we are currently working on updates for AWS cluster supports with Amazon braket.
+- Seamless integration with Amazon braket
+- AWS support
+- Multi-node support
+- Futher Optimizations
+
 
 ## Prerequisite
 - Any distribution of MPI (e.g., OpenMPI, MPICH, MVAPICH)
