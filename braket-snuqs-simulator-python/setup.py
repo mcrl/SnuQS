@@ -6,7 +6,7 @@ setup(
     package_dir={"": "src"},
     entry_points={
         "braket.simulators": [
-            "snuqs = braket.snuqs.snuqs_simulator:SnuQSStateVectorSimulator",
+            "snuqs = braket.snuqs.simulator:SnuQSStateVectorSimulator",
         ]
     },
 )
