@@ -14,24 +14,71 @@ from braket.task_result import (
     ResultTypeValue,
     TaskMetadata,
 )
-from typing import Dict
+from typing import Dict, Union
 from braket.default_simulator.operation_helpers import (
     from_braket_instruction,
 )
 
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
 
-IRTYPE = braket.ir.jaqcd.program_v1.Program
+IRTYPE = Union[braket.ir.openqasm.Program, braket.ir.jaqcd.Program],
 
 
-class SnuQSBaseSimulator(ABC):
-    @abstractmethod
+class BaseSimulator(ABC):
     def run(self, ir: IRTYPE, *args, **kwargs):
-        pass
+        if isinstance(ir, braket.ir.openqasm.Program):
+            return self.run_openqasm(ir, *args, **kwargs)
+        return self.run_jaqcd(ir, *args, **kwargs)
+
+    def run_openqasm(self, ir: braket.ir.openqasm.Program, *args, **kwargs) -> GateModelTaskResult:
+        raise "Not Implemented"
+
+    def run_jaqcd(self, ir: braket.ir.jaqcd.Program, *args, **kwargs) -> GateModelTaskResult:
+        qubit_map = self._qubit_map(ir)
+        qubit_count = len(qubit_map)
+
+        operations = [
+            from_braket_instruction(instr) for instr in ir.instructions
+        ]
+
+        simulation = self.initialize_simulation(qubit_count=qubit_count, shots=0)
+        simulation.evolve(operations)
+
+        return GateModelTaskResult.construct(
+            taskMetadata=TaskMetadata(
+                id=str(uuid.uuid4()),
+                shots=simulation.shots,
+                deviceId=self.DEVICE_ID,
+            ),
+            additionalMetadata=AdditionalMetadata(
+                action=ir,
+            ),
+            resultTypes=[
+                ResultTypeValue.construct(
+                    type=braket.ir.jaqcd.StateVector(),
+                    value=simulation._state_vector,
+                ),
+            ]
+        )
+
+    @abstractmethod
+    def _qubit_map(self, ir):
+        """Return the qubit mapping"""
+
+    @abstractmethod
+    def _state_vector(self, qubit_count: int, qubit_map: Dict[int, int]):
+        """Returns the state vector"""
 
     @abstractmethod
     def initialize_simulation(self, **kwargs) -> Simulation:
         """Initializes simulation with keyword arguments"""
+
+
+class StateVectorSimulator(BaseSimulator):
+    DEVICE_ID = "snuqs"
+
+    def __init__(self, *args, **kwargs):
+        self.max_qubits = 1
 
     def _qubit_map(self, ir):
         qubit_set = set()
@@ -50,13 +97,6 @@ class SnuQSBaseSimulator(ABC):
         sv = np.zeros(2**qubit_count, dtype=complex)
         sv[0] = 1
         return sv
-
-
-class SnuQSStateVectorSimulator(SnuQSBaseSimulator):
-    DEVICE_ID = "snuqs"
-
-    def __init__(self, *args, **kwargs):
-        self.max_qubits = 1
 
     def _service(self):
         return {
@@ -135,15 +175,12 @@ class SnuQSStateVectorSimulator(SnuQSBaseSimulator):
                 "cy",
                 "cz",
                 "ecr",
-                "gpi",
-                "gpi2",
                 "h",
                 "i",
                 "iswap",
-                "ms",
-                "pswap",
                 "phaseshift",
                 "prx",
+                "pswap",
                 "rx",
                 "ry",
                 "rz",
@@ -238,32 +275,3 @@ class SnuQSStateVectorSimulator(SnuQSBaseSimulator):
         qubit_count = kwargs.get("qubit_count")
         shots = kwargs.get("shots")
         return StateVectorSimulation(qubit_count, shots)
-
-
-    def run(self, ir: IRTYPE, *args, **kwargs) -> GateModelTaskResult:
-        qubit_map = self._qubit_map(ir)
-        qubit_count = len(qubit_map)
-
-        operations = [
-            from_braket_instruction(instr) for instr in ir.instructions
-        ]
-
-        simulation = self.initialize_simulation(qubit_count=qubit_count, shots=0)
-        simulation.evolve(operations)
-
-        return GateModelTaskResult.construct(
-            taskMetadata=TaskMetadata(
-                id=str(uuid.uuid4()),
-                shots=simulation.shots,
-                deviceId=self.DEVICE_ID,
-            ),
-            additionalMetadata=AdditionalMetadata(
-                action=ir,
-            ),
-            resultTypes=[
-                ResultTypeValue.construct(
-                    type=braket.ir.jaqcd.StateVector(),
-                    value=simulation._state_vector
-                ),
-            ]
-        )

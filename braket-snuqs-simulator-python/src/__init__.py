@@ -1,1 +1,1 @@
-from .braket import SnuQSStateVectorSimulator
+from .braket import StateVectorSimulator

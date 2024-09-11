@@ -1,6 +1,6 @@
 # SnuQS
 
-For we are currently working on updates for AWS cluster supports with Amazon braket.
+Now we are currently working on updates for AWS cluster supports with Amazon braket.
 - Seamless integration with Amazon braket
 - AWS support
 - Multi-node support
@@ -8,6 +8,7 @@ For we are currently working on updates for AWS cluster supports with Amazon bra
 
 
 ## Prerequisite
+### Local System
 - Any distribution of MPI (e.g., OpenMPI, MPICH, MVAPICH)
     * It has been tested with MPICH Version 4.1.2.
     * Latest versions are recommended.
@@ -22,14 +23,63 @@ conda activate <name>
 ...
 ```
 
+### AWS
+TBD
 
 ## Installation
 ```
 pip install .
 ```
 
-## (Optional) QASM Parser Generation
-See [grammar](grammar).
+## Examples
+TBD
+
+## List of supported gates
+ - CCNot
+ - CPhaseShift
+ - CPhaseShift00
+ - CPhaseShift01
+ - CPhaseShift10
+ - CSwap
+ - CV
+ - CX
+ - CY
+ - CZ
+ - ECR
+ - GPhase
+ - Hadamard
+ - ISwap
+ - Identity
+ - PRx
+ - PSwap
+ - PauliX
+ - PauliY
+ - PauliZ
+ - PhaseShift
+ - RotX
+ - RotY
+ - RotZ
+ - S
+ - Si
+ - Swap
+ - T
+ - Ti
+ - U
+ - Unitary
+ - V
+ - Vi
+ - XX
+ - XY
+ - YY
+ - ZZ
+
+## List of *not* supported gates
+ - GPi
+ - GPi2
+ - MS
+
+## Unit test
+TBD
 
 ## License
 Copyright (c) 2022 Seoul National University.

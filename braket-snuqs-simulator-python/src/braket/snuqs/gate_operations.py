@@ -662,105 +662,6 @@ class PRx(GateOperation):
         )
 
 
-class GPi(GateOperation):
-    """
-    IonQ GPi gate.
-
-    Reference: https://ionq.com/docs/getting-started-with-native-gates#single-qubit-gates
-    """
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> np.ndarray:
-        return np.array(
-            [
-                [0, np.exp(-1j * self._angle)],
-                [np.exp(1j * self._angle), 0],
-            ]
-        )
-
-
-class GPi2(GateOperation):
-    """
-    IonQ GPi2 gate.
-
-    Reference: https://ionq.com/docs/getting-started-with-native-gates#single-qubit-gates
-    """
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> np.ndarray:
-        return np.array(
-            [
-                [1, -1j * np.exp(-1j * self._angle)],
-                [-1j * np.exp(1j * self._angle), 1],
-            ]
-        ) / np.sqrt(2)
-
-
-class MS(GateOperation):
-    """
-    IonQ MS gate.
-
-    Reference: https://ionq.com/docs/getting-started-with-native-gates#entangling-gates
-    """
-
-    def __init__(self, targets, angle_1, angle_2, angle_3=np.pi / 2, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle_1 = angle_1
-        self._angle_2 = angle_2
-        self._angle_3 = angle_3
-
-    @property
-    def _base_matrix(self) -> np.ndarray:
-        return np.array(
-            [
-                [
-                    np.cos(self._angle_3 / 2),
-                    0,
-                    0,
-                    -1j * np.exp(-1j * (self._angle_1 + self._angle_2)) * np.sin(self._angle_3 / 2),
-                ],
-                [
-                    0,
-                    np.cos(self._angle_3 / 2),
-                    -1j * np.exp(-1j * (self._angle_1 - self._angle_2)) * np.sin(self._angle_3 / 2),
-                    0,
-                ],
-                [
-                    0,
-                    -1j * np.exp(1j * (self._angle_1 - self._angle_2)) * np.sin(self._angle_3 / 2),
-                    np.cos(self._angle_3 / 2),
-                    0,
-                ],
-                [
-                    -1j * np.exp(1j * (self._angle_1 + self._angle_2)) * np.sin(self._angle_3 / 2),
-                    0,
-                    0,
-                    np.cos(self._angle_3 / 2),
-                ],
-            ]
-        )
-
-
 class Unitary(GateOperation):
     """Arbitrary unitary gate"""
 
@@ -1015,3 +916,44 @@ def _cswap(instruction) -> CSwap:
 @_from_braket_instruction.register(braket_instruction.Unitary)
 def _unitary(instruction) -> Unitary:
     return Unitary(instruction.targets, ir_matrix_to_ndarray(instruction.matrix))
+
+
+BRAKET_GATES = {
+    "i": Identity,
+    "h": Hadamard,
+    "x": PauliX,
+    "y": PauliY,
+    "z": PauliZ,
+    "cv": CV,
+    "cnot": CX,
+    "cy": CY,
+    "cz": CZ,
+    "ecr": ECR,
+    "s": S,
+    "si": Si,
+    "t": T,
+    "ti": Ti,
+    "v": V,
+    "vi": Vi,
+    "phaseshift": PhaseShift,
+    "cphaseshift": CPhaseShift,
+    "cphaseshift00": CPhaseShift00,
+    "cphaseshift01": CPhaseShift01,
+    "cphaseshift10": CPhaseShift10,
+    "rx": RotX,
+    "ry": RotY,
+    "rz": RotZ,
+    "swap": Swap,
+    "iswap": ISwap,
+    "pswap": PSwap,
+    "xy": XY,
+    "xx": XX,
+    "yy": YY,
+    "zz": ZZ,
+    "ccnot": CCNot,
+    "cswap": CSwap,
+    "prx": PRx,
+    "unitary": Unitary,
+    "U": U,
+    "gphase": GPhase,
+}

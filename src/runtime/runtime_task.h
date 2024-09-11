@@ -1,22 +1,21 @@
-#ifndef __RT_TASK_H__
-#define __RT_TASK_H__
+#ifndef _RUNTIME_TASK_H_
+#define _RUNTIME_TASK_H_
 
-#include "rt_type.h"
-#include "rt_error.h"
+#include "runtime_error.h"
+#include "runtime_types.h"
 #include <mutex>
 
-namespace snuqs {
-namespace rt {
+namespace runtime {
 
-struct task_t {
-  enum class status_t {
+class RuntimeTask {
+  enum class RuntimeTaskStatus {
     CREATED,
     ENQUEUED,
     RUNNING,
     DONE,
   };
 
-  enum class type_t {
+  enum class RuntimeTaskType {
     EVENT,
 
     MEMCPY_H2D,
@@ -27,16 +26,15 @@ struct task_t {
     MEMCPY_S2H,
   };
 
-  task_t(type_t _type);
-  virtual ~task_t();
-  void set_status(task_t::status_t status);
+  RuntimeTask(RuntimeTaskType _type);
+  virtual ~RuntimeTask();
+  void set_status(RuntimeTask::RuntimeTaskStatus status);
   void set_error(RuntimeError error);
   RuntimeError synchronize();
 
-  type_t type;
-  status_t status;
+  RuntimeTaskType type;
+  RuntimeTaskStatus status;
   RuntimeError error;
-
   std::mutex mutex;
 
   union {
@@ -53,11 +51,8 @@ struct task_t {
     uint64_t size;
     uint64_t shared_mem;
   };
-
-
 };
 
-} // namespace rt
-} // namespace snuqs
+} // namespace runtime
 
-#endif // __RT_TASK_H__
+#endif // _RUNTIME_TASK_H_
