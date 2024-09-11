@@ -1,7 +1,7 @@
 import cmath
 import math
 import numpy as np
-from braket.snuqs.snuqs_operation import GateOperation
+from braket.snuqs.operation import GateOperation
 
 from collections.abc import Sequence
 import braket.ir.jaqcd as braket_instruction

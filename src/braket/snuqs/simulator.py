@@ -33,8 +33,68 @@ class BaseSimulator(ABC):
     def run_openqasm(self, ir: braket.ir.openqasm.Program, *args, **kwargs) -> GateModelTaskResult:
         raise "Not Implemented"
 
+    @staticmethod
+    def _map_instruction_attributes(instruction, qubit_map: dict):
+        """
+        Maps the qubit attributes of an instruction from JaqcdProgram to the corresponding
+        qubits in the qubit_map.
+
+        Args:
+            instruction: The Jaqcd instruction whose qubit attributes need to be mapped.
+            qubit_map (dict): A dictionary mapping original qubits to new qubits.
+        """
+        if hasattr(instruction, "control"):
+            instruction.control = qubit_map.get(instruction.control, instruction.control)
+
+        if hasattr(instruction, "controls") and instruction.controls:
+            instruction.controls = [qubit_map.get(q, q) for q in instruction.controls]
+
+        if hasattr(instruction, "target"):
+            instruction.target = qubit_map.get(instruction.target, instruction.target)
+
+        if hasattr(instruction, "targets") and instruction.targets:
+            instruction.targets = [qubit_map.get(q, q) for q in instruction.targets]
+
+    @staticmethod
+    def _map_jaqcd_instructions(circuit: braket.ir.jaqcd.Program, qubit_map: dict):
+        """
+        Maps the attributes of each instruction in the JaqcdProgram to the corresponding qubits in
+        the qubit_map.
+
+        Args:
+            circuit (JaqcdProgram): The JaqcdProgram containing the instructions.
+            qubit_map (dict): A dictionary mapping original qubits to new qubits.
+        """
+        for ins in circuit.instructions:
+            BaseSimulator._map_instruction_attributes(ins, qubit_map)
+
+        if hasattr(circuit, "results") and circuit.results:
+            for ins in circuit.results:
+                BaseSimulator._map_instruction_attributes(ins, qubit_map)
+
+        if circuit.basis_rotation_instructions:
+            for ins in circuit.basis_rotation_instructions:
+                ins.target = qubit_map[ins.target]
+
+    @staticmethod
+    def _map_circuit_qubits(circuit: braket.ir.jaqcd.Program, qubit_map: dict[int, int]):
+        """
+        Maps the qubits in operations and result types to contiguous qubits.
+
+        Args:
+            circuit (Circuit): The circuit containing the operations and result types.
+            qubit_map (dict[int, int]): The mapping from qubits to their contiguous indices.
+
+        Returns:
+            Circuit: The circuit with qubits in operations and result types mapped
+            to contiguous qubits.
+        """
+        BaseSimulator._map_jaqcd_instructions(circuit, qubit_map)
+        return circuit
+
     def run_jaqcd(self, ir: braket.ir.jaqcd.Program, *args, **kwargs) -> GateModelTaskResult:
         qubit_map = self._qubit_map(ir)
+        BaseSimulator._map_circuit_qubits(ir, qubit_map)
         qubit_count = len(qubit_map)
 
         operations = [
@@ -83,13 +143,23 @@ class StateVectorSimulator(BaseSimulator):
     def _qubit_map(self, ir):
         qubit_set = set()
         for i in ir.instructions:
-            qubit_set.add(i.target)
+            if hasattr(i, 'target'):
+                qubit_set.add(i.target)
+
             if hasattr(i, 'control'):
                 qubit_set.add(i.control)
 
+            if hasattr(i, 'targets'):
+                for t in i.targets:
+                    qubit_set.add(t)
+
+            if hasattr(i, 'controls'):
+                for t in i.controls:
+                    qubit_set.add(t)
+
         qubit_map = {}
-        for i, q in enumerate(qubit_set):
-            qubit_map[i] = q
+        for i, q in enumerate(sorted(qubit_set)):
+            qubit_map[q] = i
 
         return qubit_map
 
