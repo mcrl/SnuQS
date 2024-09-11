@@ -1,14 +1,12 @@
 import os
 import pathlib
 
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, Extension, find_packages, find_namespace_packages
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
 install_requires = [
-    'antlr4-python3-runtime==4.13.1',
     'pybind11==2.12.0',
     'numpy==1.26.4',
-    'qiskit==1.0.2',
     'pyyaml==6.0.1',
     'cmake==3.29.0',
 ]
@@ -35,6 +33,8 @@ class CMakeBuildExt(build_ext_orig):
 
         extdir = pathlib.Path(self.get_ext_fullpath(ext.name))
         extdir.mkdir(parents=True, exist_ok=True)
+        print(str(extdir))
+        print(str(extdir.parent.absolute()))
 
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
@@ -59,21 +59,27 @@ class CMakeBuildExt(build_ext_orig):
 
 
 setup(
-    name='snuqs',
+    name='snuqs-braket',
     version='1.1',
-    description='Python interface for quantum circuit simulator SnuQS',
+    description='Braket+SnuQS',
     author='Daeyoung Park',
     author_email='dypshong@gmail.com',
-    packages=find_packages(),
+    packages=find_namespace_packages(where="src", exclude=("test",)),
+    package_dir={"": "src"},
     include_package_data=True,
     install_requires=install_requires,
     package_data={
         "": ["*.inc"],
     },
     ext_modules=[
-        CMakeExtension('snuqs.python'),
+        CMakeExtension('snuqs_braket.python'),
     ],
     cmdclass={
         'build_ext': CMakeBuildExt,
-    }
+    },
+    entry_points={
+        "braket.simulators": [
+            "snuqs = braket.snuqs.simulator:StateVectorSimulator",
+        ]
+    },
 )

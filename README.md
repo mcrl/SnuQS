@@ -9,16 +9,20 @@ Now we are currently working on updates for AWS cluster supports with Amazon bra
 
 ## Prerequisite
 ### Local System
+
+- Python >= 3.11.9
+    * Python 3.12 may not work.
+- CUDA >= 12.4
+- amazon-braket-sdk-python == v1.9.5.post0
+- amazon-braket-schemas-python == v1.22.0
+- amazon-braket-default-simulator-python ==  v1.26.0
 - Any distribution of MPI (e.g., OpenMPI, MPICH, MVAPICH)
     * It has been tested with MPICH Version 4.1.2.
     * Latest versions are recommended.
-- python >= 3.11.8
-    * We recommend to use Python 3.11 not Python 3.12.
-- cuda >= 12.1
 
 For example, if you are using anaconda or miniconda,
 ```
-conda create -n <name> python=3.11.8
+conda create -n <name> python=3.11.9
 conda activate <name>
 ...
 ```

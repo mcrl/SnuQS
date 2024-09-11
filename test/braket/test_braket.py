@@ -4,6 +4,7 @@ from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
 from braket.circuits import Circuit
 
+
 class BraketTest(unittest.TestCase):
 #    def test_braket(self):
 #        bell = Circuit()
@@ -26,6 +27,7 @@ class BraketTest(unittest.TestCase):
         sim = LocalSimulator(backend="snuqs")
         task = sim.run(bell)
         print(task.result())
+
 
 if __name__ == '__main__':
     unittest.main()

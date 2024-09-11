@@ -26,7 +26,7 @@ IRTYPE = Union[braket.ir.openqasm.Program, braket.ir.jaqcd.Program],
 
 class BaseSimulator(ABC):
     def run(self, ir: IRTYPE, *args, **kwargs):
-        if isinstance(ir, braket.ir.openqasm.Program):
+        if isinstance(ir, braket.ir.openqasm.program_v1.Program):
             return self.run_openqasm(ir, *args, **kwargs)
         return self.run_jaqcd(ir, *args, **kwargs)
 
