@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "snuqs-braket"
+version = "1.1.rc1"
+description = "Braket+SnuQS for AWS Support"
+authors = [
+    {name = "Daeyoung Park", email = "dypshong@gmail.com"},
+]
+readme = "README.md"
+requires-python = "==3.11.9"
+dependencies = [
+    'pybind11==2.12.0',
+    'numpy==1.26.4',
+    'pyyaml==6.0.1',
+    'cmake==3.29.0',
+    'amazon-braket-default-simulator==1.26.0',
+    'amazon-braket-schemas==1.22.0',
+    'amazon-braket-sdk==1.9.5.post0',
+]
+
+#[tool.setuptools.packages.find]
+#where = ["src"]
+#exclude = ["test"]
+#
+#[tool.setuptools]
+#package-dir = {"" = "src"}
+
+[project.entry-points."braket.simulators"]
+snuqs = "braket.snuqs.simulator:StateVectorSimulator"

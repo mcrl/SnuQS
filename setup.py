@@ -33,15 +33,12 @@ class CMakeBuildExt(build_ext_orig):
 
         extdir = pathlib.Path(self.get_ext_fullpath(ext.name))
         extdir.mkdir(parents=True, exist_ok=True)
-        print(str(extdir))
-        print(str(extdir.parent.absolute()))
 
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
             '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' +
-            str(extdir.parent.absolute()),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute()),
             '-DCMAKE_BUILD_TYPE=' + config
         ]
 
@@ -55,31 +52,43 @@ class CMakeBuildExt(build_ext_orig):
         self.spawn(['cmake', str(cwd)] + cmake_args)
         if not self.dry_run:
             self.spawn(['cmake', '--build', '.'] + build_args)
-            os.chdir(str(cwd))
-
+        os.chdir(str(cwd))
 
 setup(
-    name='snuqs-braket',
-    version='1.1',
-    description='Braket+SnuQS',
-    author='Daeyoung Park',
-    author_email='dypshong@gmail.com',
     packages=find_namespace_packages(where="src", exclude=("test",)),
     package_dir={"": "src"},
-    include_package_data=True,
-    install_requires=install_requires,
-    package_data={
-        "": ["*.inc"],
-    },
     ext_modules=[
-        CMakeExtension('snuqs_braket.python'),
+        CMakeExtension('braket.snuqs.csrc'),
     ],
     cmdclass={
         'build_ext': CMakeBuildExt,
     },
-    entry_points={
-        "braket.simulators": [
-            "snuqs = braket.snuqs.simulator:StateVectorSimulator",
-        ]
-    },
 )
+
+# setup(
+#    name='snuqs-braket',
+#    version='1.1.rc1',
+#    description='Braket+SnuQS',
+#    author='Daeyoung Park',
+#    author_email='dypshong@gmail.com',
+#    packages=find_namespace_packages(where="src", exclude=("test",)),
+#    package_dir={"": "src"},
+#    include_package_data=True,
+#    install_requires=install_requires,
+#    package_data={
+#        "": ["*.inc"],
+#    },
+#
+#    ext_modules=[
+#        CMakeExtension('braket.snuqs.csrc'),
+#    ],
+#    cmdclass={
+#        'build_ext': CMakeBuildExt,
+#    },
+#
+#    entry_points={
+#        "braket.simulators": [
+#            "snuqs = braket.snuqs.simulator:StateVectorSimulator",
+#        ]
+#    },
+# )
