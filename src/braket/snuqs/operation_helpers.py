@@ -1,21 +1,20 @@
 from functools import singledispatch
-from typing import Union
 
-from braket.default_simulator.operation import GateOperation, KrausOperation
+import braket.snuqs.quantumpy as qp
+from braket.snuqs.operation import GateOperation
 
 
-def from_braket_instruction(instruction) -> Union[GateOperation, KrausOperation]:
-    """Instantiates the concrete `GateOperation` or `KrausOperation` object from the
+def from_braket_instruction(instruction) -> GateOperation:
+    """Instantiates the concrete `GateOperation` object from the
     specified Braket instruction.
 
     Args:
         instruction: instruction for a circuit specified using the `braket.ir.jacqd` format.
     Returns:
-        Union[GateOperation, KrausOperation]: instance of the concrete GateOperation or
-        KrausOperation class corresponding to the specified instruction.
+        GateOperation]: instance of the concrete GateOperation or
 
     Raises:
-        NotImplementedError: If no concrete `GateOperation` or `KrausOperation` class has been
+        NotImplementedError: If no concrete `GateOperation` class has been
             registered for the instruction type.
     """
     return _from_braket_instruction(instruction)
@@ -26,11 +25,11 @@ def _from_braket_instruction(instruction):
     raise NotImplementedError(f"Instruction {instruction} not recognized")
 
 
-def check_matrix_dimensions(matrix: np.ndarray, targets: tuple[int, ...]) -> None:
+def check_matrix_dimensions(matrix: qp.ndarray, targets: tuple[int, ...]) -> None:
     """Checks that the matrix is of the correct shape to act on the targets.
 
     Args:
-        matrix (np.ndarray): The matrix to check
+        matrix (qp.ndarray): The matrix to check
         targets (tuple[int, ...]): The target qubits the matrix acts on
 
     Raises:
@@ -47,26 +46,26 @@ def check_matrix_dimensions(matrix: np.ndarray, targets: tuple[int, ...]) -> Non
         )
 
 
-def check_unitary(matrix: np.ndarray):
+def check_unitary(matrix: qp.ndarray):
     """Checks that the given matrix is unitary.
 
     Args:
-        matrix (np.ndarray): The matrix to check
+        matrix (qp.ndarray): The matrix to check
 
     Raises:
         ValueError: If the matrix is not unitary
     """
-    if not np.allclose(np.eye(len(matrix)), matrix.dot(matrix.T.conj())):
+    if not qp.allclose(qp.eye(len(matrix)), matrix.dot(matrix.T.conj())):
         raise ValueError(f"{matrix} is not unitary")
 
 
-def ir_matrix_to_ndarray(matrix: list[list[list[float]]]) -> np.ndarray:
+def ir_matrix_to_ndarray(matrix: list[list[list[float]]]) -> qp.ndarray:
     """Converts a JAQCD matrix into a numpy array.
 
     Args:
         matrix (list[list[list[float]]]: The IR representation of a matrix
 
     Returns:
-        np.ndarray: The numpy ndarray representation of the matrix
+        qp.ndarray: The numpy ndarray representation of the matrix
     """
-    return np.array([[complex(element[0], element[1]) for element in row] for row in matrix])
+    return qp.array([[complex(element[0], element[1]) for element in row] for row in matrix])

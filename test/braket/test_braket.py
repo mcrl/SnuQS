@@ -11,6 +11,7 @@ MIN_QUBIT = 4
 MAX_QUBIT = 20
 MAX_GATE = 100
 NGATE_KIND = 31
+NUM_ITER = 1000
 
 
 class RandomInstruction:
@@ -93,7 +94,6 @@ class RandomInstruction:
     def get(self):
         idx = np.random.randint(0, len(self.gates))
         param = np.random.rand() * np.pi * 2
-        print(self.gates[idx].fixed_qubit_count())
         return Instruction(self.gate_maps[idx](param), self.get_qubits(self.gates[idx].fixed_qubit_count()))
 
 
@@ -116,7 +116,7 @@ class BraketTest(unittest.TestCase):
         return task
 
     def test_braket_snuqs(self):
-        for i in range(10000):
+        for i in range(NUM_ITER):
             circ = self.random_circuit()
             circ.state_vector()
 

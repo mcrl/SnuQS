@@ -1,4 +1,4 @@
-import numpy as np
+import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
 from scipy.linalg import fractional_matrix_power
 
@@ -37,14 +37,14 @@ class GateOperation(Operation, ABC):
 
     @property
     @abstractmethod
-    def _base_matrix(self) -> np.ndarray:
-        """np.ndarray: The matrix representation of the operation."""
+    def _base_matrix(self) -> qp.ndarray:
+        """qp.ndarray: The matrix representation of the operation."""
 
     @property
-    def matrix(self) -> np.ndarray:
+    def matrix(self) -> qp.ndarray:
         unitary = self._base_matrix
         if int(self._power) == self._power:
-            unitary = np.linalg.matrix_power(unitary, int(self._power))
+            unitary = qp.linalg.matrix_power(unitary, int(self._power))
         else:
             unitary = fractional_matrix_power(unitary, self._power)
         return unitary

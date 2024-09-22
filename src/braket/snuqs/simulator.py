@@ -1,5 +1,3 @@
-import numpy as np
-
 from braket.device_schema.simulators import (
     GateModelSimulatorDeviceCapabilities,
     GateModelSimulatorDeviceParameters,
@@ -14,11 +12,11 @@ from braket.task_result import (
     ResultTypeValue,
     TaskMetadata,
 )
-from typing import Dict, Union
-from braket.default_simulator.operation_helpers import (
+from typing import Union
+from braket.snuqs.operation_helpers import (
     from_braket_instruction,
 )
-
+import braket.snuqs.gate_operations  # This line must follow
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
 
 IRTYPE = Union[braket.ir.openqasm.Program, braket.ir.jaqcd.Program],
@@ -126,10 +124,6 @@ class BaseSimulator(ABC):
         """Return the qubit mapping"""
 
     @abstractmethod
-    def _state_vector(self, qubit_count: int, qubit_map: Dict[int, int]):
-        """Returns the state vector"""
-
-    @abstractmethod
     def initialize_simulation(self, **kwargs) -> Simulation:
         """Initializes simulation with keyword arguments"""
 
@@ -162,11 +156,6 @@ class StateVectorSimulator(BaseSimulator):
             qubit_map[q] = i
 
         return qubit_map
-
-    def _state_vector(self, qubit_count: int, qubit_map: Dict[int, int]):
-        sv = np.zeros(2**qubit_count, dtype=complex)
-        sv[0] = 1
-        return sv
 
     def _service(self):
         return {

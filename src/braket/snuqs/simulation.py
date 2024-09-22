@@ -1,5 +1,5 @@
-import numpy as np
 from braket.snuqs.operation import GateOperation
+import braket.snuqs.quantumpy as qp
 
 
 class Simulation:
@@ -61,32 +61,31 @@ class StateVectorSimulation(Simulation):
         """
 
         super().__init__(qubit_count=qubit_count, shots=shots)
-        initial_state = np.zeros(2**qubit_count, dtype=complex)
-        initial_state[0] = 1
+        initial_state = qp.statevector(qubit_count)
         self._state_vector = initial_state
 
     def _multiply_matrix(
             self,
-            state: np.ndarray,
-            matrix: np.ndarray,
+            state: qp.ndarray,
+            matrix: qp.ndarray,
             targets: tuple[int, ...],
-    ) -> np.ndarray:
-        gate_matrix = np.reshape(matrix, [2] * len(targets) * 2)
+    ) -> qp.ndarray:
+        gate_matrix = qp.reshape(matrix, [2] * len(targets) * 2)
         axes = (
-            np.arange(len(targets), 2 * len(targets)),
+            qp.arange(len(targets), 2 * len(targets)),
             targets,
         )
-        product = np.tensordot(gate_matrix, state, axes=axes)
+        product = qp.tensordot(gate_matrix, state, axes=axes)
 
         # Axes given in `operation.targets` are in the first positions.
         unused_idxs = [idx for idx in range(len(state.shape)) if idx not in targets]
         permutation = list(targets) + unused_idxs
         # Invert the permutation to put the indices in the correct place
-        inverse_permutation = np.argsort(permutation)
-        return np.transpose(product, inverse_permutation)
+        inverse_permutation = qp.argsort(permutation)
+        return qp.transpose(product, inverse_permutation)
 
     def evolve(self, operations: list[GateOperation]) -> None:
-        self._state_vector = np.reshape(self._state_vector, [2] * self._qubit_count)
+        self._state_vector = qp.reshape(self._state_vector, [2] * self._qubit_count)
         for op in operations:
             self._state_vector = self._multiply_matrix(self._state_vector, op.matrix, op.targets)
-        self._state_vector = np.reshape(self._state_vector, 2**self._qubit_count)
+        self._state_vector = qp.reshape(self._state_vector, 2**self._qubit_count)
