@@ -4,19 +4,30 @@
 
 #include "gate_operation.h"
 #include "state_vector.h"
+#include "tensordot.h"
 #include <complex>
 
 namespace py = pybind11;
 
 #define GATEOP(name)                                                           \
   py::class_<name>(m, #name, py::buffer_protocol())                            \
-      .def_buffer([](name &g) -> py::buffer_info {                            \
+      .def_buffer([](name &g) -> py::buffer_info {                             \
         return py::buffer_info(                                                \
-            g.data(), sizeof(std::complex<double>),                           \
-            py::format_descriptor<std::complex<double>>::format(), g.dim(),   \
-            g.shape(), g.stride());                                          \
+            g.data(), sizeof(std::complex<double>),                            \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
+            g.shape(), g.stride());                                            \
       })                                                                       \
       .def(py::init<>())
+
+#define GATEOP1(name)                                                          \
+  py::class_<name>(m, #name, py::buffer_protocol())                            \
+      .def_buffer([](name &g) -> py::buffer_info {                             \
+        return py::buffer_info(                                                \
+            g.data(), sizeof(std::complex<double>),                            \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
+            g.shape(), g.stride());                                            \
+      })                                                                       \
+      .def(py::init<double>())
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
@@ -37,4 +48,35 @@ PYBIND11_MODULE(_C, m) {
   // GateOperation
   GATEOP(Identity);
   GATEOP(Hadamard);
+  GATEOP(PauliX);
+  GATEOP(PauliY);
+  GATEOP(PauliZ);
+  GATEOP(CX);
+  GATEOP(CY);
+  GATEOP(CZ);
+  GATEOP(S);
+  GATEOP(Si);
+  GATEOP(T);
+  GATEOP(Ti);
+  GATEOP(V);
+  GATEOP(Vi);
+  GATEOP1(PhaseShift);
+  GATEOP1(CPhaseShift);
+  GATEOP1(CPhaseShift00);
+  GATEOP1(CPhaseShift01);
+  GATEOP1(CPhaseShift10);
+  GATEOP1(RotX);
+  GATEOP1(RotY);
+  GATEOP1(RotZ);
+  GATEOP(Swap);
+  GATEOP(ISwap);
+  GATEOP1(PSwap);
+  GATEOP1(XY);
+  GATEOP1(XX);
+  GATEOP1(YY);
+  GATEOP1(ZZ);
+  GATEOP(CCNot);
+  GATEOP(CSwap);
+
+  m.def("tensordot", &tensordot);
 }

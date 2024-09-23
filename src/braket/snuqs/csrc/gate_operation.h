@@ -15,304 +15,268 @@ public:
   std::complex<double> *data_;
 };
 
-class Identity : public GateOperation {
+class OneQubitGate : public GateOperation {
+public:
+  OneQubitGate();
+  virtual ~OneQubitGate();
+  virtual std::complex<double> *data() override;
+  virtual size_t dim() const override;
+  virtual std::vector<size_t> shape() const override;
+  virtual std::vector<size_t> stride() const override;
+};
+
+class TwoQubitGate : public GateOperation {
+public:
+  TwoQubitGate();
+  virtual ~TwoQubitGate();
+  virtual std::complex<double> *data() override;
+  virtual size_t dim() const override;
+  virtual std::vector<size_t> shape() const override;
+  virtual std::vector<size_t> stride() const override;
+};
+
+class ThreeQubitGate : public GateOperation {
+public:
+  ThreeQubitGate();
+  virtual ~ThreeQubitGate();
+  virtual std::complex<double> *data() override;
+  virtual size_t dim() const override;
+  virtual std::vector<size_t> shape() const override;
+  virtual std::vector<size_t> stride() const override;
+};
+
+class ControlledGate : public GateOperation {
+public:
+  ControlledGate();
+  virtual ~ControlledGate();
+  virtual std::complex<double> *data() override;
+  virtual size_t dim() const override;
+  virtual std::vector<size_t> shape() const override;
+  virtual std::vector<size_t> stride() const override;
+};
+
+class Identity : public OneQubitGate {
 public:
   Identity();
   ~Identity();
-  virtual std::complex<double> *data() override;
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
-  virtual std::vector<size_t> stride() const override;
 };
 
- class Hadamard : public GateOperation {
- public:
+class Hadamard : public OneQubitGate {
+public:
   Hadamard();
   ~Hadamard();
+};
+
+class PauliX : public OneQubitGate {
+public:
+  PauliX();
+  ~PauliX();
+};
+
+class PauliY : public OneQubitGate {
+public:
+  PauliY();
+  ~PauliY();
+};
+
+class PauliZ : public OneQubitGate {
+public:
+  PauliZ();
+  ~PauliZ();
+};
+
+class CX : public ControlledGate {
+public:
+  CX();
+  ~CX();
+};
+
+class CY : public ControlledGate {
+public:
+  CY();
+  ~CY();
+};
+
+class CZ : public ControlledGate {
+public:
+  CZ();
+  ~CZ();
+};
+
+class S : public OneQubitGate {
+public:
+  S();
+  ~S();
+};
+
+class Si : public OneQubitGate {
+public:
+  Si();
+  ~Si();
+};
+
+class T : public OneQubitGate {
+public:
+  T();
+  ~T();
+};
+
+class Ti : public OneQubitGate {
+public:
+  Ti();
+  ~Ti();
+};
+
+class V : public OneQubitGate {
+public:
+  V();
+  ~V();
+};
+
+class Vi : public OneQubitGate {
+public:
+  Vi();
+  ~Vi();
+};
+
+class PhaseShift : public OneQubitGate {
+public:
+  PhaseShift(double angle);
+  ~PhaseShift();
+  double angle_;
+};
+
+class CPhaseShift : public ControlledGate {
+public:
+  CPhaseShift(double angle);
+  ~CPhaseShift();
+  double angle_;
+};
+
+class CPhaseShift00 : public ControlledGate {
+public:
+  CPhaseShift00(double angle);
+  ~CPhaseShift00();
+  double angle_;
+};
+
+class CPhaseShift01 : public ControlledGate {
+public:
+  CPhaseShift01(double angle);
+  ~CPhaseShift01();
+  double angle_;
+};
+
+class CPhaseShift10 : public ControlledGate {
+public:
+  CPhaseShift10(double angle);
+  ~CPhaseShift10();
+  double angle_;
+};
+
+class RotX : public OneQubitGate {
+public:
+  RotX(double angle);
+  ~RotX();
+  double angle_;
+};
+
+class RotY : public OneQubitGate {
+public:
+  RotY(double angle);
+  ~RotY();
+  double angle_;
+};
+
+class RotZ : public OneQubitGate {
+public:
+  RotZ(double angle);
+  ~RotZ();
+  double angle_;
+};
+
+class Swap : public TwoQubitGate {
+public:
+  Swap();
+  ~Swap();
+};
+
+class ISwap : public TwoQubitGate {
+public:
+  ISwap();
+  ~ISwap();
+};
+
+class PSwap : public TwoQubitGate {
+public:
+  PSwap(double angle);
+  ~PSwap();
+  double angle_;
+};
+
+class XY : public TwoQubitGate {
+public:
+  XY(double angle);
+  ~XY();
+  double angle_;
+};
+
+class XX : public TwoQubitGate {
+public:
+  XX(double angle);
+  ~XX();
+  double angle_;
+};
+
+class YY : public TwoQubitGate {
+public:
+  YY(double angle);
+  ~YY();
+  double angle_;
+};
+
+class ZZ : public TwoQubitGate {
+public:
+  ZZ(double angle);
+  ~ZZ();
+  double angle_;
+};
+
+class CCNot : public ThreeQubitGate {
+public:
+  CCNot();
+  ~CCNot();
+};
+
+class CSwap : public ThreeQubitGate {
+public:
+  CSwap();
+  ~CSwap();
+};
+
+class Unitary : public GateOperation {
+public:
+  Unitary();
+  ~Unitary();
   virtual std::complex<double> *data() override;
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
 };
-//
-// class PauliX : public GateOperation {
-// public:
-//  PauliX();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class PauliY : public GateOperation {
-// public:
-//  PauliY();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class PauliZ : public GateOperation {
-// public:
-//  PauliZ();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CV : public GateOperation {
-// public:
-//  CV();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CX : public GateOperation {
-// public:
-//  CX();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CY : public GateOperation {
-// public:
-//  CY();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CZ : public GateOperation {
-// public:
-//  CZ();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class ECR : public GateOperation {
-// public:
-//  ECR();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class S : public GateOperation {
-// public:
-//  S();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class Si : public GateOperation {
-// public:
-//  Si();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class T : public GateOperation {
-// public:
-//  T();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class Ti : public GateOperation {
-// public:
-//  Ti();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class V : public GateOperation {
-// public:
-//  V();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class Vi : public GateOperation {
-// public:
-//  Vi();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class PhaseShift : public GateOperation {
-// public:
-//  PhaseShift();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CPhaseShift : public GateOperation {
-// public:
-//  CPhaseShift();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CPhaseShift00 : public GateOperation {
-// public:
-//  CPhaseShift00();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CPhaseShift01 : public GateOperation {
-// public:
-//  CPhaseShift01();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CPhaseShift10 : public GateOperation {
-// public:
-//  CPhaseShift10();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class RotX : public GateOperation {
-// public:
-//  RotX();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class RotY : public GateOperation {
-// public:
-//  RotY();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class RotZ : public GateOperation {
-// public:
-//  RotZ();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class Swap : public GateOperation {
-// public:
-//  Swap();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class ISwap : public GateOperation {
-// public:
-//  ISwap();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class PSwap : public GateOperation {
-// public:
-//  PSwap();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class XY : public GateOperation {
-// public:
-//  XY();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class XX : public GateOperation {
-// public:
-//  XX();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class YY : public GateOperation {
-// public:
-//  YY();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class ZZ : public GateOperation {
-// public:
-//  ZZ();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CCNot : public GateOperation {
-// public:
-//  CCNot();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class CSwap : public GateOperation {
-// public:
-//  CSwap();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class PRx : public GateOperation {
-// public:
-//  PRx();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class Unitary : public GateOperation {
-// public:
-//  Unitary();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class U : public GateOperation {
-// public:
-//  U();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
-//
-// class GPhase : public GateOperation {
-// public:
-//  GPhase();
-//  virtual std::complex<double> *data() override;
-//  virtual size_t dim() const override;
-//  virtual std::vector<size_t> shape() const override;
-//};
 
+class U : public OneQubitGate {
+public:
+  U(double theta, double phi, double lambda);
+  ~U();
+  double theta_;
+  double phi_;
+  double lambda_;
+};
+
+class GPhase : public OneQubitGate {
+public:
+  GPhase(double angle);
+  ~GPhase();
+  double angle_;
+};
 #endif //_GATE_OPERATION_H_

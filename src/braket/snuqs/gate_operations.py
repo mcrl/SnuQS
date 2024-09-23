@@ -26,7 +26,6 @@ class Identity(GateOperation):
     @property
     def _base_matrix(self) -> qp.ndarray:
         return qp.identity()
-        #return qp.eye(2)
 
 
 class Hadamard(GateOperation):
@@ -42,7 +41,6 @@ class Hadamard(GateOperation):
     @property
     def _base_matrix(self) -> qp.ndarray:
         return qp.hadamard()
-        #return qp.array([[1, 1], [1, -1]]) / math.sqrt(2)
 
 
 class PauliX(GateOperation):
@@ -57,7 +55,7 @@ class PauliX(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[0, 1], [1, 0]])
+        return qp.paulix()
 
 
 class PauliY(GateOperation):
@@ -72,7 +70,7 @@ class PauliY(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[0, -1j], [1j, 0]])
+        return qp.pauliy()
 
 
 class PauliZ(GateOperation):
@@ -87,29 +85,7 @@ class PauliZ(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0], [0, -1]])
-
-
-class CV(GateOperation):
-    """Controlled-Sqrt(NOT) gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.array(
-            [
-                [1, 0, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 0.5 + 0.5j, 0.5 - 0.5j],
-                [0, 0, 0.5 - 0.5j, 0.5 + 0.5j],
-            ]
-        )
+        return qp.pauliz()
 
 
 class CX(GateOperation):
@@ -124,7 +100,7 @@ class CX(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])
+        return qp.cx()
 
 
 class CY(GateOperation):
@@ -139,7 +115,7 @@ class CY(GateOperation):
 
     @property
     def _base_matrix(self):
-        return qp.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, -1j], [0, 0, 1j, 0]])
+        return qp.cy()
 
 
 class CZ(GateOperation):
@@ -154,29 +130,7 @@ class CZ(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]])
-
-
-class ECR(GateOperation):
-    """ECR gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return (
-            1
-            / qp.sqrt(2)
-            * qp.array(
-                [[0, 0, 1, 1.0j], [0, 0, 1.0j, 1], [1, -1.0j, 0, 0], [-1.0j, 1, 0, 0]],
-                dtype=complex,
-            )
-        )
+        return qp.cz()
 
 
 class S(GateOperation):
@@ -191,7 +145,7 @@ class S(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0], [0, 1j]], dtype=complex)
+        return qp.s()
 
 
 class Si(GateOperation):
@@ -206,7 +160,7 @@ class Si(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0], [0, -1j]], dtype=complex)
+        return qp.si()
 
 
 class T(GateOperation):
@@ -221,7 +175,7 @@ class T(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0], [0, cmath.exp(1j * math.pi / 4)]], dtype=complex)
+        return qp.t()
 
 
 class Ti(GateOperation):
@@ -236,7 +190,7 @@ class Ti(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0], [0, cmath.exp(-1j * math.pi / 4)]], dtype=complex)
+        return qp.ti()
 
 
 class V(GateOperation):
@@ -251,7 +205,7 @@ class V(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]], dtype=complex)
+        return qp.v()
 
 
 class Vi(GateOperation):
@@ -266,7 +220,7 @@ class Vi(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array(([[0.5 - 0.5j, 0.5 + 0.5j], [0.5 + 0.5j, 0.5 - 0.5j]]), dtype=complex)
+        return qp.vi()
 
 
 class PhaseShift(GateOperation):
@@ -282,7 +236,7 @@ class PhaseShift(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0], [0, cmath.exp(1j * self._angle)]])
+        return qp.phase_shift(self._angle)
 
 
 class CPhaseShift(GateOperation):
@@ -298,7 +252,7 @@ class CPhaseShift(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.diag([1.0, 1.0, 1.0, cmath.exp(1j * self._angle)])
+        return qp.cphase_shift(self._angle)
 
 
 class CPhaseShift00(GateOperation):
@@ -314,7 +268,7 @@ class CPhaseShift00(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.diag([cmath.exp(1j * self._angle), 1.0, 1.0, 1.0])
+        return qp.cphase_shift00(self._angle)
 
 
 class CPhaseShift01(GateOperation):
@@ -330,7 +284,7 @@ class CPhaseShift01(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.diag([1.0, cmath.exp(1j * self._angle), 1.0, 1.0])
+        return qp.cphase_shift01(self._angle)
 
 
 class CPhaseShift10(GateOperation):
@@ -346,7 +300,7 @@ class CPhaseShift10(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.diag([1.0, 1.0, cmath.exp(1j * self._angle), 1.0])
+        return qp.cphase_shift10(self._angle)
 
 
 class RotX(GateOperation):
@@ -362,9 +316,7 @@ class RotX(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        cos_half_angle = math.cos(self._angle / 2)
-        i_sin_half_angle = 1j * math.sin(self._angle / 2)
-        return qp.array([[cos_half_angle, -i_sin_half_angle], [-i_sin_half_angle, cos_half_angle]])
+        return qp.rot_x(self._angle)
 
 
 class RotY(GateOperation):
@@ -380,9 +332,7 @@ class RotY(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        cos_half_angle = math.cos(self._angle / 2)
-        sin_half_angle = math.sin(self._angle / 2)
-        return qp.array([[cos_half_angle, -sin_half_angle], [sin_half_angle, cos_half_angle]])
+        return qp.rot_y(self._angle)
 
 
 class RotZ(GateOperation):
@@ -398,9 +348,7 @@ class RotZ(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        positive_phase = cmath.exp(1j * self._angle / 2)
-        negative_phase = cmath.exp(-1j * self._angle / 2)
-        return qp.array([[negative_phase, 0], [0, positive_phase]])
+        return qp.rot_z(self._angle)
 
 
 class Swap(GateOperation):
@@ -415,7 +363,7 @@ class Swap(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
+        return qp.swap()
 
 
 class ISwap(GateOperation):
@@ -430,15 +378,7 @@ class ISwap(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array(
-            [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0j, 0.0],
-                [0.0, 1.0j, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
-            ],
-            dtype=complex,
-        )
+        return qp.iswap()
 
 
 class PSwap(GateOperation):
@@ -454,15 +394,7 @@ class PSwap(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array(
-            [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, cmath.exp(1j * self._angle), 0.0],
-                [0.0, cmath.exp(1j * self._angle), 0.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
-            ],
-            dtype=complex,
-        )
+        return qp.pswap(self._angle)
 
 
 class XY(GateOperation):
@@ -481,17 +413,7 @@ class XY(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        cos = math.cos(self._angle / 2)
-        sin = math.sin(self._angle / 2)
-        return qp.array(
-            [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, cos, 1.0j * sin, 0.0],
-                [0.0, 1.0j * sin, cos, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
-            ],
-            dtype=complex,
-        )
+        return qp.xy(self._angle)
 
 
 class XX(GateOperation):
@@ -510,16 +432,7 @@ class XX(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        cos_angle = math.cos(self._angle / 2)
-        i_sin_angle = 1j * math.sin(self._angle / 2)
-        return qp.array(
-            [
-                [cos_angle, 0, 0, -i_sin_angle],
-                [0, cos_angle, -i_sin_angle, 0],
-                [0, -i_sin_angle, cos_angle, 0],
-                [-i_sin_angle, 0, 0, cos_angle],
-            ]
-        )
+        return qp.xx(self._angle)
 
 
 class YY(GateOperation):
@@ -538,16 +451,7 @@ class YY(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        cos_angle = math.cos(self._angle / 2)
-        i_sin_angle = 1j * math.sin(self._angle / 2)
-        return qp.array(
-            [
-                [cos_angle, 0, 0, i_sin_angle],
-                [0, cos_angle, -i_sin_angle, 0],
-                [0, -i_sin_angle, cos_angle, 0],
-                [i_sin_angle, 0, 0, cos_angle],
-            ]
-        )
+        return qp.yy(self._angle)
 
 
 class ZZ(GateOperation):
@@ -566,16 +470,7 @@ class ZZ(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        positive_phase = cmath.exp(1j * self._angle / 2)
-        negative_phase = cmath.exp(-1j * self._angle / 2)
-        return qp.array(
-            [
-                [negative_phase, 0, 0, 0],
-                [0, positive_phase, 0, 0],
-                [0, 0, positive_phase, 0],
-                [0, 0, 0, negative_phase],
-            ]
-        )
+        return qp.zz(self._angle)
 
 
 class CCNot(GateOperation):
@@ -590,19 +485,7 @@ class CCNot(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array(
-            [
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 1, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 1],
-                [0, 0, 0, 0, 0, 0, 1, 0],
-            ],
-            dtype=complex,
-        )
+        return qp.ccnot()
 
 
 class CSwap(GateOperation):
@@ -617,51 +500,7 @@ class CSwap(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return qp.array(
-            [
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 1, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 1],
-            ],
-            dtype=complex,
-        )
-
-
-class PRx(GateOperation):
-    """
-    PhaseRx gate.
-    """
-
-    def __init__(self, targets, angle_1, angle_2, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle_1 = angle_1
-        self._angle_2 = angle_2
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        theta = self._angle_1
-        phi = self._angle_2
-        return qp.array(
-            [
-                [
-                    qp.cos(theta / 2),
-                    -1j * qp.exp(-1j * phi) * qp.sin(theta / 2),
-                ],
-                [
-                    -1j * qp.exp(1j * phi) * qp.sin(theta / 2),
-                    qp.cos(theta / 2),
-                ],
-            ]
-        )
+        return qp.cswap()
 
 
 class Unitary(GateOperation):
@@ -720,18 +559,7 @@ class U(GateOperation):
         Returns:
             qp.ndarray: U Matrix
         """
-        return qp.array(
-            [
-                [
-                    math.cos(self._theta / 2),
-                    -cmath.exp(1j * self._lambda) * math.sin(self._theta / 2),
-                ],
-                [
-                    cmath.exp(1j * self._phi) * math.sin(self._theta / 2),
-                    cmath.exp(1j * (self._phi + self._lambda)) * math.cos(self._theta / 2),
-                ],
-            ]
-        )
+        return qp.u(self._theta, self._phi, self._lambda)
 
 
 class GPhase(GateOperation):
@@ -747,7 +575,8 @@ class GPhase(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        return cmath.exp(self._angle * 1j) * qp.eye(2 ** len(self._targets))
+        #return cmath.exp(self._angle * 1j) * qp.eye(2 ** len(self._targets))
+        return qp.gphase(self._angle)
 
 
 @_from_braket_instruction.register(braket_instruction.I)
@@ -775,11 +604,6 @@ def _pauli_z(instruction) -> PauliZ:
     return PauliZ([instruction.target])
 
 
-@_from_braket_instruction.register(braket_instruction.CV)
-def _cv(instruction) -> CV:
-    return CV([instruction.control, instruction.target])
-
-
 @_from_braket_instruction.register(braket_instruction.CNot)
 def _cx(instruction) -> CX:
     return CX([instruction.control, instruction.target])
@@ -793,11 +617,6 @@ def _cy(instruction) -> CY:
 @_from_braket_instruction.register(braket_instruction.CZ)
 def _cz(instruction) -> CZ:
     return CZ([instruction.control, instruction.target])
-
-
-@_from_braket_instruction.register(braket_instruction.ECR)
-def _ecr(instruction) -> ECR:
-    return ECR(instruction.targets)
 
 
 @_from_braket_instruction.register(braket_instruction.S)
@@ -926,11 +745,9 @@ BRAKET_GATES = {
     "x": PauliX,
     "y": PauliY,
     "z": PauliZ,
-    "cv": CV,
     "cnot": CX,
     "cy": CY,
     "cz": CZ,
-    "ecr": ECR,
     "s": S,
     "si": Si,
     "t": T,
@@ -954,8 +771,9 @@ BRAKET_GATES = {
     "zz": ZZ,
     "ccnot": CCNot,
     "cswap": CSwap,
-    "prx": PRx,
     "unitary": Unitary,
     "U": U,
     "gphase": GPhase,
+
+    # Removed: CV, ECR, PRx
 }
