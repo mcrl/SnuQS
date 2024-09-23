@@ -36,7 +36,8 @@ def multiply_matrix(
         targets,
     )
     product = np.tensordot(gate_matrix, state, axes=axes)
-    product = tensordot(gate_matrix, state, axes=axes)
+    # FIXME
+    tensordot(gate_matrix, state, axes=axes)
 
     # Axes given in `operation.targets` are in the first positions.
     unused_idxs = [idx for idx in range(len(state.shape)) if idx not in targets]
