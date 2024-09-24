@@ -13,6 +13,12 @@ std::vector<size_t> OneQubitGate::stride() const {
   return {2 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
+void OneQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
+  py::buffer_info info = buffer.request();
+  std::complex<double> *buf =
+      reinterpret_cast<std::complex<double> *>(info.ptr);
+}
+
 TwoQubitGate::TwoQubitGate() { data_ = new std::complex<double>[4 * 4]; }
 TwoQubitGate::~TwoQubitGate() { delete[] data_; }
 std::complex<double> *TwoQubitGate::data() { return data_; }
@@ -20,6 +26,10 @@ size_t TwoQubitGate::dim() const { return 2; }
 std::vector<size_t> TwoQubitGate::shape() const { return {4, 4}; }
 std::vector<size_t> TwoQubitGate::stride() const {
   return {4 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
+}
+
+void TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
+  throw "NOT IMPLEMENTED";
 }
 
 ThreeQubitGate::ThreeQubitGate() { data_ = new std::complex<double>[8 * 8]; }
@@ -31,13 +41,8 @@ std::vector<size_t> ThreeQubitGate::stride() const {
   return {8 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-ControlledGate::ControlledGate() { data_ = new std::complex<double>[4 * 4]; }
-ControlledGate::~ControlledGate() { delete[] data_; }
-std::complex<double> *ControlledGate::data() { return data_; }
-size_t ControlledGate::dim() const { return 2; }
-std::vector<size_t> ControlledGate::shape() const { return {4, 4}; }
-std::vector<size_t> ControlledGate::stride() const {
-  return {4 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
+void ThreeQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
+  throw "NOT IMPLEMENTED";
 }
 
 Identity::Identity() {
@@ -46,8 +51,7 @@ Identity::Identity() {
   data_[1 * 2 + 0] = 0;
   data_[1 * 2 + 1] = 1;
 }
-Identity::~Identity() {
-}
+Identity::~Identity() {}
 
 Hadamard::Hadamard() {
   data_ = new std::complex<double>[4];

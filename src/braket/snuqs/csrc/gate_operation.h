@@ -1,10 +1,14 @@
 #ifndef _GATE_OPERATION_H_
 #define _GATE_OPERATION_H_
 
-#include "state_vector.h"
 #include <complex>
 #include <map>
+#include <pybind11/complex.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <vector>
+
+namespace py = pybind11;
 
 class GateOperation {
 public:
@@ -12,6 +16,7 @@ public:
   virtual size_t dim() const = 0;
   virtual std::vector<size_t> shape() const = 0;
   virtual std::vector<size_t> stride() const = 0;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) = 0;
   std::complex<double> *data_;
 };
 
@@ -23,16 +28,7 @@ public:
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-};
-
-class TwoQubitGate : public GateOperation {
-public:
-  TwoQubitGate();
-  virtual ~TwoQubitGate();
-  virtual std::complex<double> *data() override;
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
-  virtual std::vector<size_t> stride() const override;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) override;
 };
 
 class ThreeQubitGate : public GateOperation {
@@ -43,16 +39,18 @@ public:
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) override;
 };
 
-class ControlledGate : public GateOperation {
+class TwoQubitGate : public GateOperation {
 public:
-  ControlledGate();
-  virtual ~ControlledGate();
+  TwoQubitGate();
+  virtual ~TwoQubitGate();
   virtual std::complex<double> *data() override;
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) override;
 };
 
 class Identity : public OneQubitGate {
@@ -85,19 +83,19 @@ public:
   ~PauliZ();
 };
 
-class CX : public ControlledGate {
+class CX : public TwoQubitGate {
 public:
   CX();
   ~CX();
 };
 
-class CY : public ControlledGate {
+class CY : public TwoQubitGate {
 public:
   CY();
   ~CY();
 };
 
-class CZ : public ControlledGate {
+class CZ : public TwoQubitGate {
 public:
   CZ();
   ~CZ();
@@ -146,28 +144,28 @@ public:
   double angle_;
 };
 
-class CPhaseShift : public ControlledGate {
+class CPhaseShift : public TwoQubitGate {
 public:
   CPhaseShift(double angle);
   ~CPhaseShift();
   double angle_;
 };
 
-class CPhaseShift00 : public ControlledGate {
+class CPhaseShift00 : public TwoQubitGate {
 public:
   CPhaseShift00(double angle);
   ~CPhaseShift00();
   double angle_;
 };
 
-class CPhaseShift01 : public ControlledGate {
+class CPhaseShift01 : public TwoQubitGate {
 public:
   CPhaseShift01(double angle);
   ~CPhaseShift01();
   double angle_;
 };
 
-class CPhaseShift10 : public ControlledGate {
+class CPhaseShift10 : public TwoQubitGate {
 public:
   CPhaseShift10(double angle);
   ~CPhaseShift10();

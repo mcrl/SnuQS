@@ -51,8 +51,20 @@ def multiply_matrix(
 
 def evolve(state_vector: ndarray, qubit_count: int, operations) -> None:
     state_vector = np.reshape(state_vector, [2] * qubit_count)
+    supported_gates = [
+        Identity,
+        # Hadamard, PauliX, PauliY, PauliZ,
+        # CX, CY, CZ, S, Si, T, Ti, V, Vi,
+        # PhaseShift, CPhaseShift, CPhaseShift00, CPhaseShift01, CPhaseShift10,
+        # RotX, RotY, RotZ,
+        # Swap, ISwap, PSwap, XY, XX, YY, ZZ,
+        # CCNot, CSwap
+    ]
     for op in operations:
-        state_vector = multiply_matrix(state_vector, op.matrix, op.targets)
+        if any(isinstance(op.matrix.buffer, g) for g in supported_gates):
+            op.matrix.buffer.evolve(state_vector, op.targets)
+        else:
+            state_vector=multiply_matrix(state_vector, op.matrix, op.targets)
     return np.reshape(state_vector, 2**qubit_count)
 
 

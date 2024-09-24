@@ -17,7 +17,8 @@ namespace py = pybind11;
             py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
             g.shape(), g.stride());                                            \
       })                                                                       \
-      .def(py::init<>())
+      .def(py::init<>()) \
+      .def("evolve", &name::evolve);
 
 #define GATEOP1(name)                                                          \
   py::class_<name>(m, #name, py::buffer_protocol())                            \
@@ -27,7 +28,8 @@ namespace py = pybind11;
             py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
             g.shape(), g.stride());                                            \
       })                                                                       \
-      .def(py::init<double>())
+      .def(py::init<double>()) \
+      .def("evolve", &name::evolve);
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
