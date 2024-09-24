@@ -46,25 +46,13 @@ def multiply_matrix(
     permutation = list(targets) + unused_idxs
     # Invert the permutation to put the indices in the correct place
     inverse_permutation = np.argsort(permutation)
-    return np.transpose(product, inverse_permutation)
+    return np.ascontiguousarray(np.transpose(product, inverse_permutation))
 
 
 def evolve(state_vector: ndarray, qubit_count: int, operations) -> None:
     state_vector = np.reshape(state_vector, [2] * qubit_count)
-    supported_gates = [
-        Identity,
-        # Hadamard, PauliX, PauliY, PauliZ,
-        # CX, CY, CZ, S, Si, T, Ti, V, Vi,
-        # PhaseShift, CPhaseShift, CPhaseShift00, CPhaseShift01, CPhaseShift10,
-        # RotX, RotY, RotZ,
-        # Swap, ISwap, PSwap, XY, XX, YY, ZZ,
-        # CCNot, CSwap
-    ]
     for op in operations:
-        if any(isinstance(op.matrix.buffer, g) for g in supported_gates):
-            op.matrix.buffer.evolve(state_vector, op.targets)
-        else:
-            state_vector=multiply_matrix(state_vector, op.matrix, op.targets)
+        op.matrix.buffer.evolve(state_vector, op.targets)
     return np.reshape(state_vector, 2**qubit_count)
 
 

@@ -17,7 +17,7 @@ namespace py = pybind11;
             py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
             g.shape(), g.stride());                                            \
       })                                                                       \
-      .def(py::init<>()) \
+      .def(py::init<>())                                                       \
       .def("evolve", &name::evolve);
 
 #define GATEOP1(name)                                                          \
@@ -28,7 +28,7 @@ namespace py = pybind11;
             py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
             g.shape(), g.stride());                                            \
       })                                                                       \
-      .def(py::init<double>()) \
+      .def(py::init<double>())                                                 \
       .def("evolve", &name::evolve);
 
 PYBIND11_MODULE(_C, m) {
@@ -46,7 +46,7 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>());
-      //.def("__repr__", &StateVector::__repr__);
+  //.def("__repr__", &StateVector::__repr__);
 
   // GateOperation
   GATEOP(Identity);

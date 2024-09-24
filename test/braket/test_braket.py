@@ -7,11 +7,11 @@ from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
-MIN_QUBIT = 4
-MAX_QUBIT = 16
-MAX_GATE = 100
+MIN_QUBIT = 12
+MAX_QUBIT = 12
+MAX_GATE = 200
 NGATE_KIND = 31
-NUM_ITER = 3000
+NUM_ITER = 1000
 
 
 class RandomInstruction:
@@ -92,12 +92,22 @@ class RandomInstruction:
         qubits = set()
         while len(qubits) < count:
             qubits.add(np.random.randint(0, self.nqubits))
-        return qubits
+        return np.random.permutation(list(qubits))
 
     def get(self):
-        idx = np.random.randint(0, len(self.gates))
+        idx = np.random.randint(0, len(self.gate_maps))
         param = np.random.rand() * np.pi * 2
         return Instruction(self.gate_maps[idx](param), self.get_qubits(self.gates[idx].fixed_qubit_count()))
+
+
+def repeat(times):
+    def repeat_helper(f):
+        def call_helper(*args):
+            for i in range(0, times):
+                f(*args)
+        return call_helper
+
+    return repeat_helper
 
 
 class BraketTest(unittest.TestCase):
@@ -118,23 +128,23 @@ class BraketTest(unittest.TestCase):
         task = sim.run(circ)
         return task
 
+    @repeat(NUM_ITER)
     def test_braket_snuqs(self):
-        for i in range(NUM_ITER):
-            circ = self.random_circuit()
-            circ.state_vector()
+        circ = self.random_circuit()
+        circ.state_vector()
 
-            print(f"#{i} Running random circuit test...")
-            print(circ)
+        print(f"Running random circuit test...")
+        print(circ)
 
-            task_braket = self.run_braket(circ)
-            task_snuqs = self.run_snuqs(circ)
+        task_braket = self.run_braket(circ)
+        task_snuqs = self.run_snuqs(circ)
 
-            print(task_braket.result().values)
-            print(task_snuqs.result().values)
-            self.assertTrue(np.allclose(
-                task_braket.result().values,
-                task_snuqs.result().values
-            ))
+        print(task_braket.result().values)
+        print(task_snuqs.result().values)
+        self.assertTrue(np.allclose(
+            task_braket.result().values,
+            task_snuqs.result().values
+        ))
 
 
 if __name__ == '__main__':
