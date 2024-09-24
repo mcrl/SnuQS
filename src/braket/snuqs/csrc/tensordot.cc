@@ -1,5 +1,5 @@
-#include "tensordot.h"
 #include <iostream>
+#include "tensordot.h"
 
 static void contract(py::array_t<std::complex<double>> gate,
                      std::vector<size_t> indices0,

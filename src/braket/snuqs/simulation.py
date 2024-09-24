@@ -61,7 +61,7 @@ class StateVectorSimulation(Simulation):
         """
 
         super().__init__(qubit_count=qubit_count, shots=shots)
-        initial_state = qp.statevector(qubit_count)
+        initial_state = qp.state_vector(qubit_count)
         self._state_vector = initial_state
 
     def evolve(self, operations: list[GateOperation]) -> None:

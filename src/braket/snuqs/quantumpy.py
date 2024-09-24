@@ -9,20 +9,24 @@ from braket.snuqs._C import (
     CCNot, CSwap
 )
 
-from braket.snuqs._C import tensordot
-
 from typing import Optional
 
-ndarray = np.ndarray
 linalg = np.linalg
 
 
-def statevector(qubit_count: int, init: Optional[bool] = True):
-    sv = np.array(StateVector(qubit_count), copy=False)
+class ndarray(np.ndarray):
+    def __new__(cls, buffer):
+        obj = np.array(buffer, copy=False).view(cls)
+        obj.buffer = buffer
+        return obj
+
+
+def state_vector(qubit_count: int, init: Optional[bool] = True):
+    arr = ndarray(StateVector(qubit_count))
     if init:
-        sv.fill(0)
-        sv[0] = 1
-    return sv
+        arr.fill(0)
+        arr[0] = 1
+    return arr
 
 
 def multiply_matrix(
@@ -35,8 +39,6 @@ def multiply_matrix(
         np.arange(len(targets), 2 * len(targets)),
         targets,
     )
-    # FIXME
-    state = tensordot(gate_matrix, state, axes)
     product = np.tensordot(gate_matrix, state, axes=axes)
 
     # Axes given in `operation.targets` are in the first positions.
@@ -50,10 +52,10 @@ def multiply_matrix(
 def evolve(state_vector: ndarray, qubit_count: int, operations) -> None:
     for op in operations:
         multiply_matrix(state_vector, op.matrix, op.targets)
-    #state_vector = np.reshape(state_vector, [2] * qubit_count)
-    # for op in operations:
-    #state_vector = multiply_matrix(state_vector, op.matrix, op.targets)
-    # return np.reshape(state_vector, 2**qubit_count)
+    state_vector = np.reshape(state_vector, [2] * qubit_count)
+    for op in operations:
+        state_vector = multiply_matrix(state_vector, op.matrix, op.targets)
+    return np.reshape(state_vector, 2**qubit_count)
 
 
 def eye(*args, **kwargs):
@@ -69,124 +71,124 @@ def diag(*args, **kwargs):
 
 
 def identity():
-    return np.array(Identity(), copy=False)
+    return ndarray(Identity())
 
 
 def hadamard():
-    return np.array(Hadamard(), copy=False)
+    return ndarray(Hadamard())
 
 
 def paulix():
-    return np.array(PauliX(), copy=False)
+    return ndarray(PauliX())
 
 
 def pauliy():
-    return np.array(PauliY(), copy=False)
+    return ndarray(PauliY())
 
 
 def pauliz():
-    return np.array(PauliZ(), copy=False)
+    return ndarray(PauliZ())
 
 
 def cx():
-    return np.array(CX(), copy=False)
+    return ndarray(CX())
 
 
 def cy():
-    return np.array(CY(), copy=False)
+    return ndarray(CY())
 
 
 def cz():
-    return np.array(CZ(), copy=False)
+    return ndarray(CZ())
 
 
 def s():
-    return np.array(S(), copy=False)
+    return ndarray(S())
 
 
 def si():
-    return np.array(Si(), copy=False)
+    return ndarray(Si())
 
 
 def t():
-    return np.array(T(), copy=False)
+    return ndarray(T())
 
 
 def ti():
-    return np.array(Ti(), copy=False)
+    return ndarray(Ti())
 
 
 def v():
-    return np.array(V(), copy=False)
+    return ndarray(V())
 
 
 def vi():
-    return np.array(Vi(), copy=False)
+    return ndarray(Vi())
 
 
 def phase_shift(angle: float):
-    return np.array(PhaseShift(angle), copy=False)
+    return ndarray(PhaseShift(angle))
 
 
 def cphase_shift(angle: float):
-    return np.array(CPhaseShift(angle), copy=False)
+    return ndarray(CPhaseShift(angle))
 
 
 def cphase_shift00(angle: float):
-    return np.array(CPhaseShift00(angle), copy=False)
+    return ndarray(CPhaseShift00(angle))
 
 
 def cphase_shift01(angle: float):
-    return np.array(CPhaseShift01(angle), copy=False)
+    return ndarray(CPhaseShift01(angle))
 
 
 def cphase_shift10(angle: float):
-    return np.array(CPhaseShift10(angle), copy=False)
+    return ndarray(CPhaseShift10(angle))
 
 
 def rot_x(angle: float):
-    return np.array(RotX(angle), copy=False)
+    return ndarray(RotX(angle))
 
 
 def rot_y(angle: float):
-    return np.array(RotY(angle), copy=False)
+    return ndarray(RotY(angle))
 
 
 def rot_z(angle: float):
-    return np.array(RotZ(angle), copy=False)
+    return ndarray(RotZ(angle))
 
 
 def swap():
-    return np.array(Swap(), copy=False)
+    return ndarray(Swap())
 
 
 def iswap():
-    return np.array(ISwap(), copy=False)
+    return ndarray(ISwap())
 
 
 def pswap(angle: float):
-    return np.array(PSwap(angle), copy=False)
+    return ndarray(PSwap(angle))
 
 
 def xy(angle: float):
-    return np.array(XY(angle), copy=False)
+    return ndarray(XY(angle))
 
 
 def xx(angle: float):
-    return np.array(XX(angle), copy=False)
+    return ndarray(XX(angle))
 
 
 def yy(angle: float):
-    return np.array(YY(angle), copy=False)
+    return ndarray(YY(angle))
 
 
 def zz(angle: float):
-    return np.array(ZZ(angle), copy=False)
+    return ndarray(ZZ(angle))
 
 
 def ccnot():
-    return np.array(CCNot(), copy=False)
+    return ndarray(CCNot())
 
 
 def cswap():
-    return np.array(CSwap(), copy=False)
+    return ndarray(CSwap())

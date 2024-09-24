@@ -57,7 +57,7 @@ class CMakeBuildExt(build_ext_orig):
 
 setup(
     name='snuqs-braket',
-    version='1.1.rc1',
+    version='1.1rc1',
     description='Braket+SnuQS',
     author='Daeyoung Park',
     author_email='dypshong@gmail.com',

@@ -13,6 +13,7 @@ public:
   size_t dim() const;
   size_t num_elems() const;
   std::vector<size_t> shape() const;
+  std::string __repr__() const;
 
 private:
   size_t num_qubits_;

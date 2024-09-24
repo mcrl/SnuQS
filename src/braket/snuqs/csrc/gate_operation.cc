@@ -1,4 +1,5 @@
 #include "gate_operation.h"
+#include "spdlog/spdlog.h"
 #include <iostream>
 
 using namespace std::complex_literals;
@@ -45,7 +46,8 @@ Identity::Identity() {
   data_[1 * 2 + 0] = 0;
   data_[1 * 2 + 1] = 1;
 }
-Identity::~Identity() {}
+Identity::~Identity() {
+}
 
 Hadamard::Hadamard() {
   data_ = new std::complex<double>[4];

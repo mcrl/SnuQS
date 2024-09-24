@@ -44,6 +44,7 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>());
+      //.def("__repr__", &StateVector::__repr__);
 
   // GateOperation
   GATEOP(Identity);
