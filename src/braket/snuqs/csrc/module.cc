@@ -4,13 +4,12 @@
 
 #include "gate_operation.h"
 #include "state_vector.h"
-#include "tensordot.h"
 #include <complex>
 
 namespace py = pybind11;
 
 #define GATEOP(name)                                                           \
-  py::class_<name>(m, #name, py::buffer_protocol())                            \
+  py::class_<name>(m, #name, py::buffer_protocol())             \
       .def_buffer([](name &g) -> py::buffer_info {                             \
         return py::buffer_info(                                                \
             g.data(), sizeof(std::complex<double>),                            \
@@ -21,7 +20,7 @@ namespace py = pybind11;
       .def("evolve", &name::evolve);
 
 #define GATEOP1(name)                                                          \
-  py::class_<name>(m, #name, py::buffer_protocol())                            \
+  py::class_<name>(m, #name, py::buffer_protocol())             \
       .def_buffer([](name &g) -> py::buffer_info {                             \
         return py::buffer_info(                                                \
             g.data(), sizeof(std::complex<double>),                            \
@@ -46,7 +45,6 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>());
-  //.def("__repr__", &StateVector::__repr__);
 
   // GateOperation
   GATEOP(Identity);
@@ -80,6 +78,4 @@ PYBIND11_MODULE(_C, m) {
   GATEOP1(ZZ);
   GATEOP(CCNot);
   GATEOP(CSwap);
-
-  m.def("tensordot", &tensordot);
 }

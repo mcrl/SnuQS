@@ -1,4 +1,5 @@
 import numpy as np
+import braket.snuqs._C
 from braket.snuqs._C import StateVector
 from braket.snuqs._C import (
     Identity, Hadamard, PauliX, PauliY, PauliZ,

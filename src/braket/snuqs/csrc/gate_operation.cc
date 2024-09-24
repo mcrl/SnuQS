@@ -15,19 +15,19 @@ std::vector<size_t> OneQubitGate::stride() const {
 
 void OneQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
   assert(targets.size() == 1);
+  std::complex<double> *gate = data_;
   py::buffer_info info = buffer.request();
   size_t nelem = 1;
   for (int i = 0; i < info.ndim; ++i) {
     nelem *= info.shape[i];
   }
 
-  size_t num_qubits = info.ndim; // FIXME later
+  size_t nqubits = info.ndim; // FIXME later
   std::complex<double> *buf =
       reinterpret_cast<std::complex<double> *>(info.ptr);
-  std::complex<double> *gate = data_;
 
   size_t t = targets[0];
-  size_t target = num_qubits - t - 1;
+  size_t target = nqubits - t - 1;
   size_t st = (1ull << target);
   for (size_t i = 0; i < nelem; ++i) {
     if ((i & st) == 0) {
@@ -48,22 +48,22 @@ std::vector<size_t> TwoQubitGate::stride() const {
   return {4 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-py::buffer TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
-  assert(targets.size() == 2);
+void TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
+  std::complex<double> *gate = data_;
   py::buffer_info info = buffer.request();
   size_t nelem = 1;
   for (int i = 0; i < info.ndim; ++i) {
     nelem *= info.shape[i];
   }
-  size_t num_qubits = info.ndim; // FIXME later
+
+  size_t nqubits = info.ndim; // FIXME later
   std::complex<double> *buf =
       reinterpret_cast<std::complex<double> *>(info.ptr);
-  std::complex<double> *gate = data_;
 
   size_t t0 = targets[0];
   size_t t1 = targets[1];
-  size_t target0 = num_qubits - t1 - 1;
-  size_t target1 = num_qubits - t0 - 1;
+  size_t target0 = nqubits - t1 - 1;
+  size_t target1 = nqubits - t0 - 1;
   size_t st0 = (1ull << target0);
   size_t st1 = (1ull << target1);
   for (size_t i = 0; i < nelem; ++i) {
@@ -82,8 +82,6 @@ py::buffer TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) 
                            gate[3 * 4 + 2] * a2 + gate[3 * 4 + 3] * a3;
     }
   }
-
-  return buffer;
 }
 
 ThreeQubitGate::ThreeQubitGate() { data_ = new std::complex<double>[8 * 8]; }
@@ -97,22 +95,23 @@ std::vector<size_t> ThreeQubitGate::stride() const {
 
 void ThreeQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
   assert(targets.size() == 3);
+  std::complex<double> *gate = data_;
   py::buffer_info info = buffer.request();
   size_t nelem = 1;
   for (int i = 0; i < info.ndim; ++i) {
     nelem *= info.shape[i];
   }
-  size_t num_qubits = info.ndim; // FIXME later
+
+  size_t nqubits = info.ndim; // FIXME later
   std::complex<double> *buf =
       reinterpret_cast<std::complex<double> *>(info.ptr);
-  std::complex<double> *gate = data_;
 
   size_t t0 = targets[0];
   size_t t1 = targets[1];
   size_t t2 = targets[2];
-  size_t target0 = num_qubits - t2 - 1;
-  size_t target1 = num_qubits - t1 - 1;
-  size_t target2 = num_qubits - t0 - 1;
+  size_t target0 = nqubits - t2 - 1;
+  size_t target1 = nqubits - t1 - 1;
+  size_t target2 = nqubits - t0 - 1;
   size_t st0 = (1ull << target0);
   size_t st1 = (1ull << target1);
   size_t st2 = (1ull << target2);
