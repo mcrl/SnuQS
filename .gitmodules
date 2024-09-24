@@ -7,3 +7,6 @@
 [submodule "amazon-braket-schemas-python"]
 	path = amazon-braket-schemas-python
 	url = https://github.com/amazon-braket/amazon-braket-schemas-python
+[submodule "3rd-party/spdlog"]
+	path = 3rd-party/spdlog
+	url = https://github.com/gabime/spdlog

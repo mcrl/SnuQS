@@ -1,5 +1,3 @@
-import cmath
-import math
 from braket.snuqs.operation import GateOperation
 import braket.snuqs.quantumpy as qp
 
@@ -575,7 +573,7 @@ class GPhase(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        #return cmath.exp(self._angle * 1j) * qp.eye(2 ** len(self._targets))
+        # return cmath.exp(self._angle * 1j) * qp.eye(2 ** len(self._targets))
         return qp.gphase(self._angle)
 
 

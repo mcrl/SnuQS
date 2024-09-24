@@ -48,10 +48,12 @@ def multiply_matrix(
 
 
 def evolve(state_vector: ndarray, qubit_count: int, operations) -> None:
-    state_vector = np.reshape(state_vector, [2] * qubit_count)
     for op in operations:
-        state_vector = multiply_matrix(state_vector, op.matrix, op.targets)
-    return np.reshape(state_vector, 2**qubit_count)
+        multiply_matrix(state_vector, op.matrix, op.targets)
+    #state_vector = np.reshape(state_vector, [2] * qubit_count)
+    # for op in operations:
+    #state_vector = multiply_matrix(state_vector, op.matrix, op.targets)
+    # return np.reshape(state_vector, 2**qubit_count)
 
 
 def eye(*args, **kwargs):
