@@ -16,7 +16,8 @@ public:
   virtual size_t dim() const = 0;
   virtual std::vector<size_t> shape() const = 0;
   virtual std::vector<size_t> stride() const = 0;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) = 0;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
+                      bool use_cuda = false) = 0;
   std::complex<double> *data_;
 };
 
@@ -28,7 +29,8 @@ public:
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) override;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
+                      bool use_cuda = false) override;
 };
 
 class ThreeQubitGate : public GateOperation {
@@ -39,7 +41,8 @@ public:
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) override;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
+                      bool use_cuda = false) override;
 };
 
 class TwoQubitGate : public GateOperation {
@@ -50,7 +53,8 @@ public:
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets) override;
+  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
+                      bool use_cuda = false) override;
 };
 
 class Identity : public OneQubitGate {

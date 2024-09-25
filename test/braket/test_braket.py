@@ -7,9 +7,9 @@ from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
-MIN_QUBIT = 12
-MAX_QUBIT = 12
-MAX_GATE = 200
+MIN_QUBIT = 10
+MAX_QUBIT = 10
+MAX_GATE = 1000
 NGATE_KIND = 31
 NUM_ITER = 1000
 

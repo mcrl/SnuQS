@@ -10,3 +10,9 @@
 [submodule "3rd-party/spdlog"]
 	path = 3rd-party/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "benchmark/mqt-bench"]
+	path = benchmark/mqt-bench
+	url = https://github.com/cda-tum/mqt-bench
+[submodule "benchmark/QASMBench"]
+	path = benchmark/QASMBench
+	url = https://github.com/pnnl/QASMBench

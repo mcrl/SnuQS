@@ -1,4 +1,5 @@
 #include "gate_operation.h"
+#include "gate_operation_impl.h"
 #include "spdlog/spdlog.h"
 #include <iostream>
 
@@ -13,30 +14,19 @@ std::vector<size_t> OneQubitGate::stride() const {
   return {2 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-void OneQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
+void OneQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets,
+                          bool use_cuda) {
   assert(targets.size() == 1);
-  std::complex<double> *gate = data_;
   py::buffer_info info = buffer.request();
   size_t nelem = 1;
   for (int i = 0; i < info.ndim; ++i) {
     nelem *= info.shape[i];
   }
-
   size_t nqubits = info.ndim; // FIXME later
-  std::complex<double> *buf =
-      reinterpret_cast<std::complex<double> *>(info.ptr);
 
-  size_t t = targets[0];
-  size_t target = nqubits - t - 1;
-  size_t st = (1ull << target);
-  for (size_t i = 0; i < nelem; ++i) {
-    if ((i & st) == 0) {
-      std::complex<double> a0 = buf[i];
-      std::complex<double> a1 = buf[i + st];
-      buf[i] = gate[0 * 2 + 0] * a0 + gate[0 * 2 + 1] * a1;
-      buf[i + st] = gate[1 * 2 + 0] * a0 + gate[1 * 2 + 1] * a1;
-    }
-  }
+  applyOneQubitGate(reinterpret_cast<std::complex<double> *>(info.ptr),
+                    reinterpret_cast<std::complex<double> *>(data_), targets,
+                    nqubits, nelem);
 }
 
 TwoQubitGate::TwoQubitGate() { data_ = new std::complex<double>[4 * 4]; }
@@ -48,8 +38,8 @@ std::vector<size_t> TwoQubitGate::stride() const {
   return {4 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-void TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
-  std::complex<double> *gate = data_;
+void TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets,
+                          bool use_cuda) {
   py::buffer_info info = buffer.request();
   size_t nelem = 1;
   for (int i = 0; i < info.ndim; ++i) {
@@ -57,31 +47,10 @@ void TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
   }
 
   size_t nqubits = info.ndim; // FIXME later
-  std::complex<double> *buf =
-      reinterpret_cast<std::complex<double> *>(info.ptr);
 
-  size_t t0 = targets[0];
-  size_t t1 = targets[1];
-  size_t target0 = nqubits - t1 - 1;
-  size_t target1 = nqubits - t0 - 1;
-  size_t st0 = (1ull << target0);
-  size_t st1 = (1ull << target1);
-  for (size_t i = 0; i < nelem; ++i) {
-    if ((i & st0) == 0 && (i & st1) == 0) {
-      std::complex<double> a0 = buf[i + 0];
-      std::complex<double> a1 = buf[i + st0];
-      std::complex<double> a2 = buf[i + st1];
-      std::complex<double> a3 = buf[i + st1 + st0];
-      buf[i + 0] = gate[0 * 4 + 0] * a0 + gate[0 * 4 + 1] * a1 +
-                   gate[0 * 4 + 2] * a2 + gate[0 * 4 + 3] * a3;
-      buf[i + st0] = gate[1 * 4 + 0] * a0 + gate[1 * 4 + 1] * a1 +
-                     gate[1 * 4 + 2] * a2 + gate[1 * 4 + 3] * a3;
-      buf[i + st1] = gate[2 * 4 + 0] * a0 + gate[2 * 4 + 1] * a1 +
-                     gate[2 * 4 + 2] * a2 + gate[2 * 4 + 3] * a3;
-      buf[i + st1 + st0] = gate[3 * 4 + 0] * a0 + gate[3 * 4 + 1] * a1 +
-                           gate[3 * 4 + 2] * a2 + gate[3 * 4 + 3] * a3;
-    }
-  }
+  applyTwoQubitGate(reinterpret_cast<std::complex<double> *>(info.ptr),
+                    reinterpret_cast<std::complex<double> *>(data_), targets,
+                    nqubits, nelem);
 }
 
 ThreeQubitGate::ThreeQubitGate() { data_ = new std::complex<double>[8 * 8]; }
@@ -93,9 +62,9 @@ std::vector<size_t> ThreeQubitGate::stride() const {
   return {8 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-void ThreeQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
+void ThreeQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets,
+                            bool use_cuda) {
   assert(targets.size() == 3);
-  std::complex<double> *gate = data_;
   py::buffer_info info = buffer.request();
   size_t nelem = 1;
   for (int i = 0; i < info.ndim; ++i) {
@@ -103,62 +72,9 @@ void ThreeQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets) {
   }
 
   size_t nqubits = info.ndim; // FIXME later
-  std::complex<double> *buf =
-      reinterpret_cast<std::complex<double> *>(info.ptr);
-
-  size_t t0 = targets[0];
-  size_t t1 = targets[1];
-  size_t t2 = targets[2];
-  size_t target0 = nqubits - t2 - 1;
-  size_t target1 = nqubits - t1 - 1;
-  size_t target2 = nqubits - t0 - 1;
-  size_t st0 = (1ull << target0);
-  size_t st1 = (1ull << target1);
-  size_t st2 = (1ull << target2);
-  for (size_t i = 0; i < nelem; ++i) {
-    if ((i & st0) == 0 && (i & st1) == 0 && (i & st2) == 0) {
-      std::complex<double> a0 = buf[i + 0];
-      std::complex<double> a1 = buf[i + st0];
-      std::complex<double> a2 = buf[i + st1];
-      std::complex<double> a3 = buf[i + st1 + st0];
-      std::complex<double> a4 = buf[i + st2];
-      std::complex<double> a5 = buf[i + st2 + st0];
-      std::complex<double> a6 = buf[i + st2 + st1];
-      std::complex<double> a7 = buf[i + st2 + st1 + st0];
-      buf[i + 0] = gate[0 * 8 + 0] * a0 + gate[0 * 8 + 1] * a1 +
-                   gate[0 * 8 + 2] * a2 + gate[0 * 8 + 3] * a3 +
-                   gate[0 * 8 + 4] * a4 + gate[0 * 8 + 5] * a5 +
-                   gate[0 * 8 + 6] * a6 + gate[0 * 8 + 7] * a7;
-      buf[i + st0] = gate[1 * 8 + 0] * a0 + gate[1 * 8 + 1] * a1 +
-                     gate[1 * 8 + 2] * a2 + gate[1 * 8 + 3] * a3 +
-                     gate[1 * 8 + 4] * a4 + gate[1 * 8 + 5] * a5 +
-                     gate[1 * 8 + 6] * a6 + gate[1 * 8 + 7] * a7;
-      buf[i + st1] = gate[2 * 8 + 0] * a0 + gate[2 * 8 + 1] * a1 +
-                     gate[2 * 8 + 2] * a2 + gate[2 * 8 + 3] * a3 +
-                     gate[2 * 8 + 4] * a4 + gate[2 * 8 + 5] * a5 +
-                     gate[2 * 8 + 6] * a6 + gate[2 * 8 + 7] * a7;
-      buf[i + st1 + st0] = gate[3 * 8 + 0] * a0 + gate[3 * 8 + 1] * a1 +
-                           gate[3 * 8 + 2] * a2 + gate[3 * 8 + 3] * a3 +
-                           gate[3 * 8 + 4] * a4 + gate[3 * 8 + 5] * a5 +
-                           gate[3 * 8 + 6] * a6 + gate[3 * 8 + 7] * a7;
-      buf[i + st2] = gate[4 * 8 + 0] * a0 + gate[4 * 8 + 1] * a1 +
-                     gate[4 * 8 + 2] * a2 + gate[4 * 8 + 3] * a3 +
-                     gate[4 * 8 + 4] * a4 + gate[4 * 8 + 5] * a5 +
-                     gate[4 * 8 + 6] * a6 + gate[4 * 8 + 7] * a7;
-      buf[i + st2 + st0] = gate[5 * 8 + 0] * a0 + gate[5 * 8 + 1] * a1 +
-                           gate[5 * 8 + 2] * a2 + gate[5 * 8 + 3] * a3 +
-                           gate[5 * 8 + 4] * a4 + gate[5 * 8 + 5] * a5 +
-                           gate[5 * 8 + 6] * a6 + gate[5 * 8 + 7] * a7;
-      buf[i + st2 + st1] = gate[6 * 8 + 0] * a0 + gate[6 * 8 + 1] * a1 +
-                           gate[6 * 8 + 2] * a2 + gate[6 * 8 + 3] * a3 +
-                           gate[6 * 8 + 4] * a4 + gate[6 * 8 + 5] * a5 +
-                           gate[6 * 8 + 6] * a6 + gate[6 * 8 + 7] * a7;
-      buf[i + st2 + st1 + st0] = gate[7 * 8 + 0] * a0 + gate[7 * 8 + 1] * a1 +
-                                 gate[7 * 8 + 2] * a2 + gate[7 * 8 + 3] * a3 +
-                                 gate[7 * 8 + 4] * a4 + gate[7 * 8 + 5] * a5 +
-                                 gate[7 * 8 + 6] * a6 + gate[7 * 8 + 7] * a7;
-    }
-  }
+  applyThreeQubitGate(reinterpret_cast<std::complex<double> *>(info.ptr),
+                      reinterpret_cast<std::complex<double> *>(data_), targets,
+                      nqubits, nelem);
 }
 
 Identity::Identity() {
