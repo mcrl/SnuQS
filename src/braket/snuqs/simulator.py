@@ -12,7 +12,7 @@ from braket.task_result import (
     ResultTypeValue,
     TaskMetadata,
 )
-from typing import Union
+from typing import Union, List, Optional, Any
 from braket.snuqs.operation_helpers import (
     from_braket_instruction,
 )
@@ -90,7 +90,12 @@ class BaseSimulator(ABC):
         BaseSimulator._map_jaqcd_instructions(circuit, qubit_map)
         return circuit
 
-    def run_jaqcd(self, ir: braket.ir.jaqcd.Program, *args, **kwargs) -> GateModelTaskResult:
+    def run_jaqcd(self, ir: braket.ir.jaqcd.Program,
+                  qubit_count: Any = None,
+                  shots: int = 0,
+                  *, path: Optional[List[str]] = None) -> GateModelTaskResult:
+        print(path)
+
         qubit_map = self._qubit_map(ir)
         BaseSimulator._map_circuit_qubits(ir, qubit_map)
         qubit_count = len(qubit_map)
