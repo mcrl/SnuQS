@@ -94,8 +94,6 @@ class BaseSimulator(ABC):
                   qubit_count: Any = None,
                   shots: int = 0,
                   *, path: Optional[List[str]] = None) -> GateModelTaskResult:
-        print(path)
-
         qubit_map = self._qubit_map(ir)
         BaseSimulator._map_circuit_qubits(ir, qubit_map)
         qubit_count = len(qubit_map)

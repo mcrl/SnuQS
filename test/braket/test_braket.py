@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 
+import braket
 from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
 from braket.circuits import Circuit

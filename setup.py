@@ -9,6 +9,8 @@ install_requires = [
     'numpy==1.26.4',
     'pyyaml==6.0.1',
     'cmake==3.29.0',
+    'amazon-braket-sdk==1.87.1',
+    'amazon-braket-schemas==1.22.1',
 ]
 
 
