@@ -1,7 +1,8 @@
 #include "gate_operation.h"
-#include "gate_operation_impl.h"
+#include "gate_operation_impl_cpu.h"
 #include "gate_operation_impl_cuda.h"
 #include "utils.h"
+#include <cuda_runtime.h>
 #include <iostream>
 
 using namespace std::complex_literals;
@@ -109,10 +110,22 @@ PauliZ::PauliZ() {
 PauliZ::~PauliZ() {}
 
 CX::CX() {
-  data_[0 * 4 + 0] = 1; data_[0 * 4 + 1] = 0; data_[0 * 4 + 2] = 0; data_[0 * 4 + 3] = 0;
-  data_[1 * 4 + 0] = 0; data_[1 * 4 + 1] = 1; data_[1 * 4 + 2] = 0; data_[1 * 4 + 3] = 0;
-  data_[2 * 4 + 0] = 0; data_[2 * 4 + 1] = 0; data_[2 * 4 + 2] = 0; data_[2 * 4 + 3] = 1;
-  data_[3 * 4 + 0] = 0; data_[3 * 4 + 1] = 0; data_[3 * 4 + 2] = 1; data_[3 * 4 + 3] = 0;
+  data_[0 * 4 + 0] = 1;
+  data_[0 * 4 + 1] = 0;
+  data_[0 * 4 + 2] = 0;
+  data_[0 * 4 + 3] = 0;
+  data_[1 * 4 + 0] = 0;
+  data_[1 * 4 + 1] = 1;
+  data_[1 * 4 + 2] = 0;
+  data_[1 * 4 + 3] = 0;
+  data_[2 * 4 + 0] = 0;
+  data_[2 * 4 + 1] = 0;
+  data_[2 * 4 + 2] = 0;
+  data_[2 * 4 + 3] = 1;
+  data_[3 * 4 + 0] = 0;
+  data_[3 * 4 + 1] = 0;
+  data_[3 * 4 + 2] = 1;
+  data_[3 * 4 + 3] = 0;
 }
 CX::~CX() {}
 
@@ -323,10 +336,22 @@ RotZ::RotZ(double angle) : angle_(angle) {
 RotZ::~RotZ() {}
 
 Swap::Swap() {
-  data_[0 * 4 + 0] = 1; data_[0 * 4 + 1] = 0; data_[0 * 4 + 2] = 0; data_[0 * 4 + 3] = 0;
-  data_[1 * 4 + 0] = 0; data_[1 * 4 + 1] = 0; data_[1 * 4 + 2] = 1; data_[1 * 4 + 3] = 0;
-  data_[2 * 4 + 0] = 0; data_[2 * 4 + 1] = 1; data_[2 * 4 + 2] = 0; data_[2 * 4 + 3] = 0;
-  data_[3 * 4 + 0] = 0; data_[3 * 4 + 1] = 0; data_[3 * 4 + 2] = 0; data_[3 * 4 + 3] = 1;
+  data_[0 * 4 + 0] = 1;
+  data_[0 * 4 + 1] = 0;
+  data_[0 * 4 + 2] = 0;
+  data_[0 * 4 + 3] = 0;
+  data_[1 * 4 + 0] = 0;
+  data_[1 * 4 + 1] = 0;
+  data_[1 * 4 + 2] = 1;
+  data_[1 * 4 + 3] = 0;
+  data_[2 * 4 + 0] = 0;
+  data_[2 * 4 + 1] = 1;
+  data_[2 * 4 + 2] = 0;
+  data_[2 * 4 + 3] = 0;
+  data_[3 * 4 + 0] = 0;
+  data_[3 * 4 + 1] = 0;
+  data_[3 * 4 + 2] = 0;
+  data_[3 * 4 + 3] = 1;
 }
 Swap::~Swap() {}
 

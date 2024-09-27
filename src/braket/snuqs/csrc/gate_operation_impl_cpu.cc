@@ -1,6 +1,7 @@
-#include "gate_operation_impl.h"
+#include "gate_operation_impl_cpu.h"
 #include <cassert>
 
+namespace cpu {
 static void applyOneQubitGate(std::complex<double> *buffer,
                               std::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,
@@ -120,3 +121,4 @@ void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
     assert(false);
   }
 }
+} // namespace cpu
