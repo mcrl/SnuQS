@@ -1,4 +1,5 @@
 import numpy as np
+from __util import hellinger_fidelity
 
 from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
@@ -21,7 +22,7 @@ class GHZ:
     probability distributions.
     """
 
-    def __init__(self, num_qubits: int, method: str = "ladder") -> None:
+    def __init__(self, num_qubits: int, method: str = "ladder", backend: str = None) -> None:
         """
         Initialize a `GHZ` object.
 
@@ -40,6 +41,7 @@ class GHZ:
             )
         self.num_qubits = num_qubits
         self.method = method
+        self.backend = backend
 
     def ghz_circuit(self) -> Circuit:
         """
@@ -88,19 +90,13 @@ class GHZ:
         total = sum(counts.values())
         device_dist = {bitstr: count / total for bitstr, count in counts.items()}
 
-        fidelity = 0.0
-        for bitstr in ideal_dist:
-            p_i = ideal_dist.get(bitstr, 0)
-            q_i = device_dist.get(bitstr, 0)
-            fidelity += (np.sqrt(p_i) * np.sqrt(q_i))
-
-        return fidelity**2
+        return hellinger_fidelity(ideal_dist, device_dist)
     
-    def run(self, shots, backend=None):
-        if not backend:
+    def run(self, shots):
+        if not self.backend:
             sim = LocalSimulator()
         else:
-            sim = LocalSimulator(backend=backend)
+            sim = LocalSimulator(backend=self.backend)
 
         circ = self.ghz_circuit()
         task = sim.run(circ, shots=shots)

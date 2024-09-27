@@ -5,7 +5,7 @@ import stabilizers
 
 from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
-from braket.circuits import Gate, Circuit
+from braket.circuits import Circuit
 
 # https://github.com/Infleqtion/client-superstaq/blob/main/supermarq-benchmarks/supermarq/benchmarks/mermin_bell.py
 
@@ -17,7 +17,7 @@ class MerminBell:
     the Mermin operator.
     """
 
-    def __init__(self, num_qubits: int) -> None:
+    def __init__(self, num_qubits: int, backend: str = None) -> None:
         """
         Initializes a `MerminBell`.
 
@@ -29,6 +29,7 @@ class MerminBell:
         self.stabilizer, self.pauli_basis = stabilizers.construct_stabilizer(
             self.num_qubits, self.mermin_operator
         )
+        self.backend = backend
 
     def mb_circuit(self) -> Circuit:
         """
@@ -232,11 +233,11 @@ class MerminBell:
 
         return mermin_op
 
-    def run(self, shots: int, backend=None):
-        if not backend:
+    def run(self, shots: int):
+        if not self.backend:
             sim = LocalSimulator()
         else:
-            sim = LocalSimulator(backend=backend)
+            sim = LocalSimulator(backend=self.backend)
 
         circ = self.mb_circuit()
         task = sim.run(circ, shots=shots)
