@@ -1,80 +1,71 @@
 #include "gate_operation.h"
 #include "gate_operation_impl.h"
-#include "spdlog/spdlog.h"
+#include "gate_operation_impl_cuda.h"
+#include "utils.h"
 #include <iostream>
 
 using namespace std::complex_literals;
 
-OneQubitGate::OneQubitGate() { data_ = new std::complex<double>[2 * 2]; }
-OneQubitGate::~OneQubitGate() { delete[] data_; }
-std::complex<double> *OneQubitGate::data() { return data_; }
+void *GateOperation::data() { return data_; }
+void *GateOperation::data_cuda() {
+  if (!copied_to_cuda) {
+    CUDA_CHECK(cudaMemcpy(data_cuda_, data_,
+                          num_elems() * sizeof(std::complex<double>),
+                          cudaMemcpyHostToDevice));
+    copied_to_cuda = true;
+  }
+  return data_cuda_;
+}
+
+size_t GateOperation::num_elems() const {
+  size_t nelems = 1;
+  auto sh = shape();
+  for (size_t d = 0; d < dim(); ++d) {
+    nelems *= sh[d];
+  }
+  return nelems;
+}
+
+OneQubitGate::OneQubitGate() {
+  data_ = new std::complex<double>[2 * 2];
+  CUDA_CHECK(cudaMalloc(&data_cuda_, 2 * 2 * sizeof(std::complex<double>)));
+}
+OneQubitGate::~OneQubitGate() {
+  delete[] data_;
+  cudaFree(data_cuda_);
+}
 size_t OneQubitGate::dim() const { return 2; }
 std::vector<size_t> OneQubitGate::shape() const { return {2, 2}; }
 std::vector<size_t> OneQubitGate::stride() const {
   return {2 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-void OneQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets,
-                          bool use_cuda) {
-  assert(targets.size() == 1);
-  py::buffer_info info = buffer.request();
-  size_t nelem = 1;
-  for (int i = 0; i < info.ndim; ++i) {
-    nelem *= info.shape[i];
-  }
-  size_t nqubits = info.ndim; // FIXME later
-
-  applyOneQubitGate(reinterpret_cast<std::complex<double> *>(info.ptr),
-                    reinterpret_cast<std::complex<double> *>(data_), targets,
-                    nqubits, nelem);
+TwoQubitGate::TwoQubitGate() {
+  data_ = new std::complex<double>[4 * 4];
+  CUDA_CHECK(cudaMalloc(&data_cuda_, 4 * 4 * sizeof(std::complex<double>)));
 }
-
-TwoQubitGate::TwoQubitGate() { data_ = new std::complex<double>[4 * 4]; }
-TwoQubitGate::~TwoQubitGate() { delete[] data_; }
-std::complex<double> *TwoQubitGate::data() { return data_; }
+TwoQubitGate::~TwoQubitGate() {
+  delete[] data_;
+  cudaFree(data_cuda_);
+}
 size_t TwoQubitGate::dim() const { return 2; }
 std::vector<size_t> TwoQubitGate::shape() const { return {4, 4}; }
 std::vector<size_t> TwoQubitGate::stride() const {
   return {4 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-void TwoQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets,
-                          bool use_cuda) {
-  py::buffer_info info = buffer.request();
-  size_t nelem = 1;
-  for (int i = 0; i < info.ndim; ++i) {
-    nelem *= info.shape[i];
-  }
-
-  size_t nqubits = info.ndim; // FIXME later
-
-  applyTwoQubitGate(reinterpret_cast<std::complex<double> *>(info.ptr),
-                    reinterpret_cast<std::complex<double> *>(data_), targets,
-                    nqubits, nelem);
+ThreeQubitGate::ThreeQubitGate() {
+  data_ = new std::complex<double>[8 * 8];
+  CUDA_CHECK(cudaMalloc(&data_cuda_, 8 * 8 * sizeof(std::complex<double>)));
 }
-
-ThreeQubitGate::ThreeQubitGate() { data_ = new std::complex<double>[8 * 8]; }
-ThreeQubitGate::~ThreeQubitGate() { delete[] data_; }
-std::complex<double> *ThreeQubitGate::data() { return data_; }
+ThreeQubitGate::~ThreeQubitGate() {
+  delete[] data_;
+  cudaFree(data_cuda_);
+}
 size_t ThreeQubitGate::dim() const { return 2; }
 std::vector<size_t> ThreeQubitGate::shape() const { return {8, 8}; }
 std::vector<size_t> ThreeQubitGate::stride() const {
   return {8 * sizeof(std::complex<double>), sizeof(std::complex<double>)};
-}
-
-void ThreeQubitGate::evolve(py::buffer buffer, std::vector<size_t> targets,
-                            bool use_cuda) {
-  assert(targets.size() == 3);
-  py::buffer_info info = buffer.request();
-  size_t nelem = 1;
-  for (int i = 0; i < info.ndim; ++i) {
-    nelem *= info.shape[i];
-  }
-
-  size_t nqubits = info.ndim; // FIXME later
-  applyThreeQubitGate(reinterpret_cast<std::complex<double> *>(info.ptr),
-                      reinterpret_cast<std::complex<double> *>(data_), targets,
-                      nqubits, nelem);
 }
 
 Identity::Identity() {
@@ -118,22 +109,10 @@ PauliZ::PauliZ() {
 PauliZ::~PauliZ() {}
 
 CX::CX() {
-  data_[0 * 4 + 0] = 1;
-  data_[0 * 4 + 1] = 0;
-  data_[0 * 4 + 2] = 0;
-  data_[0 * 4 + 3] = 0;
-  data_[1 * 4 + 0] = 0;
-  data_[1 * 4 + 1] = 1;
-  data_[1 * 4 + 2] = 0;
-  data_[1 * 4 + 3] = 0;
-  data_[2 * 4 + 0] = 0;
-  data_[2 * 4 + 1] = 0;
-  data_[2 * 4 + 2] = 0;
-  data_[2 * 4 + 3] = 1;
-  data_[3 * 4 + 0] = 0;
-  data_[3 * 4 + 1] = 0;
-  data_[3 * 4 + 2] = 1;
-  data_[3 * 4 + 3] = 0;
+  data_[0 * 4 + 0] = 1; data_[0 * 4 + 1] = 0; data_[0 * 4 + 2] = 0; data_[0 * 4 + 3] = 0;
+  data_[1 * 4 + 0] = 0; data_[1 * 4 + 1] = 1; data_[1 * 4 + 2] = 0; data_[1 * 4 + 3] = 0;
+  data_[2 * 4 + 0] = 0; data_[2 * 4 + 1] = 0; data_[2 * 4 + 2] = 0; data_[2 * 4 + 3] = 1;
+  data_[3 * 4 + 0] = 0; data_[3 * 4 + 1] = 0; data_[3 * 4 + 2] = 1; data_[3 * 4 + 3] = 0;
 }
 CX::~CX() {}
 
@@ -344,22 +323,10 @@ RotZ::RotZ(double angle) : angle_(angle) {
 RotZ::~RotZ() {}
 
 Swap::Swap() {
-  data_[0 * 4 + 0] = 1;
-  data_[0 * 4 + 1] = 0;
-  data_[0 * 4 + 2] = 0;
-  data_[0 * 4 + 3] = 0;
-  data_[1 * 4 + 0] = 0;
-  data_[1 * 4 + 1] = 0;
-  data_[1 * 4 + 2] = 1;
-  data_[1 * 4 + 3] = 0;
-  data_[2 * 4 + 0] = 0;
-  data_[2 * 4 + 1] = 1;
-  data_[2 * 4 + 2] = 0;
-  data_[2 * 4 + 3] = 0;
-  data_[3 * 4 + 0] = 0;
-  data_[3 * 4 + 1] = 0;
-  data_[3 * 4 + 2] = 0;
-  data_[3 * 4 + 3] = 1;
+  data_[0 * 4 + 0] = 1; data_[0 * 4 + 1] = 0; data_[0 * 4 + 2] = 0; data_[0 * 4 + 3] = 0;
+  data_[1 * 4 + 0] = 0; data_[1 * 4 + 1] = 0; data_[1 * 4 + 2] = 1; data_[1 * 4 + 3] = 0;
+  data_[2 * 4 + 0] = 0; data_[2 * 4 + 1] = 1; data_[2 * 4 + 2] = 0; data_[2 * 4 + 3] = 0;
+  data_[3 * 4 + 0] = 0; data_[3 * 4 + 1] = 0; data_[3 * 4 + 2] = 0; data_[3 * 4 + 3] = 1;
 }
 Swap::~Swap() {}
 
@@ -629,10 +596,6 @@ CSwap::~CSwap() {}
 
 Unitary::Unitary() { throw "Not Implemented"; }
 Unitary::~Unitary() {}
-std::complex<double> *Unitary::data() { return data_; }
-size_t Unitary::dim() const { throw "Not Implemeneted"; }
-std::vector<size_t> Unitary::shape() const { throw "Not Implemeneted"; }
-std::vector<size_t> Unitary::stride() const { throw "Not Implemeneted"; }
 
 U::U(double theta, double phi, double lambda)
     : theta_(theta), phi_(phi), lambda_(lambda) {

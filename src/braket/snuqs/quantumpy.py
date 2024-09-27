@@ -16,10 +16,10 @@ linalg = np.linalg
 
 
 class ndarray(np.ndarray):
-    def __new__(cls, buffer):
-        obj = np.array(buffer, copy=False).view(cls)
-        obj.buffer = buffer
-        return obj
+    def __new__(cls, obj):
+        arr = np.array(obj, copy=False).view(cls)
+        arr.obj = obj
+        return arr
 
 
 def state_vector(qubit_count: int, init: Optional[bool] = True):
@@ -30,31 +30,15 @@ def state_vector(qubit_count: int, init: Optional[bool] = True):
     return arr
 
 
-def multiply_matrix(
-        state: ndarray,
-        matrix: ndarray,
-        targets: tuple[int, ...],
-) -> ndarray:
-    gate_matrix = np.reshape(matrix, [2] * len(targets) * 2)
-    axes = (
-        np.arange(len(targets), 2 * len(targets)),
-        targets,
-    )
-    product = np.tensordot(gate_matrix, state, axes=axes)
-
-    # Axes given in `operation.targets` are in the first positions.
-    unused_idxs = [idx for idx in range(len(state.shape)) if idx not in targets]
-    permutation = list(targets) + unused_idxs
-    # Invert the permutation to put the indices in the correct place
-    inverse_permutation = np.argsort(permutation)
-    return np.ascontiguousarray(np.transpose(product, inverse_permutation))
-
-
 def evolve(state_vector: ndarray, qubit_count: int, operations) -> None:
-    state_vector = np.reshape(state_vector, [2] * qubit_count)
+    state_vector.obj.toCUDA()
     for op in operations:
-        op.matrix.buffer.evolve(state_vector, op.targets)
-    return np.reshape(state_vector, 2**qubit_count)
+        braket.snuqs._C.evolve(
+            state_vector.obj,
+            op.matrix.obj,
+            op.targets, True)
+    state_vector.obj.toCPU()
+    return state_vector
 
 
 def eye(*args, **kwargs):

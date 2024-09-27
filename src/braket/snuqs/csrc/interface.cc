@@ -1,17 +1,24 @@
 #include "interface.h"
 #include "gate_operation.h"
+#include "gate_operation_impl.h"
+#include "gate_operation_impl_cuda.h"
+#include <memory>
+#include <thrust/complex.h>
 
 namespace py = pybind11;
-void evolve(GateOperation *op, py::buffer buffer, std::vector<size_t> targets) {
-  py::buffer_info info = buffer.request();
-  size_t nelem = 1;
-  for (int i = 0; i < info.ndim; ++i) {
-    nelem *= info.shape[i];
+void evolve(StateVector &state_vector, GateOperation &op,
+            std::vector<size_t> targets, bool use_cuda) {
+  size_t nelem = state_vector.num_elems();
+  size_t nqubits = state_vector.num_qubits();
+
+  if (!use_cuda) {
+    applyGate(reinterpret_cast<std::complex<double> *>(state_vector.data()),
+              reinterpret_cast<std::complex<double> *>(op.data()), targets,
+              nqubits, nelem);
+  } else {
+    cu::applyGate(
+        reinterpret_cast<thrust::complex<double> *>(state_vector.data_cuda()),
+        reinterpret_cast<thrust::complex<double> *>(op.data_cuda()), targets,
+        nqubits, nelem);
   }
-
-  size_t nqubits = info.ndim; // FIXME later
-  std::complex<double> *buf =
-      reinterpret_cast<std::complex<double> *>(info.ptr);
-
-  op->evolve(buf, targets, nqubits, nelem);
 }

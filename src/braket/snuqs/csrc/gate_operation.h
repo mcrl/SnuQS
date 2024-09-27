@@ -12,49 +12,42 @@ namespace py = pybind11;
 
 class GateOperation {
 public:
-  virtual std::complex<double> *data() = 0;
+  virtual void *data();
+  virtual void *data_cuda();
+  virtual size_t num_elems() const;
   virtual size_t dim() const = 0;
   virtual std::vector<size_t> shape() const = 0;
   virtual std::vector<size_t> stride() const = 0;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
-                      bool use_cuda = false) = 0;
-  std::complex<double> *data_;
+  std::complex<double> *data_ = nullptr;
+  std::complex<double> *data_cuda_ = nullptr;
+  bool copied_to_cuda = false;
 };
 
 class OneQubitGate : public GateOperation {
 public:
   OneQubitGate();
   virtual ~OneQubitGate();
-  virtual std::complex<double> *data() override;
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
-                      bool use_cuda = false) override;
 };
 
 class ThreeQubitGate : public GateOperation {
 public:
   ThreeQubitGate();
   virtual ~ThreeQubitGate();
-  virtual std::complex<double> *data() override;
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
-                      bool use_cuda = false) override;
 };
 
 class TwoQubitGate : public GateOperation {
 public:
   TwoQubitGate();
   virtual ~TwoQubitGate();
-  virtual std::complex<double> *data() override;
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
   virtual std::vector<size_t> stride() const override;
-  virtual void evolve(py::buffer buffer, std::vector<size_t> targets,
-                      bool use_cuda = false) override;
 };
 
 class Identity : public OneQubitGate {
@@ -260,10 +253,6 @@ class Unitary : public GateOperation {
 public:
   Unitary();
   ~Unitary();
-  virtual std::complex<double> *data() override;
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
-  virtual std::vector<size_t> stride() const override;
 };
 
 class U : public OneQubitGate {

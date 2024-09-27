@@ -3,32 +3,31 @@
 #include <pybind11/stl.h>
 
 #include "gate_operation.h"
+#include "interface.h"
 #include "state_vector.h"
 #include <complex>
 
 namespace py = pybind11;
 
 #define GATEOP(name)                                                           \
-  py::class_<name>(m, #name, py::buffer_protocol())             \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())             \
       .def_buffer([](name &g) -> py::buffer_info {                             \
         return py::buffer_info(                                                \
             g.data(), sizeof(std::complex<double>),                            \
             py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
             g.shape(), g.stride());                                            \
       })                                                                       \
-      .def(py::init<>())                                                       \
-      .def("evolve", &name::evolve);
+      .def(py::init<>())
 
 #define GATEOP1(name)                                                          \
-  py::class_<name>(m, #name, py::buffer_protocol())             \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())             \
       .def_buffer([](name &g) -> py::buffer_info {                             \
         return py::buffer_info(                                                \
             g.data(), sizeof(std::complex<double>),                            \
             py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
             g.shape(), g.stride());                                            \
       })                                                                       \
-      .def(py::init<double>())                                                 \
-      .def("evolve", &name::evolve);
+      .def(py::init<double>())
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
@@ -44,9 +43,14 @@ PYBIND11_MODULE(_C, m) {
                                                        descriptor */
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
-      .def(py::init<size_t>());
+      .def(py::init<size_t>())
+      .def("toCPU", &StateVector::toCPU)
+      .def("toCUDA", &StateVector::toCUDA);
+
+  m.def("evolve", &evolve);
 
   // GateOperation
+  py::class_<GateOperation>(m, "GateOperation");
   GATEOP(Identity);
   GATEOP(Hadamard);
   GATEOP(PauliX);

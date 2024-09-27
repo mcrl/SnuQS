@@ -7,11 +7,11 @@ from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
-MIN_QUBIT = 10
-MAX_QUBIT = 10
-MAX_GATE = 1000
+MIN_QUBIT = 5
+MAX_QUBIT = 15
+MAX_GATE = 200
 NGATE_KIND = 31
-NUM_ITER = 1000
+NUM_ITER = 30000
 
 
 class RandomInstruction:

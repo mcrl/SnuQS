@@ -1,8 +1,10 @@
 #include "gate_operation_impl.h"
+#include <cassert>
 
-void applyOneQubitGate(std::complex<double> *buffer, std::complex<double> *gate,
-                       std::vector<size_t> targets, size_t nqubits,
-                       size_t nelem) {
+static void applyOneQubitGate(std::complex<double> *buffer,
+                              std::complex<double> *gate,
+                              std::vector<size_t> targets, size_t nqubits,
+                              size_t nelem) {
   size_t target = targets[0];
   size_t st = (1ull << (nqubits - target - 1));
   for (size_t i = 0; i < nelem; ++i) {
@@ -15,9 +17,10 @@ void applyOneQubitGate(std::complex<double> *buffer, std::complex<double> *gate,
   }
 }
 
-void applyTwoQubitGate(std::complex<double> *buffer, std::complex<double> *gate,
-                       std::vector<size_t> targets, size_t nqubits,
-                       size_t nelem) {
+static void applyTwoQubitGate(std::complex<double> *buffer,
+                              std::complex<double> *gate,
+                              std::vector<size_t> targets, size_t nqubits,
+                              size_t nelem) {
   size_t t0 = targets[0];
   size_t t1 = targets[1];
   size_t target0 = nqubits - t1 - 1;
@@ -42,10 +45,10 @@ void applyTwoQubitGate(std::complex<double> *buffer, std::complex<double> *gate,
   }
 }
 
-void applyThreeQubitGate(std::complex<double> *buffer,
-                         std::complex<double> *gate,
-                         std::vector<size_t> targets, size_t nqubits,
-                         size_t nelem) {
+static void applyThreeQubitGate(std::complex<double> *buffer,
+                                std::complex<double> *gate,
+                                std::vector<size_t> targets, size_t nqubits,
+                                size_t nelem) {
   size_t t0 = targets[0];
   size_t t1 = targets[1];
   size_t t2 = targets[2];
@@ -98,5 +101,22 @@ void applyThreeQubitGate(std::complex<double> *buffer,
           gate[7 * 8 + 3] * a3 + gate[7 * 8 + 4] * a4 + gate[7 * 8 + 5] * a5 +
           gate[7 * 8 + 6] * a6 + gate[7 * 8 + 7] * a7;
     }
+  }
+}
+
+void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
+               size_t nqubits, size_t nelem) {
+  assert(targets.size() == 1 || targets.size() == 2 || targets.size() == 3);
+  auto buffer = reinterpret_cast<std::complex<double> *>(_buffer);
+  auto gate = reinterpret_cast<std::complex<double> *>(_gate);
+
+  if (targets.size() == 1) {
+    applyOneQubitGate(buffer, gate, targets, nqubits, nelem);
+  } else if (targets.size() == 2) {
+    applyTwoQubitGate(buffer, gate, targets, nqubits, nelem);
+  } else if (targets.size() == 3) {
+    applyThreeQubitGate(buffer, gate, targets, nqubits, nelem);
+  } else {
+    assert(false);
   }
 }
