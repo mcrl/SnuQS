@@ -1,4 +1,4 @@
-from functools import singledispatch
+from functools import lru_cache, singledispatch
 
 import braket.snuqs.quantumpy as qp
 from braket.snuqs.operation import GateOperation
@@ -23,6 +23,20 @@ def from_braket_instruction(instruction) -> GateOperation:
 @singledispatch
 def _from_braket_instruction(instruction):
     raise NotImplementedError(f"Instruction {instruction} not recognized")
+
+
+@lru_cache()
+def pauli_eigenvalues(num_qubits: int) -> qp.ndarray:
+    """The eigenvalues of Pauli operators and their tensor products.
+
+    Args:
+        num_qubits (int): the number of qubits the operator acts on
+    Returns:
+        qp.ndarray: the eigenvalues of a Pauli product operator of the given size
+    """
+    if num_qubits == 1:
+        return qp.array([1, -1])
+    return qp.concatenate([pauli_eigenvalues(num_qubits - 1), -pauli_eigenvalues(num_qubits - 1)])
 
 
 def check_matrix_dimensions(matrix: qp.ndarray, targets: tuple[int, ...]) -> None:

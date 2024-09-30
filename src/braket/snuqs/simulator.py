@@ -167,7 +167,6 @@ class BaseSimulator(ABC):
         if isinstance(circuit, OpenQASMCircuit):
             return circuit.qubit_set
         else:
-            print(type(circuit))
             operations = [
                 from_braket_instruction(instruction) for instruction in circuit.instructions
             ]
@@ -295,7 +294,6 @@ class BaseSimulator(ABC):
         )
 
         operations = circuit.instructions
-        print(operations)
 
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
         simulation.evolve(operations)
@@ -325,6 +323,9 @@ class BaseSimulator(ABC):
         operations = [
             from_braket_instruction(instr) for instr in ir.instructions
         ]
+        if shots > 0 and ir.basis_rotation_instructions:
+            for instruction in ir.basis_rotation_instructions:
+                operations.append(from_braket_instruction(instruction))
 
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
         simulation.evolve(operations)

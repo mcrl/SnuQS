@@ -19,10 +19,10 @@ from typing import Optional
 
 import numpy as np
 
-from braket.default_simulator import gate_operations
-from braket.default_simulator.linalg_utils import multiply_matrix
-from braket.default_simulator.operation import GateOperation, Observable
-from braket.default_simulator.operation_helpers import (
+from braket.snuqs import gate_operations
+from braket.snuqs.linalg_utils import multiply_matrix
+from braket.snuqs.operation import GateOperation, Observable
+from braket.snuqs.operation_helpers import (
     check_hermitian,
     check_matrix_dimensions,
     pauli_eigenvalues,
