@@ -59,6 +59,19 @@ def check_unitary(matrix: qp.ndarray):
         raise ValueError(f"{matrix} is not unitary")
 
 
+def check_hermitian(matrix: qp.ndarray):
+    """Checks that the given matrix is Hermitian.
+
+    Args:
+        matrix (qp.ndarray): The matrix to check
+
+    Raises:
+        ValueError: If the matrix is not Hermitian
+    """
+    if not qp.allclose(matrix, matrix.T.conj()):
+        raise ValueError(f"{matrix} is not Hermitian")
+
+
 def ir_matrix_to_ndarray(matrix: list[list[list[float]]]) -> qp.ndarray:
     """Converts a JAQCD matrix into a numpy array.
 
@@ -69,3 +82,17 @@ def ir_matrix_to_ndarray(matrix: list[list[list[float]]]) -> qp.ndarray:
         qp.ndarray: The numpy ndarray representation of the matrix
     """
     return qp.array([[complex(element[0], element[1]) for element in row] for row in matrix])
+
+
+def check_cptp(matrices: list[qp.ndarray]):
+    """Checks that the given matrices define a CPTP map.
+
+    Args:
+        matrices (list[qp.ndarray]): The matrices to check
+
+    Raises:
+        ValueError: If the matrices do not define a CPTP map
+    """
+    E = sum([qp.matmul(matrix.T.conjugate(), matrix) for matrix in matrices])
+    if not qp.allclose(E, qp.eye(*E.shape)):
+        raise ValueError(f"{matrices} do not define a CPTP map")

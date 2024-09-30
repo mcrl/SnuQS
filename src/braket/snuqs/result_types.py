@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from functools import singledispatch
-from typing import Any
+from typing import Any, Union, Optional
 from braket.ir import jaqcd
 from braket.circuits import ResultType
-from braket.snuqs.quantumpy import qp
+import braket.snuqs.quantumpy as qp
+from braket.snuqs.simulation import Simulation, StateVectorSimulation
+from braket.snuqs.observables import Observable
 
 
 def from_braket_result_type(result_type) -> ResultType:
@@ -51,6 +53,82 @@ class ResultType(ABC):
         """
 
 
+class TargetedResultType(ResultType, ABC):
+    """
+    Holds an observable that may target qubits.
+    """
+
+    def __init__(self, targets: Optional[list[int]] = None):
+        """
+        Args:
+            targets (list[int], optional): The target qubits of the result type.
+                If None, no specific qubits are targeted.
+        """
+        self._targets = targets
+
+    @property
+    def targets(self) -> Optional[tuple[int, ...]]:
+        """tuple[int], optional: The target qubits of the result type, if any."""
+        return self._targets
+
+
+class ObservableResultType(TargetedResultType, ABC):
+    """
+    Holds an observable to perform a calculation in conjunction with a state.
+    """
+
+    def __init__(self, observable: Observable):
+        """
+        Args:
+            observable (Observable): The observable for which the desired result is calculated
+        """
+        super().__init__(observable.measured_qubits)
+        self._observable = observable
+
+    @property
+    def observable(self):
+        """Observable: The observable for which the desired result is calculated."""
+        return self._observable
+
+    @property
+    def targets(self) -> Optional[tuple[int, ...]]:
+        return self._observable.measured_qubits
+
+    def calculate(self, simulation: Simulation) -> Union[float, list[float]]:
+        """Calculates the result type using the underlying observable.
+
+        Returns a real number if the observable has defined targets,
+        or a list of real numbers, one for the result type on each target,
+        if the observable has no target.
+
+        Args:
+            simulation (Simulation): The simulation to use in the calculation.
+
+        Returns:
+            Union[float, list[float]]: The value of the result type;
+            will be a real due to self-adjointness of observable.
+        """
+        if self._observable.measured_qubits:
+            return self._calculate_single_quantity(simulation, self._observable)
+        return [
+            self._calculate_single_quantity(simulation, self._observable.fix_qubit(qubit))
+            for qubit in range(simulation.qubit_count)
+        ]
+
+    @staticmethod
+    @abstractmethod
+    def _calculate_single_quantity(simulation: Simulation, observable: Observable) -> float:
+        """Calculates a single real value of the result type.
+
+        Args:
+            simulation (Simulation): The simulation to use in the calculation.
+            observable (Observable): The observable used to calculate the result type.
+
+        Returns:
+            float: The value of the result type.
+        """
+
+
 class StateVector(ResultType):
     """
     Simply returns the given state vector.
@@ -71,3 +149,20 @@ class StateVector(ResultType):
 @_from_braket_result_type.register
 def _(_: jaqcd.StateVector):
     return StateVector()
+
+
+def _from_braket_observable(
+    ir_observable: list[Union[str, list[list[list[float]]]]], ir_targets: Optional[list[int]] = None
+) -> Observable:
+    targets = list(ir_targets) if ir_targets else None
+    if len(ir_observable) == 1:
+        return _from_single_observable(ir_observable[0], targets)
+    else:
+        observable = TensorProduct(
+            [_from_single_observable(factor, targets, is_factor=True) for factor in ir_observable]
+        )
+        if targets:
+            raise ValueError(
+                f"Found {len(targets)} more target qubits than the tensor product acts on"
+            )
+        return observable

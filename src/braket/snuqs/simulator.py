@@ -3,6 +3,7 @@ from braket.device_schema.simulators import (
     GateModelSimulatorDeviceParameters,
 )
 
+import numpy as np
 import uuid
 import braket
 from abc import ABC, abstractmethod
@@ -19,12 +20,18 @@ from braket.snuqs.operation_helpers import (
 from braket.snuqs.operation import Operation
 import braket.snuqs.gate_operations  # This line must follow
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
-from braket.default_simulator.openqasm.circuit import Circuit as OpenQASMCircuit
-from braket.default_simulator.openqasm.interpreter import Interpreter
-from braket.default_simulator.openqasm.program_context import AbstractProgramContext, ProgramContext
+from braket.snuqs.openqasm.circuit import Circuit as OpenQASMCircuit
+from braket.snuqs.openqasm.interpreter import Interpreter
+from braket.snuqs.openqasm.program_context import AbstractProgramContext, ProgramContext
 from braket.ir.jaqcd import Program as JaqcdProgram
 from braket.ir.jaqcd.shared_models import MultiTarget, OptionalMultiTarget
+from braket.ir.jaqcd.program_v1 import Results
 from braket.ir.openqasm import Program as OpenQASMProgram
+from braket.snuqs.result_types import (
+    ResultType,
+    TargetedResultType,
+    from_braket_result_type,
+)
 
 
 class BaseSimulator(ABC):
@@ -202,6 +209,79 @@ class BaseSimulator(ABC):
         BaseSimulator._map_circuit_qubits(circuit, qubit_map)
         return qubit_map
 
+    @staticmethod
+    def _formatted_measurements(
+        simulation: Simulation, measured_qubits: Union[list[int], None] = None
+    ) -> list[list[str]]:
+        """Retrieves formatted measurements obtained from the specified simulation.
+
+        Args:
+            simulation (Simulation): Simulation to use for obtaining the measurements.
+            measured_qubits (list[int] | None): The qubits that were measured.
+
+        Returns:
+            list[list[str]]: List containing the measurements, where each measurement consists
+            of a list of measured values of qubits.
+        """
+        # Get the full measurements
+        measurements = [
+            list("{number:0{width}b}".format(number=sample, width=simulation.qubit_count))
+            for sample in simulation.retrieve_samples()
+        ]
+        #  Gets the subset of measurements from the full measurements
+        if measured_qubits is not None and measured_qubits != []:
+            measured_qubits = np.array(measured_qubits)
+            in_circuit_mask = measured_qubits < simulation.qubit_count
+            measured_qubits_in_circuit = measured_qubits[in_circuit_mask]
+            measured_qubits_not_in_circuit = measured_qubits[~in_circuit_mask]
+
+            measurements_array = np.array(measurements)
+            selected_measurements = measurements_array[:, measured_qubits_in_circuit]
+            measurements = np.pad(
+                selected_measurements, ((0, 0), (0, len(measured_qubits_not_in_circuit)))
+            ).tolist()
+        return measurements
+
+    def _create_results_obj(
+        self,
+        results: list[dict[str, Any]],
+        openqasm_ir: OpenQASMProgram,
+        simulation: Simulation,
+        measured_qubits: list[int] = None,
+        mapped_measured_qubits: list[int] = None,
+    ) -> GateModelTaskResult:
+        return GateModelTaskResult.construct(
+            taskMetadata=TaskMetadata(
+                id=str(uuid.uuid4()),
+                shots=simulation.shots,
+                deviceId=self.DEVICE_ID,
+            ),
+            additionalMetadata=AdditionalMetadata(
+                action=openqasm_ir,
+            ),
+            resultTypes=results,
+            measurements=self._formatted_measurements(simulation, mapped_measured_qubits),
+            measuredQubits=(measured_qubits or list(range(simulation.qubit_count))),
+        )
+
+    @staticmethod
+    def _generate_results(
+        results: list[Results],
+        result_types: list[ResultType],
+        simulation: Simulation,
+    ) -> list[ResultTypeValue]:
+        return [
+            ResultTypeValue.construct(
+                type=results[index],
+                value=result_types[index].calculate(simulation),
+            )
+            for index in range(len(results))
+        ]
+
+    @staticmethod
+    def _translate_result_types(results: list[Results]) -> list[ResultType]:
+        return [from_braket_result_type(result) for result in results]
+
     def run_openqasm(self, ir: OpenQASMProgram,
                      qubit_count: Any = None,
                      shots: int = 0,
@@ -220,21 +300,19 @@ class BaseSimulator(ABC):
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
         simulation.evolve(operations)
 
-        return GateModelTaskResult.construct(
-            taskMetadata=TaskMetadata(
-                id=str(uuid.uuid4()),
-                shots=simulation.shots,
-                deviceId=self.DEVICE_ID,
-            ),
-            additionalMetadata=AdditionalMetadata(
-                action=ir,
-            ),
-            resultTypes=[
-                ResultTypeValue.construct(
-                    type=braket.ir.openqasm.StateVector(),
-                    value=simulation._state_vector,
-                ),
-            ]
+        results = circuit.results
+        if not shots:
+            result_types = BaseSimulator._translate_result_types(results)
+            results = BaseSimulator._generate_results(
+                circuit.results,
+                result_types,
+                simulation,
+            )
+        else:
+            simulation.evolve(circuit.basis_rotation_instructions)
+
+        return self._create_results_obj(
+            results, ir, simulation, measured_qubits, mapped_measured_qubits
         )
 
     def run_jaqcd(self, ir: JaqcdProgram,
@@ -251,22 +329,24 @@ class BaseSimulator(ABC):
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
         simulation.evolve(operations)
 
-        return GateModelTaskResult.construct(
-            taskMetadata=TaskMetadata(
-                id=str(uuid.uuid4()),
-                shots=simulation.shots,
-                deviceId=self.DEVICE_ID,
-            ),
-            additionalMetadata=AdditionalMetadata(
-                action=ir,
-            ),
-            resultTypes=[
-                ResultTypeValue.construct(
-                    type=braket.ir.jaqcd.StateVector(),
-                    value=simulation._state_vector,
-                ),
-            ]
-        )
+        results = []
+        if not shots and ir.results:
+            result_types = BaseSimulator._translate_result_types(ir.results)
+            BaseSimulator._validate_result_types_qubits_exist(
+                [
+                    result_type
+                    for result_type in result_types
+                    if isinstance(result_type, TargetedResultType)
+                ],
+                qubit_count,
+            )
+            results = self._generate_results(
+                ir.results,
+                result_types,
+                simulation,
+            )
+
+        return self._create_results_obj(results, ir, simulation)
 
     @abstractmethod
     def _qubit_map(self, ir):

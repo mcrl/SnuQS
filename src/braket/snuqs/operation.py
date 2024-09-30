@@ -1,3 +1,4 @@
+from __future__ import annotations
 import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
 from scipy.linalg import fractional_matrix_power
@@ -55,3 +56,107 @@ class GateOperation(Operation, ABC):
             getattr(self, param, None) == getattr(other, param, None)
             for param in possible_parameters
         )
+
+
+class KrausOperation(Operation, ABC):
+    """
+    Encapsulates a quantum channel acting on a set of target qubits in the Kraus operator
+    representation.
+    """
+
+    @property
+    @abstractmethod
+    def matrices(self) -> list[qp.ndarray]:
+        """list[qp.ndarray]: A list of matrices representing Kraus operators."""
+
+    def __eq__(self, other):
+        return self.targets == other.targets and qp.allclose(self.matrices, other.matrices)
+
+
+class Observable(Operation, ABC):
+    """
+    Encapsulates an observable to be measured in the computational basis.
+    """
+
+    @property
+    def measured_qubits(self) -> tuple[int, ...]:
+        """tuple[int, ...]: The indices of the qubits that are measured for this observable.
+
+        Unlike `targets`, this includes indices on which the observable acts trivially.
+        For example, a tensor product observable made entirely of n Z factors will have
+        n measured qubits.
+        """
+        return self.targets
+
+    @property
+    def is_standard(self) -> bool:
+        r"""bool: Whether the observable is Pauli-like, that is, has eigenvalues of :math:`\pm 1`.
+
+        Examples include the Pauli and Hadamard observables.
+        """
+        return False
+
+    def __pow__(self, power: int) -> Observable:
+        if not isinstance(power, int):
+            raise TypeError("power must be integer")
+        return self._pow(power)
+
+    @abstractmethod
+    def _pow(self, power: int) -> Observable:
+        """Raises this observable to the given power.
+
+        Only defined for integer powers.
+
+        Args:
+            power (int): The power to raise the observable to.
+
+        Returns:
+            Observable: The observable raised to the given power.
+        """
+
+    @property
+    @abstractmethod
+    def eigenvalues(self) -> qp.ndarray:
+        """
+        qp.ndarray: The eigenvalues of the observable ordered by computational basis state.
+        """
+
+    @abstractmethod
+    def apply(self, state: qp.ndarray) -> qp.ndarray:
+        """Applies this observable to the given state.
+
+        Args:
+            state (qp.ndarray): The state to apply the observable to.
+
+        Returns:
+            qp.ndarray: The state after the observable has been applied.
+        """
+
+    @abstractmethod
+    def fix_qubit(self, qubit: int) -> Observable:
+        """Creates a copy of it acting on the given qubit.
+
+        Only defined for observables that act on 1 qubit.
+
+        Args:
+            qubit (int): The target qubit of the new observable.
+
+        Returns:
+            Observable: A copy of this observable, acting on the new qubit.
+        """
+
+    @abstractmethod
+    def diagonalizing_gates(self, num_qubits: Optional[int] = None) -> tuple[GateOperation, ...]:
+        """The gates that diagonalize the observable in the computational basis.
+
+        Args:
+            num_qubits (int, optional): The number of qubits the observable acts on.
+                Only used if no target is specified, in which case a gate is created
+                for each target qubit. This only makes sense for single-qubit observables.
+
+        Returns:
+            tuple[GateOperation, ...]: The gates that diagonalize the observable in the
+            computational basis, if it is not already in the computational basis.
+            If there is no explicit target, this method returns a tuple of gates
+            acting on every qubit.
+        """
