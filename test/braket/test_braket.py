@@ -7,6 +7,7 @@ from braket.devices import LocalSimulator
 from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
+from braket.circuits.serialization import IRType, SerializableProgram
 
 MIN_QUBIT = 5
 MAX_QUBIT = 15
@@ -117,6 +118,7 @@ class BraketTest(unittest.TestCase):
         ngates = np.random.randint(1, MAX_GATE+1)
         print("nqubits: ", nqubits)
         circ = Circuit([RandomInstruction(nqubits).get() for _ in range(ngates)])
+        print(type(circ))
         return circ
 
     def run_braket(self, circ):

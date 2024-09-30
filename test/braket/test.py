@@ -12,4 +12,3 @@ print(circ)
 
 sim = LocalSimulator(backend='snuqs')
 task = sim.run(circ)
-my_task = sim.run(circ)
