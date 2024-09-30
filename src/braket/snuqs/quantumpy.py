@@ -7,10 +7,11 @@ from braket.snuqs._C import (
     PhaseShift, CPhaseShift, CPhaseShift00, CPhaseShift01, CPhaseShift10,
     RotX, RotY, RotZ,
     Swap, ISwap, PSwap, XY, XX, YY, ZZ,
-    CCNot, CSwap
+    CCNot, CSwap,
+    U, GPhase,
 )
 
-from typing import Optional
+from typing import Optional, List, Any
 
 linalg = np.linalg
 
@@ -30,14 +31,18 @@ def state_vector(qubit_count: int, init: Optional[bool] = True):
     return arr
 
 
-def evolve(state_vector: ndarray, qubit_count: int, operations) -> None:
-    state_vector.obj.toCUDA()
+def evolve(state_vector: ndarray, qubit_count: int, operations: List[Any], use_cuda: bool = False) -> ndarray:
+    if use_cuda:
+        state_vector.obj.toCUDA()
+
     for op in operations:
         braket.snuqs._C.evolve(
             state_vector.obj,
             op.matrix.obj,
-            op.targets, True)
-    state_vector.obj.toCPU()
+            op.targets, use_cuda)
+
+    if use_cuda:
+        state_vector.obj.toCPU()
     return state_vector
 
 
@@ -175,3 +180,11 @@ def ccnot():
 
 def cswap():
     return ndarray(CSwap())
+
+
+def u(angle_1: float, angle_2: float, angle_3: float):
+    return ndarray(U(angle_1, angle_2, angle_3))
+
+
+def gphase(angle: float):
+    return ndarray(GPhase(angle))

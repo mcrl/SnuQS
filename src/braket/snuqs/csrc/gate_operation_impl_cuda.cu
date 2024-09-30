@@ -9,6 +9,19 @@ static constexpr size_t BLOCKDIM = 256;
 
 namespace cu {
 
+static __global__ void applyGlobalPhase_kernel(thrust::complex<double> *buffer,
+                                               thrust::complex<double> *gate,
+                                               size_t target, size_t nqubits,
+                                               size_t nelems) {
+  size_t i = blockDim.x * blockIdx.x + threadIdx.x;
+
+  if (i >= nelems)
+    return;
+
+  thrust::complex<double> gphase = gate[0];
+  buffer[i] = buffer[i] * gphase;
+}
+
 static __global__ void applyOneQubitGate_kernel(thrust::complex<double> *buffer,
                                                 thrust::complex<double> *gate,
                                                 size_t target, size_t nqubits,
@@ -111,6 +124,15 @@ applyThreeQubitGate_kernel(thrust::complex<double> *buffer,
   }
 }
 
+static void applyGlobalPhase(thrust::complex<double> *buffer,
+                             thrust::complex<double> *gate,
+                             std::vector<size_t> targets, size_t nqubits,
+                             size_t nelems) {
+  applyGlobalPhase_kernel<<<(nelems + BLOCKDIM - 1) / BLOCKDIM, BLOCKDIM>>>(
+      buffer, gate, 0, nqubits, nelems);
+  CUDA_CHECK(cudaGetLastError());
+}
+
 static void applyOneQubitGate(thrust::complex<double> *buffer,
                               thrust::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,
@@ -144,7 +166,9 @@ void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
   assert(targets.size() == 1 || targets.size() == 2 || targets.size() == 3);
   auto buffer = reinterpret_cast<thrust::complex<double> *>(_buffer);
   auto gate = reinterpret_cast<thrust::complex<double> *>(_gate);
-  if (targets.size() == 1) {
+  if (targets.size() == 0) { // global Phase
+    applyGlobalPhase(buffer, gate, targets, nqubits, nelems);
+  } else if (targets.size() == 1) {
     applyOneQubitGate(buffer, gate, targets, nqubits, nelems);
   } else if (targets.size() == 2) {
     applyTwoQubitGate(buffer, gate, targets, nqubits, nelems);

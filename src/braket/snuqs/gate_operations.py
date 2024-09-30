@@ -573,7 +573,6 @@ class GPhase(GateOperation):
 
     @property
     def _base_matrix(self) -> qp.ndarray:
-        # return cmath.exp(self._angle * 1j) * qp.eye(2 ** len(self._targets))
         return qp.gphase(self._angle)
 
 
@@ -732,7 +731,17 @@ def _cswap(instruction) -> CSwap:
     return CSwap([instruction.control, *instruction.targets])
 
 
-@_from_braket_instruction.register(braket_instruction.Unitary)
+# @_from_braket_instruction.register(braket_instruction.U)
+# def _u(instruction) -> U:
+#    return U([instruction.targets], instruction.angle_1, instruction.angle_2, instruction.angle_3)
+#
+#
+# @ _from_braket_instruction.register(braket_instruction.GPhase)
+# def _gphase(instruction) -> GPhase:
+#    return GPhase([instruction.targets], instruction.angle)
+
+
+@ _from_braket_instruction.register(braket_instruction.Unitary)
 def _unitary(instruction) -> Unitary:
     return Unitary(instruction.targets, ir_matrix_to_ndarray(instruction.matrix))
 
@@ -769,9 +778,9 @@ BRAKET_GATES = {
     "zz": ZZ,
     "ccnot": CCNot,
     "cswap": CSwap,
-    "unitary": Unitary,
     "U": U,
     "gphase": GPhase,
+    "unitary": Unitary,
 
     # Removed: CV, ECR, PRx
 }

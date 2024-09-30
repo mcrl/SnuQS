@@ -52,7 +52,7 @@ class Simulation:
         """np.ndarray: The probabilities of each computational basis state."""
         raise NotImplementedError("probabilities has not been implemented.")
 
-    def evolve(self, operations: list[GateOperation]) -> None:
+    def evolve(self, operations: list[GateOperation], use_cuda: bool = False) -> None:
         """Evolves the state of the simulation under the action of
         the specified gate operations.
 
@@ -94,8 +94,9 @@ class StateVectorSimulation(Simulation):
         """
         return self._state_vector
 
-    def evolve(self, operations: list[GateOperation]) -> None:
-        self._state_vector = qp.evolve(self._state_vector, self._qubit_count, operations)
+    def evolve(self, operations: list[GateOperation], use_cuda: bool = False) -> None:
+        self._state_vector = qp.evolve(
+            self._state_vector, self._qubit_count, operations, use_cuda=use_cuda)
 
     @property
     def probabilities(self) -> qp.ndarray:

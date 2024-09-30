@@ -2,6 +2,15 @@
 #include <cassert>
 
 namespace cpu {
+static void applyGlobalPhase(std::complex<double> *buffer,
+                             std::complex<double> *gate,
+                             std::vector<size_t> targets, size_t nqubits,
+                             size_t nelem) {
+  std::complex<double> gphase = gate[0];
+  for (size_t i = 0; i < nelem; ++i) {
+    buffer[i] = buffer[i] * gphase;
+  }
+}
 static void applyOneQubitGate(std::complex<double> *buffer,
                               std::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,
@@ -111,7 +120,9 @@ void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
   auto buffer = reinterpret_cast<std::complex<double> *>(_buffer);
   auto gate = reinterpret_cast<std::complex<double> *>(_gate);
 
-  if (targets.size() == 1) {
+  if (targets.size() == 0) {
+    applyGlobalPhase(buffer, gate, targets, nqubits, nelem);
+  } else if (targets.size() == 1) {
     applyOneQubitGate(buffer, gate, targets, nqubits, nelem);
   } else if (targets.size() == 2) {
     applyTwoQubitGate(buffer, gate, targets, nqubits, nelem);

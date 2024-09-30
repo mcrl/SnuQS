@@ -51,43 +51,47 @@ class RandomInstruction:
             Gate.ZZ,
             Gate.CCNot,
             Gate.CSwap,
+            Gate.U,
+            Gate.GPhase,
         ]
 
         self.gate_maps = [
-            lambda x: Gate.I(),
-            lambda x: Gate.H(),
-            lambda x: Gate.X(),
-            lambda x: Gate.Y(),
-            lambda x: Gate.Z(),
-            lambda x: Gate.CNot(),
-            lambda x: Gate.CY(),
-            lambda x: Gate.CZ(),
-            lambda x: Gate.S(),
-            lambda x: Gate.Si(),
-            lambda x: Gate.T(),
-            lambda x: Gate.Ti(),
-            lambda x: Gate.V(),
-            lambda x: Gate.Vi(),
-            lambda x: Gate.PhaseShift(angle=x),
-            lambda x: Gate.CPhaseShift(angle=x),
-            lambda x: Gate.CPhaseShift00(angle=x),
-            lambda x: Gate.CPhaseShift01(angle=x),
-            lambda x: Gate.CPhaseShift10(angle=x),
-            lambda x: Gate.Rx(angle=x),
-            lambda x: Gate.Ry(angle=x),
-            lambda x: Gate.Rz(angle=x),
-            lambda x: Gate.Swap(),
-            lambda x: Gate.ISwap(),
-            lambda x: Gate.PSwap(angle=x),
-            lambda x: Gate.XY(angle=x),
-            lambda x: Gate.XX(angle=x),
-            lambda x: Gate.YY(angle=x),
-            lambda x: Gate.ZZ(angle=x),
-            lambda x: Gate.CCNot(),
-            lambda x: Gate.CSwap(),
+            lambda x, y, z: Gate.I(),
+            lambda x, y, z: Gate.H(),
+            lambda x, y, z: Gate.X(),
+            lambda x, y, z: Gate.Y(),
+            lambda x, y, z: Gate.Z(),
+            lambda x, y, z: Gate.CNot(),
+            lambda x, y, z: Gate.CY(),
+            lambda x, y, z: Gate.CZ(),
+            lambda x, y, z: Gate.S(),
+            lambda x, y, z: Gate.Si(),
+            lambda x, y, z: Gate.T(),
+            lambda x, y, z: Gate.Ti(),
+            lambda x, y, z: Gate.V(),
+            lambda x, y, z: Gate.Vi(),
+            lambda x, y, z: Gate.PhaseShift(angle=x),
+            lambda x, y, z: Gate.CPhaseShift(angle=x),
+            lambda x, y, z: Gate.CPhaseShift00(angle=x),
+            lambda x, y, z: Gate.CPhaseShift01(angle=x),
+            lambda x, y, z: Gate.CPhaseShift10(angle=x),
+            lambda x, y, z: Gate.Rx(angle=x),
+            lambda x, y, z: Gate.Ry(angle=x),
+            lambda x, y, z: Gate.Rz(angle=x),
+            lambda x, y, z: Gate.Swap(),
+            lambda x, y, z: Gate.ISwap(),
+            lambda x, y, z: Gate.PSwap(angle=x),
+            lambda x, y, z: Gate.XY(angle=x),
+            lambda x, y, z: Gate.XX(angle=x),
+            lambda x, y, z: Gate.YY(angle=x),
+            lambda x, y, z: Gate.ZZ(angle=x),
+            lambda x, y, z: Gate.CCNot(),
+            lambda x, y, z: Gate.CSwap(),
+            lambda x, y, z: Gate.U(angle_1=x,
+                                   angle_2=y,
+                                   angle_3=z),
+            lambda x, y, z: Gate.GPhase(angle=x),
             # Unitary
-            # U
-            # GPhase
         ]
 
     def get_qubits(self, count):
@@ -98,8 +102,10 @@ class RandomInstruction:
 
     def get(self):
         idx = np.random.randint(0, len(self.gate_maps))
-        param = np.random.rand() * np.pi * 2
-        return Instruction(self.gate_maps[idx](param), self.get_qubits(self.gates[idx].fixed_qubit_count()))
+        param1 = np.random.rand() * np.pi * 2
+        param2 = np.random.rand() * np.pi * 2
+        param3 = np.random.rand() * np.pi * 2
+        return Instruction(self.gate_maps[idx](param1, param2, param3), self.get_qubits(self.gates[idx].fixed_qubit_count()))
 
 
 def repeat(times):
@@ -128,6 +134,7 @@ class BraketTest(unittest.TestCase):
 
     def run_snuqs(self, circ):
         option = {
+            'device': 'cuda',
             'path': [
                 '/dev/nvme0n1',
                 '/dev/nvme1n1',

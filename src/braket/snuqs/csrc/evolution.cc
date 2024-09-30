@@ -3,6 +3,7 @@
 #include "gate_operation_impl_cpu.h"
 #include "gate_operation_impl_cuda.h"
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <thrust/complex.h>
 
 void evolve(StateVector &state_vector, GateOperation &op,
@@ -16,6 +17,7 @@ void evolve(StateVector &state_vector, GateOperation &op,
         reinterpret_cast<std::complex<double> *>(op.data()), targets, nqubits,
         nelem);
   } else {
+    auto op_buf = reinterpret_cast<std::complex<double> *>(op.data());
     cu::applyGate(
         reinterpret_cast<thrust::complex<double> *>(state_vector.data_cuda()),
         reinterpret_cast<thrust::complex<double> *>(op.data_cuda()), targets,

@@ -2,8 +2,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "gate_operation.h"
 #include "evolution.h"
+#include "gate_operation.h"
 #include "state_vector.h"
 #include <complex>
 
@@ -28,6 +28,16 @@ namespace py = pybind11;
             g.shape(), g.stride());                                            \
       })                                                                       \
       .def(py::init<double>())
+
+#define GATEOP3(name)                                                          \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())             \
+      .def_buffer([](name &g) -> py::buffer_info {                             \
+        return py::buffer_info(                                                \
+            g.data(), sizeof(std::complex<double>),                            \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
+            g.shape(), g.stride());                                            \
+      })                                                                       \
+      .def(py::init<double, double, double>())
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
@@ -82,4 +92,6 @@ PYBIND11_MODULE(_C, m) {
   GATEOP1(ZZ);
   GATEOP(CCNot);
   GATEOP(CSwap);
+  GATEOP3(U);
+  GATEOP1(GPhase);
 }

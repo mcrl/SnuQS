@@ -5,7 +5,6 @@ from braket.device_schema.simulators import (
 
 import numpy as np
 import uuid
-import braket
 from abc import ABC, abstractmethod
 from braket.task_result import (
     AdditionalMetadata,
@@ -18,7 +17,6 @@ from braket.snuqs.operation_helpers import (
     from_braket_instruction,
 )
 from braket.snuqs.operation import Operation
-import braket.snuqs.gate_operations  # This line must follow
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
 from braket.snuqs.openqasm.circuit import Circuit as OpenQASMCircuit
 from braket.snuqs.openqasm.interpreter import Interpreter
@@ -35,6 +33,15 @@ from braket.snuqs.result_types import (
 
 
 class BaseSimulator(ABC):
+    @staticmethod
+    def _validate_device_type(device: str):
+        supported_devices = {
+            'cpu',
+            'cuda',
+        }
+        if device not in supported_devices:
+            raise TypeError(f"Device {device} is not supported")
+
     def create_program_context(self) -> AbstractProgramContext:
         return ProgramContext()
 
@@ -284,7 +291,12 @@ class BaseSimulator(ABC):
     def run_openqasm(self, ir: OpenQASMProgram,
                      qubit_count: Any = None,
                      shots: int = 0,
-                     *, path: Optional[List[str]] = None) -> GateModelTaskResult:
+                     *,
+                     device: Optional[str],
+                     path: Optional[List[str]] = None) -> GateModelTaskResult:
+        BaseSimulator._validate_device_type(device)
+        use_cuda = True if device == 'cuda' else False
+
         circuit = self.parse_program(ir).circuit
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(circuit)
         qubit_count = circuit.num_qubits
@@ -296,7 +308,7 @@ class BaseSimulator(ABC):
         operations = circuit.instructions
 
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations)
+        simulation.evolve(operations, use_cuda=use_cuda)
 
         results = circuit.results
         if not shots:
@@ -307,7 +319,7 @@ class BaseSimulator(ABC):
                 simulation,
             )
         else:
-            simulation.evolve(circuit.basis_rotation_instructions)
+            simulation.evolve(circuit.basis_rotation_instructions, use_cuda=use_cuda)
 
         return self._create_results_obj(
             results, ir, simulation, measured_qubits, mapped_measured_qubits
@@ -316,7 +328,11 @@ class BaseSimulator(ABC):
     def run_jaqcd(self, ir: JaqcdProgram,
                   qubit_count: Any = None,
                   shots: int = 0,
-                  *, path: Optional[List[str]] = None) -> GateModelTaskResult:
+                  *,
+                  device: Optional[str],
+                  path: Optional[List[str]] = None) -> GateModelTaskResult:
+        use_cuda = True if device == 'cuda' else False
+
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(ir)
         qubit_count = len(qubit_map)
 
@@ -328,7 +344,7 @@ class BaseSimulator(ABC):
                 operations.append(from_braket_instruction(instruction))
 
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations)
+        simulation.evolve(operations, use_cuda=use_cuda)
 
         results = []
         if not shots and ir.results:
@@ -350,10 +366,6 @@ class BaseSimulator(ABC):
         return self._create_results_obj(results, ir, simulation)
 
     @abstractmethod
-    def _qubit_map(self, ir):
-        """Return the qubit mapping"""
-
-    @abstractmethod
     def initialize_simulation(self, **kwargs) -> Simulation:
         """Initializes simulation with keyword arguments"""
 
@@ -362,30 +374,7 @@ class StateVectorSimulator(BaseSimulator):
     DEVICE_ID = "snuqs"
 
     def __init__(self, *args, **kwargs):
-        self.max_qubits = 1
-
-    def _qubit_map(self, ir):
-        qubit_set = set()
-        for i in ir.instructions:
-            if hasattr(i, 'target'):
-                qubit_set.add(i.target)
-
-            if hasattr(i, 'control'):
-                qubit_set.add(i.control)
-
-            if hasattr(i, 'targets'):
-                for t in i.targets:
-                    qubit_set.add(t)
-
-            if hasattr(i, 'controls'):
-                for t in i.controls:
-                    qubit_set.add(t)
-
-        qubit_map = {}
-        for i, q in enumerate(sorted(qubit_set)):
-            qubit_map[q] = i
-
-        return qubit_map
+        self.max_qubits = 40
 
     def _service(self):
         return {

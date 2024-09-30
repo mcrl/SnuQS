@@ -619,9 +619,6 @@ CSwap::CSwap() {
 }
 CSwap::~CSwap() {}
 
-Unitary::Unitary() { throw "Not Implemented"; }
-Unitary::~Unitary() {}
-
 U::U(double theta, double phi, double lambda)
     : theta_(theta), phi_(phi), lambda_(lambda) {
   data_[0 * 2 + 0] = cos(theta / 2);
@@ -638,3 +635,6 @@ GPhase::GPhase(double angle) : angle_(angle) {
   data_[1 * 2 + 1] = std::exp(1i * angle);
 }
 GPhase::~GPhase() {}
+
+Unitary::Unitary() { throw "Not Implemented"; }
+Unitary::~Unitary() {}

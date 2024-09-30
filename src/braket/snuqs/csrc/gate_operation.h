@@ -244,12 +244,6 @@ public:
   ~CSwap();
 };
 
-class Unitary : public GateOperation {
-public:
-  Unitary();
-  ~Unitary();
-};
-
 class U : public OneQubitGate {
 public:
   U(double theta, double phi, double lambda);
@@ -264,5 +258,11 @@ public:
   GPhase(double angle);
   ~GPhase();
   double angle_;
+};
+
+class Unitary : public GateOperation {
+public:
+  Unitary();
+  ~Unitary();
 };
 #endif //_GATE_OPERATION_H_
