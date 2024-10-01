@@ -122,9 +122,7 @@ class BraketTest(unittest.TestCase):
     def random_circuit(self):
         nqubits = np.random.randint(MIN_QUBIT, MAX_QUBIT+1)
         ngates = np.random.randint(1, MAX_GATE+1)
-        print("nqubits: ", nqubits)
         circ = Circuit([RandomInstruction(nqubits).get() for _ in range(ngates)])
-        print(type(circ))
         return circ
 
     def run_braket(self, circ):
@@ -150,23 +148,20 @@ class BraketTest(unittest.TestCase):
         task = sim.run(circ, **option)
         return task
 
-    @repeat(NUM_ITER)
     def test_braket_snuqs(self):
         circ = self.random_circuit()
         circ.state_vector()
 
-        print(f"Running random circuit test...")
-        print(circ)
+        for i in range(NUM_ITER):
+            print(f"Running random circuit test #{i}...")
 
-        task_braket = self.run_braket(circ)
-        task_snuqs = self.run_snuqs(circ)
+            task_braket = self.run_braket(circ)
+            task_snuqs = self.run_snuqs(circ)
 
-        print(task_braket.result().values)
-        print(task_snuqs.result().values)
-        self.assertTrue(np.allclose(
-            task_braket.result().values,
-            task_snuqs.result().values
-        ))
+            self.assertTrue(np.allclose(
+                task_braket.result().values,
+                task_snuqs.result().values
+            ))
 
 
 if __name__ == '__main__':
