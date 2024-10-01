@@ -23,11 +23,7 @@ class ndarray(np.ndarray):
 
 
 def state_vector(qubit_count: int, init: Optional[bool] = True):
-    arr = ndarray(StateVector(qubit_count))
-    if init:
-        arr.fill(0)
-        arr[0] = 1
-    return arr
+    return ndarray(StateVector(qubit_count))
 
 
 def eye(*args, **kwargs):

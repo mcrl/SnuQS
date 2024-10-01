@@ -6,6 +6,7 @@
 
 #include "evolution.h"
 #include "gate_operation.h"
+#include "initialization.h"
 #include "state_vector.h"
 
 namespace py = pybind11;
@@ -58,7 +59,10 @@ PYBIND11_MODULE(_C, m) {
       .def("toCPU", &StateVector::toCPU)
       .def("toCUDA", &StateVector::toCUDA);
 
+  // Functions
   m.def("evolve", &evolve);
+  m.def("initialize_zero", &initialize_zero);
+  m.def("initialize_z_basis", &initialize_z_basis);
 
   // GateOperation
   py::class_<GateOperation>(m, "GateOperation");

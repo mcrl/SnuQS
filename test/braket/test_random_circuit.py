@@ -10,7 +10,7 @@ MIN_QUBIT = 15
 MAX_QUBIT = 20
 MAX_GATE = 200
 NGATE_KIND = 31
-NUM_ITER = 5
+NUM_ITER = 100
 
 
 class RandomInstruction:

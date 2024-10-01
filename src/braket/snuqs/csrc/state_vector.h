@@ -19,6 +19,7 @@ class StateVector {
   size_t num_elems() const;
   size_t num_qubits() const;
   std::vector<size_t> shape() const;
+  Device device() const;
   std::string __repr__() const;
 
  private:

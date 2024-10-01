@@ -1,8 +1,7 @@
 #ifndef _EVOLUTION_H_
 #define _EVOLUTION_H_
 #include <vector>
-
-#include "gate_operation.h"
+#include "operation.h"
 #include "state_vector.h"
 
 void evolve(StateVector &state_vector, GateOperation &op,

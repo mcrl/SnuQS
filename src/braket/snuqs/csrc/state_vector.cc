@@ -6,11 +6,13 @@
 
 StateVector::StateVector(size_t num_qubits) : num_qubits_(num_qubits) {
   data_ = new std::complex<double>[1 << num_qubits];
-  if (data_cuda_ != nullptr) {
-    cudaFree(data_cuda_);
-  }
+  CUDA_CHECK(
+      cudaMalloc(&data_cuda_, num_elems() * sizeof(std::complex<double>)));
 }
-StateVector::~StateVector() { delete[] data_; }
+StateVector::~StateVector() {
+  cudaFree(data_cuda_);
+  delete[] data_;
+}
 void *StateVector::data() {
   if (device_ != Device::CPU) {
     toCPU();
@@ -33,15 +35,13 @@ void StateVector::toCPU() {
 }
 
 void StateVector::toCUDA() {
-  if (data_cuda_ == nullptr) {
-    CUDA_CHECK(
-        cudaMalloc(&data_cuda_, num_elems() * sizeof(std::complex<double>)));
-  }
   CUDA_CHECK(cudaMemcpy(data_cuda_, data_,
                         num_elems() * sizeof(std::complex<double>),
                         cudaMemcpyHostToDevice));
   device_ = Device::CUDA;
 }
+
+Device StateVector::device() const { return device_; }
 
 size_t StateVector::dim() const { return 1; }
 size_t StateVector::num_elems() const { return (1ul << num_qubits_); }

@@ -1,5 +1,5 @@
 import numpy as np
-from braket.snuqs._C import evolve as evolve_C
+from braket.snuqs._C import evolve as evolve_C, initialize_z_basis as initialize_z_basis_C
 from braket.snuqs.operation import GateOperation
 import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
@@ -113,14 +113,17 @@ class StateVectorSimulation(Simulation):
                use_cuda: bool = False,
                offload: Optional[str] = None,
                path: Optional[List[str]] = None) -> None:
-        state_vector = self._state_vector
+        state_vector = self._state_vector.obj
+
+        initialize_z_basis_C(state_vector)
 
         if use_cuda:
-            state_vector.obj.toCUDA()
+            state_vector.toCUDA()
 
-        for op in operations:
-            evolve_C(state_vector.obj, op.matrix.obj, op.targets, use_cuda)
+        for operation in operations:
+            op = operation.matrix.obj
+            targets = operation.targets
+            evolve_C(state_vector, op, targets, use_cuda)
 
         if use_cuda:
-            state_vector.obj.toCPU()
-        return state_vector
+            state_vector.toCPU()

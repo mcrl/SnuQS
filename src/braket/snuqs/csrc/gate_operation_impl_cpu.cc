@@ -7,9 +7,9 @@ namespace cpu {
 static void applyGlobalPhase(std::complex<double> *buffer,
                              std::complex<double> *gate,
                              std::vector<size_t> targets, size_t nqubits,
-                             size_t nelem) {
+                             size_t nelems) {
   std::complex<double> gphase = gate[0];
-  for (size_t i = 0; i < nelem; ++i) {
+  for (size_t i = 0; i < nelems; ++i) {
     buffer[i] = buffer[i] * gphase;
   }
 }
@@ -17,10 +17,10 @@ static void applyGlobalPhase(std::complex<double> *buffer,
 static void applyOneQubitGate(std::complex<double> *buffer,
                               std::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,
-                              size_t nelem) {
+                              size_t nelems) {
   size_t target = targets[0];
   size_t st = (1ull << (nqubits - target - 1));
-  for (size_t i = 0; i < nelem; ++i) {
+  for (size_t i = 0; i < nelems; ++i) {
     if ((i & st) == 0) {
       std::complex<double> a0 = buffer[i];
       std::complex<double> a1 = buffer[i + st];
@@ -33,14 +33,14 @@ static void applyOneQubitGate(std::complex<double> *buffer,
 static void applyTwoQubitGate(std::complex<double> *buffer,
                               std::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,
-                              size_t nelem) {
+                              size_t nelems) {
   size_t t0 = targets[0];
   size_t t1 = targets[1];
   size_t target0 = nqubits - t1 - 1;
   size_t target1 = nqubits - t0 - 1;
   size_t st0 = (1ull << target0);
   size_t st1 = (1ull << target1);
-  for (size_t i = 0; i < nelem; ++i) {
+  for (size_t i = 0; i < nelems; ++i) {
     if ((i & st0) == 0 && (i & st1) == 0) {
       std::complex<double> a0 = buffer[i + 0];
       std::complex<double> a1 = buffer[i + st0];
@@ -61,7 +61,7 @@ static void applyTwoQubitGate(std::complex<double> *buffer,
 static void applyThreeQubitGate(std::complex<double> *buffer,
                                 std::complex<double> *gate,
                                 std::vector<size_t> targets, size_t nqubits,
-                                size_t nelem) {
+                                size_t nelems) {
   size_t t0 = targets[0];
   size_t t1 = targets[1];
   size_t t2 = targets[2];
@@ -71,7 +71,7 @@ static void applyThreeQubitGate(std::complex<double> *buffer,
   size_t st0 = (1ull << target0);
   size_t st1 = (1ull << target1);
   size_t st2 = (1ull << target2);
-  for (size_t i = 0; i < nelem; ++i) {
+  for (size_t i = 0; i < nelems; ++i) {
     if ((i & st0) == 0 && (i & st1) == 0 && (i & st2) == 0) {
       std::complex<double> a0 = buffer[i + 0];
       std::complex<double> a1 = buffer[i + st0];
@@ -118,19 +118,19 @@ static void applyThreeQubitGate(std::complex<double> *buffer,
 }
 
 void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
-               size_t nqubits, size_t nelem) {
+               size_t nqubits, size_t nelems) {
   assert(targets.size() == 1 || targets.size() == 2 || targets.size() == 3);
   auto buffer = reinterpret_cast<std::complex<double> *>(_buffer);
   auto gate = reinterpret_cast<std::complex<double> *>(_gate);
 
   if (targets.size() == 0) {
-    applyGlobalPhase(buffer, gate, targets, nqubits, nelem);
+    applyGlobalPhase(buffer, gate, targets, nqubits, nelems);
   } else if (targets.size() == 1) {
-    applyOneQubitGate(buffer, gate, targets, nqubits, nelem);
+    applyOneQubitGate(buffer, gate, targets, nqubits, nelems);
   } else if (targets.size() == 2) {
-    applyTwoQubitGate(buffer, gate, targets, nqubits, nelem);
+    applyTwoQubitGate(buffer, gate, targets, nqubits, nelems);
   } else if (targets.size() == 3) {
-    applyThreeQubitGate(buffer, gate, targets, nqubits, nelem);
+    applyThreeQubitGate(buffer, gate, targets, nqubits, nelems);
   } else {
     assert(false);
   }

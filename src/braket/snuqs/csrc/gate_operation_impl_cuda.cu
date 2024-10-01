@@ -1,4 +1,3 @@
-#include <spdlog/spdlog.h>
 #include <thrust/complex.h>
 
 #include <cassert>
