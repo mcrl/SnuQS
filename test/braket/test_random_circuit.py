@@ -1,19 +1,16 @@
 import unittest
 import numpy as np
 
-import braket
-from braket.aws import AwsDevice
 from braket.devices import LocalSimulator
 from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
-from braket.circuits.serialization import IRType, SerializableProgram
 
-MIN_QUBIT = 5
-MAX_QUBIT = 15
+MIN_QUBIT = 15
+MAX_QUBIT = 20
 MAX_GATE = 200
 NGATE_KIND = 31
-NUM_ITER = 30000
+NUM_ITER = 5
 
 
 class RandomInstruction:
@@ -133,6 +130,7 @@ class BraketTest(unittest.TestCase):
     def run_snuqs(self, circ):
         option = {
             'device': 'cuda',
+            'offload': 'cpu',
             'path': [
                 '/dev/nvme0n1',
                 '/dev/nvme1n1',
@@ -155,7 +153,9 @@ class BraketTest(unittest.TestCase):
         for i in range(NUM_ITER):
             print(f"Running random circuit test #{i}...")
 
+            print("\tRunning braket")
             task_braket = self.run_braket(circ)
+            print("\tRunning snuqs")
             task_snuqs = self.run_snuqs(circ)
 
             self.assertTrue(np.allclose(

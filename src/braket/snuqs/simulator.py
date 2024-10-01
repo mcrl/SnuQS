@@ -38,9 +38,22 @@ class BaseSimulator(ABC):
         supported_devices = {
             'cpu',
             'cuda',
+            'hybrid',
         }
-        if device not in supported_devices:
+        if device is not None and device not in supported_devices:
             raise TypeError(f"Device {device} is not supported")
+
+    @staticmethod
+    def _validate_offload_type(offload: Optional[str], path: Optional[List[str]]):
+        supported_devices = {
+            'cpu',
+            'storage',
+        }
+        if offload is None:
+            return
+
+        if offload not in supported_devices:
+            raise TypeError(f"Offload {offload} is not supported")
 
     def create_program_context(self) -> AbstractProgramContext:
         return ProgramContext()
@@ -292,10 +305,14 @@ class BaseSimulator(ABC):
                      qubit_count: Any = None,
                      shots: int = 0,
                      *,
-                     device: Optional[str],
+                     device: str,
+                     offload: Optional[str] = None,
                      path: Optional[List[str]] = None) -> GateModelTaskResult:
         BaseSimulator._validate_device_type(device)
         use_cuda = True if device == 'cuda' else False
+
+        BaseSimulator._validate_offload_type(offload, path)
+        offload = True if offload is not None else False
 
         circuit = self.parse_program(ir).circuit
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(circuit)
@@ -308,7 +325,10 @@ class BaseSimulator(ABC):
         operations = circuit.instructions
 
         simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations, use_cuda=use_cuda)
+        simulation.evolve(operations,
+                          use_cuda=use_cuda,
+                          offload=offload,
+                          path=path)
 
         results = circuit.results
         if not shots:

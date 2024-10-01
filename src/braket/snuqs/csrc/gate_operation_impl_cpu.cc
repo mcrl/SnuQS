@@ -1,6 +1,7 @@
 #include "gate_operation_impl_cpu.h"
 
 #include <cassert>
+#include <complex>
 
 namespace cpu {
 static void applyGlobalPhase(std::complex<double> *buffer,
@@ -12,6 +13,7 @@ static void applyGlobalPhase(std::complex<double> *buffer,
     buffer[i] = buffer[i] * gphase;
   }
 }
+
 static void applyOneQubitGate(std::complex<double> *buffer,
                               std::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,

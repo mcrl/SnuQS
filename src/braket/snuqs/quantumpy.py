@@ -1,5 +1,4 @@
 import numpy as np
-import braket.snuqs._C
 from braket.snuqs._C import StateVector
 from braket.snuqs._C import (
     Identity, Hadamard, PauliX, PauliY, PauliZ,
@@ -11,7 +10,7 @@ from braket.snuqs._C import (
     U, GPhase,
 )
 
-from typing import Optional, List, Any
+from typing import Optional
 
 linalg = np.linalg
 
@@ -29,21 +28,6 @@ def state_vector(qubit_count: int, init: Optional[bool] = True):
         arr.fill(0)
         arr[0] = 1
     return arr
-
-
-def evolve(state_vector: ndarray, qubit_count: int, operations: List[Any], use_cuda: bool = False) -> ndarray:
-    if use_cuda:
-        state_vector.obj.toCUDA()
-
-    for op in operations:
-        braket.snuqs._C.evolve(
-            state_vector.obj,
-            op.matrix.obj,
-            op.targets, use_cuda)
-
-    if use_cuda:
-        state_vector.obj.toCPU()
-    return state_vector
 
 
 def eye(*args, **kwargs):

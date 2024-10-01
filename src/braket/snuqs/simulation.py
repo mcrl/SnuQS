@@ -1,9 +1,12 @@
 import numpy as np
+from braket.snuqs._C import evolve as evolve_C
 from braket.snuqs.operation import GateOperation
 import braket.snuqs.quantumpy as qp
+from abc import ABC, abstractmethod
+from typing import Optional, List
 
 
-class Simulation:
+class Simulation(ABC):
     """
     This class tracks the evolution of a quantum system with `qubit_count` qubits.
     The state of system the evolves by application of `GateOperation`s using the `evolve()` method.
@@ -36,6 +39,7 @@ class Simulation:
         """
         return self._shots
 
+    @abstractmethod
     def retrieve_samples(self) -> list[int]:
         """Retrieves samples of states from the state of the simulation,
         based on the probabilities.
@@ -48,10 +52,12 @@ class Simulation:
         raise NotImplementedError("retrieve_samples has not been implemented.")
 
     @property
+    @abstractmethod
     def probabilities(self) -> np.ndarray:
         """np.ndarray: The probabilities of each computational basis state."""
         raise NotImplementedError("probabilities has not been implemented.")
 
+    @abstractmethod
     def evolve(self, operations: list[GateOperation], use_cuda: bool = False) -> None:
         """Evolves the state of the simulation under the action of
         the specified gate operations.
@@ -81,9 +87,6 @@ class StateVectorSimulation(Simulation):
         initial_state = qp.state_vector(qubit_count)
         self._state_vector = initial_state
 
-    def retrieve_samples(self) -> list[int]:
-        return np.random.choice(len(self._state_vector), p=self.probabilities, size=self._shots)
-
     @property
     def state_vector(self) -> qp.ndarray:
         """
@@ -94,10 +97,6 @@ class StateVectorSimulation(Simulation):
         """
         return self._state_vector
 
-    def evolve(self, operations: list[GateOperation], use_cuda: bool = False) -> None:
-        self._state_vector = qp.evolve(
-            self._state_vector, self._qubit_count, operations, use_cuda=use_cuda)
-
     @property
     def probabilities(self) -> qp.ndarray:
         """
@@ -105,3 +104,23 @@ class StateVectorSimulation(Simulation):
             vector of the simulation.
         """
         return np.abs(self.state_vector) ** 2
+
+    def retrieve_samples(self) -> list[int]:
+        return np.random.choice(len(self._state_vector), p=self.probabilities, size=self._shots)
+
+    def evolve(self,
+               operations: list[GateOperation],
+               use_cuda: bool = False,
+               offload: Optional[str] = None,
+               path: Optional[List[str]] = None) -> None:
+        state_vector = self._state_vector
+
+        if use_cuda:
+            state_vector.obj.toCUDA()
+
+        for op in operations:
+            evolve_C(state_vector.obj, op.matrix.obj, op.targets, use_cuda)
+
+        if use_cuda:
+            state_vector.obj.toCPU()
+        return state_vector
