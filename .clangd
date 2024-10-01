@@ -1,7 +1,0 @@
-CompileFlags:
-  CompilationDatabase: commands.json
-  Remove:
-    #- -forward-unknown-to-host-compiler
-    - --generate-code*
-    - -rdc=*
-    - -Xcompiler*

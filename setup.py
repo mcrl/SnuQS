@@ -9,6 +9,7 @@ install_requires = [
     'numpy==1.26.4',
     'pyyaml==6.0.1',
     'cmake==3.29.0',
+    'ninja==1.11.1.1',
     'amazon-braket-sdk==1.87.1',
     'amazon-braket-schemas==1.22.1',
 ]
@@ -39,6 +40,7 @@ class CMakeBuildExt(build_ext_orig):
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
+            '-G Ninja',
             '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute()),
             '-DCMAKE_BUILD_TYPE=' + config
