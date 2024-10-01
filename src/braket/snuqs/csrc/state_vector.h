@@ -1,13 +1,14 @@
 #ifndef _STATE_VECTOR_H_
 #define _STATE_VECTOR_H_
 
-#include "device.h"
 #include <complex>
 #include <cstddef>
 #include <vector>
 
+#include "device.h"
+
 class StateVector {
-public:
+ public:
   StateVector(size_t num_qubits);
   ~StateVector();
   void *data();
@@ -20,11 +21,11 @@ public:
   std::vector<size_t> shape() const;
   std::string __repr__() const;
 
-private:
+ private:
   size_t num_qubits_;
   std::complex<double> *data_ = nullptr;
   std::complex<double> *data_cuda_ = nullptr;
   Device device_ = Device::CPU;
 };
 
-#endif //_STATE_VECTOR_H_
+#endif  //_STATE_VECTOR_H_

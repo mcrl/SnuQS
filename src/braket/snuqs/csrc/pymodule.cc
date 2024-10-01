@@ -2,41 +2,42 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <complex>
+
 #include "evolution.h"
 #include "gate_operation.h"
 #include "state_vector.h"
-#include <complex>
 
 namespace py = pybind11;
 
-#define GATEOP(name)                                                           \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())             \
-      .def_buffer([](name &g) -> py::buffer_info {                             \
-        return py::buffer_info(                                                \
-            g.data(), sizeof(std::complex<double>),                            \
-            py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
-            g.shape(), g.stride());                                            \
-      })                                                                       \
+#define GATEOP(name)                                                        \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
+      .def_buffer([](name &g) -> py::buffer_info {                          \
+        return py::buffer_info(                                             \
+            g.data(), sizeof(std::complex<double>),                         \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(), \
+            g.shape(), g.stride());                                         \
+      })                                                                    \
       .def(py::init<>())
 
-#define GATEOP1(name)                                                          \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())             \
-      .def_buffer([](name &g) -> py::buffer_info {                             \
-        return py::buffer_info(                                                \
-            g.data(), sizeof(std::complex<double>),                            \
-            py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
-            g.shape(), g.stride());                                            \
-      })                                                                       \
+#define GATEOP1(name)                                                       \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
+      .def_buffer([](name &g) -> py::buffer_info {                          \
+        return py::buffer_info(                                             \
+            g.data(), sizeof(std::complex<double>),                         \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(), \
+            g.shape(), g.stride());                                         \
+      })                                                                    \
       .def(py::init<double>())
 
-#define GATEOP3(name)                                                          \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())             \
-      .def_buffer([](name &g) -> py::buffer_info {                             \
-        return py::buffer_info(                                                \
-            g.data(), sizeof(std::complex<double>),                            \
-            py::format_descriptor<std::complex<double>>::format(), g.dim(),    \
-            g.shape(), g.stride());                                            \
-      })                                                                       \
+#define GATEOP3(name)                                                       \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
+      .def_buffer([](name &g) -> py::buffer_info {                          \
+        return py::buffer_info(                                             \
+            g.data(), sizeof(std::complex<double>),                         \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(), \
+            g.shape(), g.stride());                                         \
+      })                                                                    \
       .def(py::init<double, double, double>())
 
 PYBIND11_MODULE(_C, m) {

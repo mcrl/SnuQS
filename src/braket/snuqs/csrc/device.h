@@ -6,4 +6,4 @@ enum class Device {
   CUDA,
 };
 
-#endif //_DEVICE_H_
+#endif  //_DEVICE_H_

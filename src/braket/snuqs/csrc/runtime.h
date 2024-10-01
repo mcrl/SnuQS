@@ -3,4 +3,4 @@
 class Runtime {
   Runtime();
 };
-#endif //_RUNTIME_H_
+#endif  //_RUNTIME_H_

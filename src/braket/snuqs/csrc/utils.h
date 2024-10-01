@@ -1,7 +1,6 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
-#include <vector>
 
 #define CUDA_CHECK(e)                                                          \
   do {                                                                         \

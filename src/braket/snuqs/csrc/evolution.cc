@@ -1,10 +1,11 @@
 #include "evolution.h"
+
+#include <spdlog/spdlog.h>
+#include <thrust/complex.h>
+
 #include "gate_operation.h"
 #include "gate_operation_impl_cpu.h"
 #include "gate_operation_impl_cuda.h"
-#include <memory>
-#include <spdlog/spdlog.h>
-#include <thrust/complex.h>
 
 void evolve(StateVector &state_vector, GateOperation &op,
             std::vector<size_t> targets, bool use_cuda) {

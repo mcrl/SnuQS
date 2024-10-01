@@ -1,9 +1,8 @@
 #include "gate_operation.h"
-#include "gate_operation_impl_cpu.h"
-#include "gate_operation_impl_cuda.h"
-#include "utils.h"
+
 #include <cuda_runtime.h>
-#include <iostream>
+
+#include "utils.h"
 
 using namespace std::complex_literals;
 

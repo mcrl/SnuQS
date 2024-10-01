@@ -1,6 +1,8 @@
 #include "state_vector.h"
-#include "utils.h"
+
 #include <cuda_runtime.h>
+
+#include "utils.h"
 
 StateVector::StateVector(size_t num_qubits) : num_qubits_(num_qubits) {
   data_ = new std::complex<double>[1 << num_qubits];

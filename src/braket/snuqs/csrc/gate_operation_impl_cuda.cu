@@ -1,9 +1,11 @@
-#include "gate_operation_impl_cuda.h"
-#include "utils.h"
-#include <cassert>
-#include <complex>
 #include <spdlog/spdlog.h>
 #include <thrust/complex.h>
+
+#include <cassert>
+#include <complex>
+
+#include "gate_operation_impl_cuda.h"
+#include "utils.h"
 
 static constexpr size_t BLOCKDIM = 256;
 
@@ -15,8 +17,7 @@ static __global__ void applyGlobalPhase_kernel(thrust::complex<double> *buffer,
                                                size_t nelems) {
   size_t i = blockDim.x * blockIdx.x + threadIdx.x;
 
-  if (i >= nelems)
-    return;
+  if (i >= nelems) return;
 
   thrust::complex<double> gphase = gate[0];
   buffer[i] = buffer[i] * gphase;
@@ -29,8 +30,7 @@ static __global__ void applyOneQubitGate_kernel(thrust::complex<double> *buffer,
   size_t i = blockDim.x * blockIdx.x + threadIdx.x;
   size_t st = (1ull << (nqubits - target - 1));
 
-  if (i >= nelems)
-    return;
+  if (i >= nelems) return;
 
   if ((i & st) == 0) {
     thrust::complex<double> a0 = buffer[i];
@@ -48,8 +48,7 @@ static __global__ void applyTwoQubitGate_kernel(thrust::complex<double> *buffer,
   size_t st0 = (1ull << (nqubits - target1 - 1));
   size_t st1 = (1ull << (nqubits - target0 - 1));
 
-  if (i >= nelems)
-    return;
+  if (i >= nelems) return;
 
   if ((i & st0) == 0 && (i & st1) == 0) {
     thrust::complex<double> a0 = buffer[i + 0];
@@ -67,18 +66,16 @@ static __global__ void applyTwoQubitGate_kernel(thrust::complex<double> *buffer,
   }
 }
 
-static __global__ void
-applyThreeQubitGate_kernel(thrust::complex<double> *buffer,
-                           thrust::complex<double> *gate, size_t target0,
-                           size_t target1, size_t target2, size_t nqubits,
-                           size_t nelems) {
+static __global__ void applyThreeQubitGate_kernel(
+    thrust::complex<double> *buffer, thrust::complex<double> *gate,
+    size_t target0, size_t target1, size_t target2, size_t nqubits,
+    size_t nelems) {
   size_t i = blockDim.x * blockIdx.x + threadIdx.x;
   size_t st0 = (1ull << (nqubits - target2 - 1));
   size_t st1 = (1ull << (nqubits - target1 - 1));
   size_t st2 = (1ull << (nqubits - target0 - 1));
 
-  if (i >= nelems)
-    return;
+  if (i >= nelems) return;
 
   if ((i & st0) == 0 && (i & st1) == 0 && (i & st2) == 0) {
     thrust::complex<double> a0 = buffer[i + 0];
@@ -146,7 +143,6 @@ static void applyTwoQubitGate(thrust::complex<double> *buffer,
                               thrust::complex<double> *gate,
                               std::vector<size_t> targets, size_t nqubits,
                               size_t nelems) {
-
   applyTwoQubitGate_kernel<<<(nelems + BLOCKDIM - 1) / BLOCKDIM, BLOCKDIM>>>(
       buffer, gate, targets[0], targets[1], nqubits, nelems);
   CUDA_CHECK(cudaGetLastError());
@@ -166,7 +162,7 @@ void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
   assert(targets.size() == 1 || targets.size() == 2 || targets.size() == 3);
   auto buffer = reinterpret_cast<thrust::complex<double> *>(_buffer);
   auto gate = reinterpret_cast<thrust::complex<double> *>(_gate);
-  if (targets.size() == 0) { // global Phase
+  if (targets.size() == 0) {  // global Phase
     applyGlobalPhase(buffer, gate, targets, nqubits, nelems);
   } else if (targets.size() == 1) {
     applyOneQubitGate(buffer, gate, targets, nqubits, nelems);
@@ -179,4 +175,4 @@ void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
   }
 }
 
-} // namespace cu
+}  // namespace cu

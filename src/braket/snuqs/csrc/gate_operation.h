@@ -2,11 +2,10 @@
 #define _GATE_OPERATION_H_
 
 #include <complex>
-#include <map>
 #include <vector>
 
 class GateOperation {
-public:
+ public:
   virtual void *data();
   virtual void *data_cuda();
   virtual size_t num_elems() const;
@@ -19,7 +18,7 @@ public:
 };
 
 class OneQubitGate : public GateOperation {
-public:
+ public:
   OneQubitGate();
   virtual ~OneQubitGate();
   virtual size_t dim() const override;
@@ -28,7 +27,7 @@ public:
 };
 
 class ThreeQubitGate : public GateOperation {
-public:
+ public:
   ThreeQubitGate();
   virtual ~ThreeQubitGate();
   virtual size_t dim() const override;
@@ -37,7 +36,7 @@ public:
 };
 
 class TwoQubitGate : public GateOperation {
-public:
+ public:
   TwoQubitGate();
   virtual ~TwoQubitGate();
   virtual size_t dim() const override;
@@ -46,206 +45,206 @@ public:
 };
 
 class Identity : public OneQubitGate {
-public:
+ public:
   Identity();
   ~Identity();
 };
 
 class Hadamard : public OneQubitGate {
-public:
+ public:
   Hadamard();
   ~Hadamard();
 };
 
 class PauliX : public OneQubitGate {
-public:
+ public:
   PauliX();
   ~PauliX();
 };
 
 class PauliY : public OneQubitGate {
-public:
+ public:
   PauliY();
   ~PauliY();
 };
 
 class PauliZ : public OneQubitGate {
-public:
+ public:
   PauliZ();
   ~PauliZ();
 };
 
 class CX : public TwoQubitGate {
-public:
+ public:
   CX();
   ~CX();
 };
 
 class CY : public TwoQubitGate {
-public:
+ public:
   CY();
   ~CY();
 };
 
 class CZ : public TwoQubitGate {
-public:
+ public:
   CZ();
   ~CZ();
 };
 
 class S : public OneQubitGate {
-public:
+ public:
   S();
   ~S();
 };
 
 class Si : public OneQubitGate {
-public:
+ public:
   Si();
   ~Si();
 };
 
 class T : public OneQubitGate {
-public:
+ public:
   T();
   ~T();
 };
 
 class Ti : public OneQubitGate {
-public:
+ public:
   Ti();
   ~Ti();
 };
 
 class V : public OneQubitGate {
-public:
+ public:
   V();
   ~V();
 };
 
 class Vi : public OneQubitGate {
-public:
+ public:
   Vi();
   ~Vi();
 };
 
 class PhaseShift : public OneQubitGate {
-public:
+ public:
   PhaseShift(double angle);
   ~PhaseShift();
   double angle_;
 };
 
 class CPhaseShift : public TwoQubitGate {
-public:
+ public:
   CPhaseShift(double angle);
   ~CPhaseShift();
   double angle_;
 };
 
 class CPhaseShift00 : public TwoQubitGate {
-public:
+ public:
   CPhaseShift00(double angle);
   ~CPhaseShift00();
   double angle_;
 };
 
 class CPhaseShift01 : public TwoQubitGate {
-public:
+ public:
   CPhaseShift01(double angle);
   ~CPhaseShift01();
   double angle_;
 };
 
 class CPhaseShift10 : public TwoQubitGate {
-public:
+ public:
   CPhaseShift10(double angle);
   ~CPhaseShift10();
   double angle_;
 };
 
 class RotX : public OneQubitGate {
-public:
+ public:
   RotX(double angle);
   ~RotX();
   double angle_;
 };
 
 class RotY : public OneQubitGate {
-public:
+ public:
   RotY(double angle);
   ~RotY();
   double angle_;
 };
 
 class RotZ : public OneQubitGate {
-public:
+ public:
   RotZ(double angle);
   ~RotZ();
   double angle_;
 };
 
 class Swap : public TwoQubitGate {
-public:
+ public:
   Swap();
   ~Swap();
 };
 
 class ISwap : public TwoQubitGate {
-public:
+ public:
   ISwap();
   ~ISwap();
 };
 
 class PSwap : public TwoQubitGate {
-public:
+ public:
   PSwap(double angle);
   ~PSwap();
   double angle_;
 };
 
 class XY : public TwoQubitGate {
-public:
+ public:
   XY(double angle);
   ~XY();
   double angle_;
 };
 
 class XX : public TwoQubitGate {
-public:
+ public:
   XX(double angle);
   ~XX();
   double angle_;
 };
 
 class YY : public TwoQubitGate {
-public:
+ public:
   YY(double angle);
   ~YY();
   double angle_;
 };
 
 class ZZ : public TwoQubitGate {
-public:
+ public:
   ZZ(double angle);
   ~ZZ();
   double angle_;
 };
 
 class CCNot : public ThreeQubitGate {
-public:
+ public:
   CCNot();
   ~CCNot();
 };
 
 class CSwap : public ThreeQubitGate {
-public:
+ public:
   CSwap();
   ~CSwap();
 };
 
 class U : public OneQubitGate {
-public:
+ public:
   U(double theta, double phi, double lambda);
   ~U();
   double theta_;
@@ -254,15 +253,15 @@ public:
 };
 
 class GPhase : public OneQubitGate {
-public:
+ public:
   GPhase(double angle);
   ~GPhase();
   double angle_;
 };
 
 class Unitary : public GateOperation {
-public:
+ public:
   Unitary();
   ~Unitary();
 };
-#endif //_GATE_OPERATION_H_
+#endif  //_GATE_OPERATION_H_

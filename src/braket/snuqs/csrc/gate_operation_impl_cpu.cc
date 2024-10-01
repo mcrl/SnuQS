@@ -1,4 +1,5 @@
 #include "gate_operation_impl_cpu.h"
+
 #include <cassert>
 
 namespace cpu {
@@ -132,4 +133,4 @@ void applyGate(void *_buffer, void *_gate, std::vector<size_t> targets,
     assert(false);
   }
 }
-} // namespace cpu
+}  // namespace cpu
