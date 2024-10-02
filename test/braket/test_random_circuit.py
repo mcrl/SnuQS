@@ -7,8 +7,8 @@ from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
 MIN_QUBIT = 15
-MAX_QUBIT = 20
-MAX_GATE = 100
+MAX_QUBIT = 15
+MAX_GATE = 200
 NGATE_KIND = 31
 NUM_ITER = 100
 
@@ -149,19 +149,22 @@ class BraketTest(unittest.TestCase):
 
     def test_braket_snuqs(self):
         for i in range(NUM_ITER):
+            print(f"Running random circuit test #{i}...")
+
             circ = self.random_circuit()
             circ.state_vector()
-
-            print(f"Running random circuit test #{i}...")
 
             print("\tRunning braket")
             task_braket = self.run_braket(circ)
             print("\tRunning snuqs")
             task_snuqs = self.run_snuqs(circ)
 
+            result_braket = task_braket.result().values
+            result_snuqs = task_snuqs.result().values
+
             self.assertTrue(np.allclose(
-                task_braket.result().values,
-                task_snuqs.result().values
+                result_braket,
+                result_snuqs,
             ))
 
 
