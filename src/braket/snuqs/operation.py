@@ -1,4 +1,5 @@
 from __future__ import annotations
+import numpy as np
 import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
 from scipy.linalg import fractional_matrix_power
@@ -38,14 +39,14 @@ class GateOperation(Operation, ABC):
 
     @property
     @abstractmethod
-    def _base_matrix(self) -> qp.ndarray:
-        """qp.ndarray: The matrix representation of the operation."""
+    def _base_matrix(self) -> np.ndarray:
+        """np.ndarray: The matrix representation of the operation."""
 
     @property
     def matrix(self) -> qp.ndarray:
         unitary = self._base_matrix
         if int(self._power) == self._power:
-            unitary = qp.linalg.matrix_power(unitary, int(self._power))
+            unitary = np.linalg.matrix_power(unitary, int(self._power))
         else:
             unitary = fractional_matrix_power(unitary, self._power)
         return unitary
@@ -66,11 +67,11 @@ class KrausOperation(Operation, ABC):
 
     @property
     @abstractmethod
-    def matrices(self) -> list[qp.ndarray]:
-        """list[qp.ndarray]: A list of matrices representing Kraus operators."""
+    def matrices(self) -> list[np.ndarray]:
+        """list[np.ndarray]: A list of matrices representing Kraus operators."""
 
     def __eq__(self, other):
-        return self.targets == other.targets and qp.allclose(self.matrices, other.matrices)
+        return self.targets == other.targets and np.allclose(self.matrices, other.matrices)
 
 
 class Observable(Operation, ABC):
@@ -116,20 +117,20 @@ class Observable(Operation, ABC):
 
     @property
     @abstractmethod
-    def eigenvalues(self) -> qp.ndarray:
+    def eigenvalues(self) -> np.ndarray:
         """
-        qp.ndarray: The eigenvalues of the observable ordered by computational basis state.
+        np.ndarray: The eigenvalues of the observable ordered by computational basis state.
         """
 
     @abstractmethod
-    def apply(self, state: qp.ndarray) -> qp.ndarray:
+    def apply(self, state: np.ndarray) -> np.ndarray:
         """Applies this observable to the given state.
 
         Args:
-            state (qp.ndarray): The state to apply the observable to.
+            state (np.ndarray): The state to apply the observable to.
 
         Returns:
-            qp.ndarray: The state after the observable has been applied.
+            np.ndarray: The state after the observable has been applied.
         """
 
     @abstractmethod

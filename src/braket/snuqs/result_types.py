@@ -3,7 +3,7 @@ from functools import singledispatch
 from typing import Any, Union, Optional
 from braket.ir import jaqcd
 from braket.circuits import ResultType
-import braket.snuqs.quantumpy as qp
+import numpy as np
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
 from braket.snuqs.observables import Observable
 
@@ -134,16 +134,16 @@ class StateVector(ResultType):
     Simply returns the given state vector.
     """
 
-    def calculate(self, simulation: StateVectorSimulation) -> qp.ndarray:
+    def calculate(self, simulation: StateVectorSimulation) -> np.ndarray:
         """Return the given state vector of the simulation.
 
         Args:
             simulation (StateVectorSimulation): The simulation whose state vector will be returned
 
         Returns:
-            qp.ndarray: The state vector (before observables) of the simulation
+            np.ndarray: The state vector (before observables) of the simulation
         """
-        return simulation.state_vector
+        return np.array(simulation.state_vector, copy=False)
 
 
 @_from_braket_result_type.register

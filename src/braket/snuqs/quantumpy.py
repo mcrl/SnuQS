@@ -1,5 +1,4 @@
 import numpy as np
-from braket.snuqs._C import StateVector
 from braket.snuqs._C import (
     Identity, Hadamard, PauliX, PauliY, PauliZ,
     CX, CY, CZ, S, Si, T, Ti, V, Vi,
@@ -10,20 +9,12 @@ from braket.snuqs._C import (
     U, GPhase,
 )
 
-from typing import Optional
-
-linalg = np.linalg
-
 
 class ndarray(np.ndarray):
     def __new__(cls, obj):
         arr = np.array(obj, copy=False).view(cls)
         arr.obj = obj
         return arr
-
-
-def state_vector(qubit_count: int, init: Optional[bool] = True):
-    return ndarray(StateVector(qubit_count))
 
 
 def eye(*args, **kwargs):

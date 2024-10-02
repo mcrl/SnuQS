@@ -1,6 +1,6 @@
 from functools import lru_cache, singledispatch
 
-import braket.snuqs.quantumpy as qp
+import numpy as np
 from braket.snuqs.operation import GateOperation
 
 
@@ -26,24 +26,24 @@ def _from_braket_instruction(instruction):
 
 
 @lru_cache()
-def pauli_eigenvalues(num_qubits: int) -> qp.ndarray:
+def pauli_eigenvalues(num_qubits: int) -> np.ndarray:
     """The eigenvalues of Pauli operators and their tensor products.
 
     Args:
         num_qubits (int): the number of qubits the operator acts on
     Returns:
-        qp.ndarray: the eigenvalues of a Pauli product operator of the given size
+        np.ndarray: the eigenvalues of a Pauli product operator of the given size
     """
     if num_qubits == 1:
-        return qp.array([1, -1])
-    return qp.concatenate([pauli_eigenvalues(num_qubits - 1), -pauli_eigenvalues(num_qubits - 1)])
+        return np.array([1, -1])
+    return np.concatenate([pauli_eigenvalues(num_qubits - 1), -pauli_eigenvalues(num_qubits - 1)])
 
 
-def check_matrix_dimensions(matrix: qp.ndarray, targets: tuple[int, ...]) -> None:
+def check_matrix_dimensions(matrix: np.ndarray, targets: tuple[int, ...]) -> None:
     """Checks that the matrix is of the correct shape to act on the targets.
 
     Args:
-        matrix (qp.ndarray): The matrix to check
+        matrix (np.ndarray): The matrix to check
         targets (tuple[int, ...]): The target qubits the matrix acts on
 
     Raises:
@@ -60,53 +60,53 @@ def check_matrix_dimensions(matrix: qp.ndarray, targets: tuple[int, ...]) -> Non
         )
 
 
-def check_unitary(matrix: qp.ndarray):
+def check_unitary(matrix: np.ndarray):
     """Checks that the given matrix is unitary.
 
     Args:
-        matrix (qp.ndarray): The matrix to check
+        matrix (np.ndarray): The matrix to check
 
     Raises:
         ValueError: If the matrix is not unitary
     """
-    if not qp.allclose(qp.eye(len(matrix)), matrix.dot(matrix.T.conj())):
+    if not np.allclose(np.eye(len(matrix)), matrix.dot(matrix.T.conj())):
         raise ValueError(f"{matrix} is not unitary")
 
 
-def check_hermitian(matrix: qp.ndarray):
+def check_hermitian(matrix: np.ndarray):
     """Checks that the given matrix is Hermitian.
 
     Args:
-        matrix (qp.ndarray): The matrix to check
+        matrix (np.ndarray): The matrix to check
 
     Raises:
         ValueError: If the matrix is not Hermitian
     """
-    if not qp.allclose(matrix, matrix.T.conj()):
+    if not np.allclose(matrix, matrix.T.conj()):
         raise ValueError(f"{matrix} is not Hermitian")
 
 
-def ir_matrix_to_ndarray(matrix: list[list[list[float]]]) -> qp.ndarray:
+def ir_matrix_to_ndarray(matrix: list[list[list[float]]]) -> np.ndarray:
     """Converts a JAQCD matrix into a numpy array.
 
     Args:
         matrix (list[list[list[float]]]: The IR representation of a matrix
 
     Returns:
-        qp.ndarray: The numpy ndarray representation of the matrix
+        np.ndarray: The numpy ndarray representation of the matrix
     """
-    return qp.array([[complex(element[0], element[1]) for element in row] for row in matrix])
+    return np.array([[complex(element[0], element[1]) for element in row] for row in matrix])
 
 
-def check_cptp(matrices: list[qp.ndarray]):
+def check_cptp(matrices: list[np.ndarray]):
     """Checks that the given matrices define a CPTP map.
 
     Args:
-        matrices (list[qp.ndarray]): The matrices to check
+        matrices (list[np.ndarray]): The matrices to check
 
     Raises:
         ValueError: If the matrices do not define a CPTP map
     """
-    E = sum([qp.matmul(matrix.T.conjugate(), matrix) for matrix in matrices])
-    if not qp.allclose(E, qp.eye(*E.shape)):
+    E = sum([np.matmul(matrix.T.conjugate(), matrix) for matrix in matrices])
+    if not np.allclose(E, np.eye(*E.shape)):
         raise ValueError(f"{matrices} do not define a CPTP map")

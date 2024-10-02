@@ -62,7 +62,7 @@ PYBIND11_MODULE(_C, m) {
   // Functions
   m.def("evolve", &evolve);
   m.def("initialize_zero", &initialize_zero);
-  m.def("initialize_z_basis", &initialize_z_basis);
+  m.def("initialize_basis_z", &initialize_basis_z);
 
   // GateOperation
   py::class_<GateOperation>(m, "GateOperation");

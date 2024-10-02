@@ -1,9 +1,10 @@
 import numpy as np
-from braket.snuqs._C import evolve as evolve_C, initialize_z_basis as initialize_z_basis_C
 from braket.snuqs.operation import GateOperation
-import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
 from typing import Optional, List
+
+from braket.snuqs._C import StateVector
+from braket.snuqs._C import evolve as evolve_C, initialize_basis_z as initialize_basis_z_C
 
 
 class Simulation(ABC):
@@ -84,38 +85,37 @@ class StateVectorSimulation(Simulation):
         """
 
         super().__init__(qubit_count=qubit_count, shots=shots)
-        initial_state = qp.state_vector(qubit_count)
-        self._state_vector = initial_state
+        self._state_vector = StateVector(qubit_count)
 
     @property
-    def state_vector(self) -> qp.ndarray:
+    def state_vector(self) -> np.ndarray:
         """
-        qp.ndarray: The state vector specifying the current state of the simulation.
+        np.ndarray: The state vector specifying the current state of the simulation.
 
         Note:
             Mutating this array will mutate the state of the simulation.
         """
-        return self._state_vector
+        return np.array(self._state_vector, copy=False)
 
     @property
-    def probabilities(self) -> qp.ndarray:
+    def probabilities(self) -> np.ndarray:
         """
-        qp.ndarray: The probabilities of each computational basis state of the current state
+        np.ndarray: The probabilities of each computational basis state of the current state
             vector of the simulation.
         """
         return np.abs(self.state_vector) ** 2
 
     def retrieve_samples(self) -> list[int]:
-        return np.random.choice(len(self._state_vector), p=self.probabilities, size=self._shots)
+        return np.random.choice(len(self.state_vector), p=self.probabilities, size=self._shots)
 
     def evolve(self,
                operations: list[GateOperation],
                use_cuda: bool = False,
                offload: Optional[str] = None,
                path: Optional[List[str]] = None) -> None:
-        state_vector = self._state_vector.obj
+        state_vector = self._state_vector
 
-        initialize_z_basis_C(state_vector)
+        initialize_basis_z_C(state_vector)
 
         if use_cuda:
             state_vector.toCUDA()

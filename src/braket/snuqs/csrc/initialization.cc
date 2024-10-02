@@ -13,7 +13,7 @@ void initialize_zero(StateVector &state_vector) {
   }
 }
 
-void initialize_z_basis(StateVector &state_vector) {
+void initialize_basis_z(StateVector &state_vector) {
   assert(state_vector.device() == Device::CPU);
 
   auto buf = reinterpret_cast<std::complex<double> *>(state_vector.data());

@@ -1,6 +1,7 @@
 #include "state_vector.h"
 
 #include <cuda_runtime.h>
+#include <spdlog/spdlog.h>
 
 #include "utils.h"
 
@@ -9,10 +10,12 @@ StateVector::StateVector(size_t num_qubits) : num_qubits_(num_qubits) {
   CUDA_CHECK(
       cudaMalloc(&data_cuda_, num_elems() * sizeof(std::complex<double>)));
 }
+
 StateVector::~StateVector() {
   cudaFree(data_cuda_);
   delete[] data_;
 }
+
 void *StateVector::data() {
   if (device_ != Device::CPU) {
     toCPU();
@@ -42,7 +45,6 @@ void StateVector::toCUDA() {
 }
 
 Device StateVector::device() const { return device_; }
-
 size_t StateVector::dim() const { return 1; }
 size_t StateVector::num_elems() const { return (1ul << num_qubits_); }
 size_t StateVector::num_qubits() const { return num_qubits_; }

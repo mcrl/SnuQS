@@ -1,0 +1,29 @@
+---
+CompileFlags:
+  CompilationDatabase: "build/temp.linux-x86_64-cpython-311/"
+---
+If:               
+  PathMatch: .*\.cu
+
+CompileFlags:
+  Add:
+    - "-nocudalib"
+    - "--no-cuda-version-check"
+    - "-ferror-limit=0"
+  Remove:
+    # strip CUDA fatbin args
+    - "-Xcompiler=-fPIC"
+    - "-Xfatbin*"
+    # strip CUDA arch flags
+    - "-gencode*"
+    - "--generate-code*"
+    # strip CUDA flags unknown to clang
+    - "-ccbin*"
+    - "--compiler-options*"
+    - "--expt-extended-lambda"
+    - "--expt-relaxed-constexpr"
+    - "-forward-unknown-to-host-compiler"
+    - "-Werror=cross-execution-space-call"
+Diagnostics:
+  Suppress: "*"
+---
