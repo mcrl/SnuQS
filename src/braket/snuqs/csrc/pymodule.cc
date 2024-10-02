@@ -80,12 +80,16 @@ PYBIND11_MODULE(_C, m) {
 
   // Operation
   py::class_<Operation>(m, "Operation")
-      .def(py::init<std::vector<size_t>>())
-      .def_property("targets", &Operation::get_targets, &Operation::set_targets)
-      .def_readwrite("_targets", &Operation::targets_);
+      .def(py::init<const std::vector<size_t> &>())
+      .def_property("targets", &Operation::get_targets,
+                    &Operation::set_targets);
+  //.def_property("_targets", &Operation::get_targets, &Operation::set_targets);
 
   // GateOperation
-  py::class_<GateOperation, Operation>(m, "GateOperation");
+  py::class_<GateOperation, Operation>(m, "GateOperation")
+      .def(py::init<const std::vector<size_t> &, const std::vector<size_t> &,
+                    size_t>());
+
   GATEOP(Identity);
   GATEOP(Hadamard);
   GATEOP(PauliX);

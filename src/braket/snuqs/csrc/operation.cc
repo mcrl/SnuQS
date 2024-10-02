@@ -10,7 +10,6 @@ Operation::Operation(const std::vector<size_t> &targets) : targets_(targets) {}
 Operation::~Operation() {}
 std::vector<size_t> Operation::get_targets() const { return targets_; }
 void Operation::set_targets(const std::vector<size_t> &targets) {
-  spdlog::info("set_targets({})", targets.size());
   targets_ = targets;
 }
 
@@ -26,8 +25,8 @@ GateOperation::GateOperation(const std::vector<size_t> &targets,
 }
 
 GateOperation::~GateOperation() {
-  delete[] data_;
   CUDA_CHECK(cudaFree(data_cuda_));
+  delete[] data_;
 }
 
 void *GateOperation::data() { return data_; }

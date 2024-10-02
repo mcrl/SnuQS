@@ -4,8 +4,8 @@
 
 using namespace std::complex_literals;
 
-Identity::Identity(const std::vector<size_t> &targets,
-                   const std::vector<size_t> &ctrl_modifiers, size_t power)
+Identity::Identity(std::vector<size_t> targets,
+                   std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -14,8 +14,8 @@ Identity::Identity(const std::vector<size_t> &targets,
 }
 Identity::~Identity() {}
 
-Hadamard::Hadamard(const std::vector<size_t> &targets,
-                   const std::vector<size_t> &ctrl_modifiers, size_t power)
+Hadamard::Hadamard(std::vector<size_t> targets,
+                   std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = M_SQRT1_2;
   data_[0 * 2 + 1] = M_SQRT1_2;
@@ -24,8 +24,8 @@ Hadamard::Hadamard(const std::vector<size_t> &targets,
 }
 Hadamard::~Hadamard() {}
 
-PauliX::PauliX(const std::vector<size_t> &targets,
-               const std::vector<size_t> &ctrl_modifiers, size_t power)
+PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+               size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 0;
   data_[0 * 2 + 1] = 1;
@@ -34,8 +34,8 @@ PauliX::PauliX(const std::vector<size_t> &targets,
 }
 PauliX::~PauliX() {}
 
-PauliY::PauliY(const std::vector<size_t> &targets,
-               const std::vector<size_t> &ctrl_modifiers, size_t power)
+PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+               size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 0;
   data_[0 * 2 + 1] = -1i;
@@ -44,8 +44,8 @@ PauliY::PauliY(const std::vector<size_t> &targets,
 }
 PauliY::~PauliY() {}
 
-PauliZ::PauliZ(const std::vector<size_t> &targets,
-               const std::vector<size_t> &ctrl_modifiers, size_t power)
+PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+               size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -54,8 +54,8 @@ PauliZ::PauliZ(const std::vector<size_t> &targets,
 }
 PauliZ::~PauliZ() {}
 
-CX::CX(const std::vector<size_t> &targets,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -76,8 +76,8 @@ CX::CX(const std::vector<size_t> &targets,
 }
 CX::~CX() {}
 
-CY::CY(const std::vector<size_t> &targets,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -98,8 +98,8 @@ CY::CY(const std::vector<size_t> &targets,
 }
 CY::~CY() {}
 
-CZ::CZ(const std::vector<size_t> &targets,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -120,8 +120,8 @@ CZ::CZ(const std::vector<size_t> &targets,
 }
 CZ::~CZ() {}
 
-S::S(const std::vector<size_t> &targets,
-     const std::vector<size_t> &ctrl_modifiers, size_t power)
+S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -130,8 +130,8 @@ S::S(const std::vector<size_t> &targets,
 }
 S::~S() {}
 
-Si::Si(const std::vector<size_t> &targets,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -140,8 +140,8 @@ Si::Si(const std::vector<size_t> &targets,
 }
 Si::~Si() {}
 
-T::T(const std::vector<size_t> &targets,
-     const std::vector<size_t> &ctrl_modifiers, size_t power)
+T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -150,8 +150,8 @@ T::T(const std::vector<size_t> &targets,
 }
 T::~T() {}
 
-Ti::Ti(const std::vector<size_t> &targets,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -160,8 +160,8 @@ Ti::Ti(const std::vector<size_t> &targets,
 }
 Ti::~Ti() {}
 
-V::V(const std::vector<size_t> &targets,
-     const std::vector<size_t> &ctrl_modifiers, size_t power)
+V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 0.5 + 0.5i;
   data_[0 * 2 + 1] = 0.5 - 0.5i;
@@ -170,8 +170,8 @@ V::V(const std::vector<size_t> &targets,
 }
 V::~V() {}
 
-Vi::Vi(const std::vector<size_t> &targets,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 2 + 0] = 0.5 - 0.5i;
   data_[0 * 2 + 1] = 0.5 + 0.5i;
@@ -180,8 +180,8 @@ Vi::Vi(const std::vector<size_t> &targets,
 }
 Vi::~Vi() {}
 
-PhaseShift::PhaseShift(const std::vector<size_t> &targets, double angle,
-                       const std::vector<size_t> &ctrl_modifiers, size_t power)
+PhaseShift::PhaseShift(std::vector<size_t> targets, double angle,
+                       std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   data_[0 * 2 + 0] = 1;
   data_[0 * 2 + 1] = 0;
@@ -190,9 +190,8 @@ PhaseShift::PhaseShift(const std::vector<size_t> &targets, double angle,
 }
 PhaseShift::~PhaseShift() {}
 
-CPhaseShift::CPhaseShift(const std::vector<size_t> &targets, double angle,
-                         const std::vector<size_t> &ctrl_modifiers,
-                         size_t power)
+CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
+                         std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -213,9 +212,8 @@ CPhaseShift::CPhaseShift(const std::vector<size_t> &targets, double angle,
 }
 CPhaseShift::~CPhaseShift() {}
 
-CPhaseShift00::CPhaseShift00(const std::vector<size_t> &targets, double angle,
-                             const std::vector<size_t> &ctrl_modifiers,
-                             size_t power)
+CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
+                             std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   data_[0 * 4 + 0] = std::exp(1i * angle);
   data_[0 * 4 + 1] = 0;
@@ -236,9 +234,8 @@ CPhaseShift00::CPhaseShift00(const std::vector<size_t> &targets, double angle,
 }
 CPhaseShift00::~CPhaseShift00() {}
 
-CPhaseShift01::CPhaseShift01(const std::vector<size_t> &targets, double angle,
-                             const std::vector<size_t> &ctrl_modifiers,
-                             size_t power)
+CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
+                             std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -259,9 +256,8 @@ CPhaseShift01::CPhaseShift01(const std::vector<size_t> &targets, double angle,
 }
 CPhaseShift01::~CPhaseShift01() {}
 
-CPhaseShift10::CPhaseShift10(const std::vector<size_t> &targets, double angle,
-                             const std::vector<size_t> &ctrl_modifiers,
-                             size_t power)
+CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
+                             std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -282,8 +278,8 @@ CPhaseShift10::CPhaseShift10(const std::vector<size_t> &targets, double angle,
 }
 CPhaseShift10::~CPhaseShift10() {}
 
-RotX::RotX(const std::vector<size_t> &targets, double angle,
-           const std::vector<size_t> &ctrl_modifiers, size_t power)
+RotX::RotX(std::vector<size_t> targets, double angle,
+           std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   double cos_half_angle = cos(angle_ / 2);
   std::complex<double> i_sin_hanlf_angle = 1i * sin(angle_ / 2);
@@ -294,8 +290,8 @@ RotX::RotX(const std::vector<size_t> &targets, double angle,
 }
 RotX::~RotX() {}
 
-RotY::RotY(const std::vector<size_t> &targets, double angle,
-           const std::vector<size_t> &ctrl_modifiers, size_t power)
+RotY::RotY(std::vector<size_t> targets, double angle,
+           std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   double cos_half_angle = cos(angle_ / 2);
   std::complex<double> sin_hanlf_angle = sin(angle_ / 2);
@@ -306,8 +302,8 @@ RotY::RotY(const std::vector<size_t> &targets, double angle,
 }
 RotY::~RotY() {}
 
-RotZ::RotZ(const std::vector<size_t> &targets, double angle,
-           const std::vector<size_t> &ctrl_modifiers, size_t power)
+RotZ::RotZ(std::vector<size_t> targets, double angle,
+           std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   std::complex<double> positive_phase = std::exp(1i * angle_ / 2.);
   std::complex<double> negative_phase = std::exp(-1i * angle_ / 2.);
@@ -318,8 +314,8 @@ RotZ::RotZ(const std::vector<size_t> &targets, double angle,
 }
 RotZ::~RotZ() {}
 
-Swap::Swap(const std::vector<size_t> &targets,
-           const std::vector<size_t> &ctrl_modifiers, size_t power)
+Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+           size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -340,8 +336,8 @@ Swap::Swap(const std::vector<size_t> &targets,
 }
 Swap::~Swap() {}
 
-ISwap::ISwap(const std::vector<size_t> &targets,
-             const std::vector<size_t> &ctrl_modifiers, size_t power)
+ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+             size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -362,8 +358,8 @@ ISwap::ISwap(const std::vector<size_t> &targets,
 }
 ISwap::~ISwap() {}
 
-PSwap::PSwap(const std::vector<size_t> &targets, double angle,
-             const std::vector<size_t> &ctrl_modifiers, size_t power)
+PSwap::PSwap(std::vector<size_t> targets, double angle,
+             std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   data_[0 * 4 + 0] = 1;
   data_[0 * 4 + 1] = 0;
@@ -384,8 +380,8 @@ PSwap::PSwap(const std::vector<size_t> &targets, double angle,
 }
 PSwap::~PSwap() {}
 
-XY::XY(const std::vector<size_t> &targets, double angle,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+XY::XY(std::vector<size_t> targets, double angle,
+       std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
@@ -408,8 +404,8 @@ XY::XY(const std::vector<size_t> &targets, double angle,
 }
 XY::~XY() {}
 
-XX::XX(const std::vector<size_t> &targets, double angle,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+XX::XX(std::vector<size_t> targets, double angle,
+       std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
@@ -432,8 +428,8 @@ XX::XX(const std::vector<size_t> &targets, double angle,
 }
 XX::~XX() {}
 
-YY::YY(const std::vector<size_t> &targets, double angle,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+YY::YY(std::vector<size_t> targets, double angle,
+       std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
@@ -456,8 +452,8 @@ YY::YY(const std::vector<size_t> &targets, double angle,
 }
 YY::~YY() {}
 
-ZZ::ZZ(const std::vector<size_t> &targets, double angle,
-       const std::vector<size_t> &ctrl_modifiers, size_t power)
+ZZ::ZZ(std::vector<size_t> targets, double angle,
+       std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
   std::complex<double> positive_phase = std::exp(1i * angle_ / 2.);
   std::complex<double> negative_phase = std::exp(-1i * angle_ / 2.);
@@ -480,8 +476,8 @@ ZZ::ZZ(const std::vector<size_t> &targets, double angle,
 }
 ZZ::~ZZ() {}
 
-CCNot::CCNot(const std::vector<size_t> &targets,
-             const std::vector<size_t> &ctrl_modifiers, size_t power)
+CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+             size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 8 + 0] = 1;
   data_[0 * 8 + 1] = 0;
@@ -550,8 +546,8 @@ CCNot::CCNot(const std::vector<size_t> &targets,
 }
 CCNot::~CCNot() {}
 
-CSwap::CSwap(const std::vector<size_t> &targets,
-             const std::vector<size_t> &ctrl_modifiers, size_t power)
+CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+             size_t power)
     : GateOperation(targets, ctrl_modifiers, power) {
   data_[0 * 8 + 0] = 1;
   data_[0 * 8 + 1] = 0;
@@ -620,8 +616,8 @@ CSwap::CSwap(const std::vector<size_t> &targets,
 }
 CSwap::~CSwap() {}
 
-U::U(const std::vector<size_t> &targets, double theta, double phi,
-     double lambda, const std::vector<size_t> &ctrl_modifiers, size_t power)
+U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
+     std::vector<size_t> ctrl_modifiers, size_t power)
     : GateOperation(targets, ctrl_modifiers, power),
       theta_(theta),
       phi_(phi),
@@ -633,14 +629,9 @@ U::U(const std::vector<size_t> &targets, double theta, double phi,
 }
 U::~U() {}
 
-GPhase::GPhase(const std::vector<size_t> &targets, double angle,
-               const std::vector<size_t> &ctrl_modifiers, size_t power)
-    : GateOperation((targets.size() == 0) ? std::vector<size_t>{0} : targets,
-                    ctrl_modifiers, power),
-      angle_(angle) {
-  data_[0 * 2 + 0] = std::exp(1i * angle);
-  data_[0 * 2 + 1] = 0;
-  data_[1 * 2 + 0] = 0;
-  data_[1 * 2 + 1] = std::exp(1i * angle);
+GPhase::GPhase(std::vector<size_t> targets, double angle,
+               std::vector<size_t> ctrl_modifiers, size_t power)
+    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+  data_[0] = std::exp(1i * angle);
 }
 GPhase::~GPhase() {}

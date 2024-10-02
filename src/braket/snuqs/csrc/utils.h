@@ -9,6 +9,6 @@
       fprintf(stderr, "CUDA Error: %s %s %s:%d\n", cudaGetErrorName(r), \
               cudaGetErrorString(r), __FILE__, __LINE__);               \
     }                                                                   \
-  } while (0);
+  } while (0)
 
 #endif  //_UTILS_H_

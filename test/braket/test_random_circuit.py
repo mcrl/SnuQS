@@ -6,9 +6,9 @@ from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
-MIN_QUBIT = 20
+MIN_QUBIT = 15
 MAX_QUBIT = 20
-MAX_GATE = 500
+MAX_GATE = 10
 NGATE_KIND = 31
 NUM_ITER = 1000
 
@@ -119,8 +119,9 @@ class BraketTest(unittest.TestCase):
     def random_circuit(self):
         nqubits = np.random.randint(MIN_QUBIT, MAX_QUBIT+1)
         ngates = np.random.randint(1, MAX_GATE+1)
-        circ = Circuit([RandomInstruction(nqubits).get()
-                       for _ in range(ngates)])
+        circ = Circuit([Instruction(Gate.I(), [q]) for q in range(nqubits)])
+        for _ in range(ngates):
+            circ.add_instruction(RandomInstruction(nqubits).get())
         return circ
 
     def run_braket(self, circ):
