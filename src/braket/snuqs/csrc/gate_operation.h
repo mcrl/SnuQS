@@ -5,251 +5,252 @@
 
 #include "operation.h"
 
-class OneQubitGate : public GateOperation {
+class Identity : public GateOperation {
  public:
-  OneQubitGate();
-  virtual ~OneQubitGate();
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
-  virtual std::vector<size_t> stride() const override;
-};
-
-class ThreeQubitGate : public GateOperation {
- public:
-  ThreeQubitGate();
-  virtual ~ThreeQubitGate();
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
-  virtual std::vector<size_t> stride() const override;
-};
-
-class TwoQubitGate : public GateOperation {
- public:
-  TwoQubitGate();
-  virtual ~TwoQubitGate();
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
-  virtual std::vector<size_t> stride() const override;
-};
-
-class Identity : public OneQubitGate {
- public:
-  Identity();
+  Identity(const std::vector<size_t> &targets,
+           const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~Identity();
 };
 
-class Hadamard : public OneQubitGate {
+class Hadamard : public GateOperation {
  public:
-  Hadamard();
+  Hadamard(const std::vector<size_t> &targets,
+           const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~Hadamard();
 };
 
-class PauliX : public OneQubitGate {
+class PauliX : public GateOperation {
  public:
-  PauliX();
+  PauliX(const std::vector<size_t> &targets,
+         const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~PauliX();
 };
 
-class PauliY : public OneQubitGate {
+class PauliY : public GateOperation {
  public:
-  PauliY();
+  PauliY(const std::vector<size_t> &targets,
+         const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~PauliY();
 };
 
-class PauliZ : public OneQubitGate {
+class PauliZ : public GateOperation {
  public:
-  PauliZ();
+  PauliZ(const std::vector<size_t> &targets,
+         const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~PauliZ();
 };
 
-class CX : public TwoQubitGate {
+class CX : public GateOperation {
  public:
-  CX();
+  CX(const std::vector<size_t> &targets,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CX();
 };
 
-class CY : public TwoQubitGate {
+class CY : public GateOperation {
  public:
-  CY();
+  CY(const std::vector<size_t> &targets,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CY();
 };
 
-class CZ : public TwoQubitGate {
+class CZ : public GateOperation {
  public:
-  CZ();
+  CZ(const std::vector<size_t> &targets,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CZ();
 };
 
-class S : public OneQubitGate {
+class S : public GateOperation {
  public:
-  S();
+  S(const std::vector<size_t> &targets,
+    const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~S();
 };
 
-class Si : public OneQubitGate {
+class Si : public GateOperation {
  public:
-  Si();
+  Si(const std::vector<size_t> &targets,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~Si();
 };
 
-class T : public OneQubitGate {
+class T : public GateOperation {
  public:
-  T();
+  T(const std::vector<size_t> &targets,
+    const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~T();
 };
 
-class Ti : public OneQubitGate {
+class Ti : public GateOperation {
  public:
-  Ti();
+  Ti(const std::vector<size_t> &targets,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~Ti();
 };
 
-class V : public OneQubitGate {
+class V : public GateOperation {
  public:
-  V();
+  V(const std::vector<size_t> &targets,
+    const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~V();
 };
 
-class Vi : public OneQubitGate {
+class Vi : public GateOperation {
  public:
-  Vi();
+  Vi(const std::vector<size_t> &targets,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~Vi();
 };
 
-class PhaseShift : public OneQubitGate {
+class PhaseShift : public GateOperation {
  public:
-  PhaseShift(double angle);
+  PhaseShift(const std::vector<size_t> &targets, double angle,
+             const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~PhaseShift();
   double angle_;
 };
 
-class CPhaseShift : public TwoQubitGate {
+class CPhaseShift : public GateOperation {
  public:
-  CPhaseShift(double angle);
+  CPhaseShift(const std::vector<size_t> &targets, double angle,
+              const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CPhaseShift();
   double angle_;
 };
 
-class CPhaseShift00 : public TwoQubitGate {
+class CPhaseShift00 : public GateOperation {
  public:
-  CPhaseShift00(double angle);
+  CPhaseShift00(const std::vector<size_t> &targets, double angle,
+                const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CPhaseShift00();
   double angle_;
 };
 
-class CPhaseShift01 : public TwoQubitGate {
+class CPhaseShift01 : public GateOperation {
  public:
-  CPhaseShift01(double angle);
+  CPhaseShift01(const std::vector<size_t> &targets, double angle,
+                const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CPhaseShift01();
   double angle_;
 };
 
-class CPhaseShift10 : public TwoQubitGate {
+class CPhaseShift10 : public GateOperation {
  public:
-  CPhaseShift10(double angle);
+  CPhaseShift10(const std::vector<size_t> &targets, double angle,
+                const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CPhaseShift10();
   double angle_;
 };
 
-class RotX : public OneQubitGate {
+class RotX : public GateOperation {
  public:
-  RotX(double angle);
+  RotX(const std::vector<size_t> &targets, double angle,
+       const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~RotX();
   double angle_;
 };
 
-class RotY : public OneQubitGate {
+class RotY : public GateOperation {
  public:
-  RotY(double angle);
+  RotY(const std::vector<size_t> &targets, double angle,
+       const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~RotY();
   double angle_;
 };
 
-class RotZ : public OneQubitGate {
+class RotZ : public GateOperation {
  public:
-  RotZ(double angle);
+  RotZ(const std::vector<size_t> &targets, double angle,
+       const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~RotZ();
   double angle_;
 };
 
-class Swap : public TwoQubitGate {
+class Swap : public GateOperation {
  public:
-  Swap();
+  Swap(const std::vector<size_t> &targets,
+       const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~Swap();
 };
 
-class ISwap : public TwoQubitGate {
+class ISwap : public GateOperation {
  public:
-  ISwap();
+  ISwap(const std::vector<size_t> &targets,
+        const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~ISwap();
 };
 
-class PSwap : public TwoQubitGate {
+class PSwap : public GateOperation {
  public:
-  PSwap(double angle);
+  PSwap(const std::vector<size_t> &targets, double angle,
+        const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~PSwap();
   double angle_;
 };
 
-class XY : public TwoQubitGate {
+class XY : public GateOperation {
  public:
-  XY(double angle);
+  XY(const std::vector<size_t> &targets, double angle,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~XY();
   double angle_;
 };
 
-class XX : public TwoQubitGate {
+class XX : public GateOperation {
  public:
-  XX(double angle);
+  XX(const std::vector<size_t> &targets, double angle,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~XX();
   double angle_;
 };
 
-class YY : public TwoQubitGate {
+class YY : public GateOperation {
  public:
-  YY(double angle);
+  YY(const std::vector<size_t> &targets, double angle,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~YY();
   double angle_;
 };
 
-class ZZ : public TwoQubitGate {
+class ZZ : public GateOperation {
  public:
-  ZZ(double angle);
+  ZZ(const std::vector<size_t> &targets, double angle,
+     const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~ZZ();
   double angle_;
 };
 
-class CCNot : public ThreeQubitGate {
+class CCNot : public GateOperation {
  public:
-  CCNot();
+  CCNot(const std::vector<size_t> &targets,
+        const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CCNot();
 };
 
-class CSwap : public ThreeQubitGate {
+class CSwap : public GateOperation {
  public:
-  CSwap();
+  CSwap(const std::vector<size_t> &targets,
+        const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~CSwap();
 };
 
-class U : public OneQubitGate {
+class U : public GateOperation {
  public:
-  U(double theta, double phi, double lambda);
+  U(const std::vector<size_t> &targets, double theta, double phi, double lambda,
+    const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~U();
   double theta_;
   double phi_;
   double lambda_;
 };
 
-class GPhase : public OneQubitGate {
+class GPhase : public GateOperation {
  public:
-  GPhase(double angle);
+  GPhase(const std::vector<size_t> &targets, double angle,
+         const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~GPhase();
   double angle_;
 };
 
-class Unitary : public GateOperation {
- public:
-  Unitary();
-  virtual ~Unitary();
-};
 #endif  //_GATE_OPERATION_H_

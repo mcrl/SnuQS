@@ -8,7 +8,7 @@ from braket.circuits.instruction import Instruction
 
 MIN_QUBIT = 15
 MAX_QUBIT = 20
-MAX_GATE = 200
+MAX_GATE = 100
 NGATE_KIND = 31
 NUM_ITER = 100
 
@@ -119,7 +119,8 @@ class BraketTest(unittest.TestCase):
     def random_circuit(self):
         nqubits = np.random.randint(MIN_QUBIT, MAX_QUBIT+1)
         ngates = np.random.randint(1, MAX_GATE+1)
-        circ = Circuit([RandomInstruction(nqubits).get() for _ in range(ngates)])
+        circ = Circuit([RandomInstruction(nqubits).get()
+                       for _ in range(ngates)])
         return circ
 
     def run_braket(self, circ):
@@ -147,10 +148,10 @@ class BraketTest(unittest.TestCase):
         return task
 
     def test_braket_snuqs(self):
-        circ = self.random_circuit()
-        circ.state_vector()
-
         for i in range(NUM_ITER):
+            circ = self.random_circuit()
+            circ.state_vector()
+
             print(f"Running random circuit test #{i}...")
 
             print("\tRunning braket")

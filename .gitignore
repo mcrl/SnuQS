@@ -9,7 +9,6 @@ dist/*
 snuqs.egg-info/*
 */*.egg-info
 trash
-*.txt
 _snuqs*
 snuqs.cpython*
 *__pycache__*

@@ -7,19 +7,24 @@
 #include "evolution.h"
 #include "gate_operation.h"
 #include "initialization.h"
+#include "operation.h"
 #include "state_vector.h"
 
 namespace py = pybind11;
 
-#define GATEOP(name)                                                        \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
-      .def_buffer([](name &g) -> py::buffer_info {                          \
-        return py::buffer_info(                                             \
-            g.data(), sizeof(std::complex<double>),                         \
-            py::format_descriptor<std::complex<double>>::format(), g.dim(), \
-            g.shape(), g.stride());                                         \
-      })                                                                    \
-      .def(py::init<>())
+#define GATEOP(name)                                                          \
+  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())            \
+      .def_buffer([](name &g) -> py::buffer_info {                            \
+        return py::buffer_info(                                               \
+            g.data(), sizeof(std::complex<double>),                           \
+            py::format_descriptor<std::complex<double>>::format(), g.dim(),   \
+            g.shape(), g.stride());                                           \
+      })                                                                      \
+      .def(py::init<const std::vector<size_t> &, const std::vector<size_t> &, \
+                    size_t>(),                                                \
+           py::arg("targets"), py::kw_only(),                                 \
+           py::arg("ctrl_modifiers") = std::vector<size_t>(),                 \
+           py::arg("power") = 1);
 
 #define GATEOP1(name)                                                       \
   py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
@@ -29,7 +34,11 @@ namespace py = pybind11;
             py::format_descriptor<std::complex<double>>::format(), g.dim(), \
             g.shape(), g.stride());                                         \
       })                                                                    \
-      .def(py::init<double>())
+      .def(py::init<const std::vector<size_t> &, double,                    \
+                    const std::vector<size_t> &, size_t>(),                 \
+           py::arg("targets"), py::arg("angle"), py::kw_only(),             \
+           py::arg("ctrl_modifiers") = std::vector<size_t>(),               \
+           py::arg("power") = 1);
 
 #define GATEOP3(name)                                                       \
   py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
@@ -39,7 +48,12 @@ namespace py = pybind11;
             py::format_descriptor<std::complex<double>>::format(), g.dim(), \
             g.shape(), g.stride());                                         \
       })                                                                    \
-      .def(py::init<double, double, double>())
+      .def(py::init<const std::vector<size_t> &, double, double, double,    \
+                    const std::vector<size_t> &, size_t>(),                 \
+           py::arg("targets"), py::arg("angle_1"), py::arg("angle_2"),      \
+           py::arg("angle_3"), py::kw_only(),                               \
+           py::arg("ctrl_modifiers") = std::vector<size_t>(),               \
+           py::arg("power") = 1);
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
@@ -64,8 +78,14 @@ PYBIND11_MODULE(_C, m) {
   m.def("initialize_zero", &initialize_zero);
   m.def("initialize_basis_z", &initialize_basis_z);
 
+  // Operation
+  py::class_<Operation>(m, "Operation")
+      .def(py::init<std::vector<size_t>>())
+      .def_property("targets", &Operation::get_targets, &Operation::set_targets)
+      .def_readwrite("_targets", &Operation::targets_);
+
   // GateOperation
-  py::class_<GateOperation>(m, "GateOperation");
+  py::class_<GateOperation, Operation>(m, "GateOperation");
   GATEOP(Identity);
   GATEOP(Hadamard);
   GATEOP(PauliX);

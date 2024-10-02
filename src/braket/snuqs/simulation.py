@@ -121,9 +121,8 @@ class StateVectorSimulation(Simulation):
             state_vector.toCUDA()
 
         for operation in operations:
-            op = operation.matrix.obj
             targets = operation.targets
-            evolve_C(state_vector, op, targets, use_cuda)
+            evolve_C(state_vector, operation, targets, use_cuda)
 
         if use_cuda:
             state_vector.toCPU()

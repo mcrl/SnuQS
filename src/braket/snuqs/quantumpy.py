@@ -17,18 +17,6 @@ class ndarray(np.ndarray):
         return arr
 
 
-def eye(*args, **kwargs):
-    return np.eye(*args, **kwargs)
-
-
-def allclose(*args, **kwargs):
-    return np.allclose(*args, **kwargs)
-
-
-def diag(*args, **kwargs):
-    return np.diag(*args, **kwargs)
-
-
 def identity():
     return ndarray(Identity())
 

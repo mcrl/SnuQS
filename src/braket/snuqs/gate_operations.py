@@ -1,6 +1,7 @@
 from braket.snuqs.operation import GateOperation
 import braket.snuqs.quantumpy as qp
 
+import numpy as np
 from collections.abc import Sequence
 import braket.ir.jaqcd as braket_instruction
 from braket.snuqs.operation_helpers import (
@@ -9,497 +10,562 @@ from braket.snuqs.operation_helpers import (
     check_unitary,
     ir_matrix_to_ndarray,
 )
-
-
-class Identity(GateOperation):
-    """Identity gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.identity()
-
-
-class Hadamard(GateOperation):
-    """Hadamard gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.hadamard()
-
-
-class PauliX(GateOperation):
-    """Pauli-X gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.paulix()
-
-
-class PauliY(GateOperation):
-    """Pauli-Y gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.pauliy()
-
-
-class PauliZ(GateOperation):
-    """Pauli-Z gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.pauliz()
-
-
-class CX(GateOperation):
-    """Controlled Pauli-X gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cx()
-
-
-class CY(GateOperation):
-    """Controlled Pauli-Y gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self):
-        return qp.cy()
-
-
-class CZ(GateOperation):
-    """Controlled Pauli-Z gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cz()
-
-
-class S(GateOperation):
-    """S gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.s()
-
-
-class Si(GateOperation):
-    r"""The adjoint :math:`S^{\dagger}` of the S gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.si()
-
-
-class T(GateOperation):
-    """T gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.t()
-
-
-class Ti(GateOperation):
-    r"""The adjoint :math:`T^{\dagger}` of the T gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.ti()
-
-
-class V(GateOperation):
-    """Square root of the X (not) gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.v()
-
-
-class Vi(GateOperation):
-    r"""The adjoint :math:`V^{\dagger}` of the square root of the X (not) gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.vi()
-
-
-class PhaseShift(GateOperation):
-    """Phase shift gate"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.phase_shift(self._angle)
-
-
-class CPhaseShift(GateOperation):
-    """Controlled phase shift gate"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cphase_shift(self._angle)
-
-
-class CPhaseShift00(GateOperation):
-    r"""Controlled phase shift gate phasing the :math:`\ket{00}` state"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cphase_shift00(self._angle)
-
-
-class CPhaseShift01(GateOperation):
-    r"""Controlled phase shift gate phasing the :math:`\ket{01}` state"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cphase_shift01(self._angle)
-
-
-class CPhaseShift10(GateOperation):
-    r"""Controlled phase shift gate phasing the :math:`\ket{10}` state"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cphase_shift10(self._angle)
-
-
-class RotX(GateOperation):
-    """X-axis rotation gate"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.rot_x(self._angle)
-
-
-class RotY(GateOperation):
-    """Y-axis rotation gate"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.rot_y(self._angle)
-
-
-class RotZ(GateOperation):
-    """Z-axis rotation gate"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.rot_z(self._angle)
-
-
-class Swap(GateOperation):
-    """Swap gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.swap()
-
-
-class ISwap(GateOperation):
-    """iSwap gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.iswap()
-
-
-class PSwap(GateOperation):
-    """Parametrized Swap gate"""
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.pswap(self._angle)
-
-
-class XY(GateOperation):
-    """XY gate
-
-    Reference: https://arxiv.org/abs/1912.04424v1
-    """
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.xy(self._angle)
-
-
-class XX(GateOperation):
-    """Ising XX gate
-
-    Reference: https://arxiv.org/abs/1707.06356
-    """
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.xx(self._angle)
-
-
-class YY(GateOperation):
-    """Ising YY gate
-
-    Reference: https://arxiv.org/abs/1707.06356
-    """
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.yy(self._angle)
-
-
-class ZZ(GateOperation):
-    """Ising ZZ gate
-
-    Reference: https://arxiv.org/abs/1707.06356
-    """
-
-    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.zz(self._angle)
-
-
-class CCNot(GateOperation):
-    """Controlled CNot or Toffoli gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.ccnot()
-
-
-class CSwap(GateOperation):
-    """Controlled Swap gate"""
-
-    def __init__(self, targets, ctrl_modifiers=(), power=1):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.cswap()
-
+from braket.snuqs._C import (
+    Identity,
+    Hadamard, PauliX, PauliY, PauliZ,
+    CX, CY, CZ, S, Si, T, Ti, V, Vi,
+    PhaseShift, CPhaseShift, CPhaseShift00, CPhaseShift01, CPhaseShift10,
+    RotX, RotY, RotZ,
+    Swap, ISwap, PSwap, XY, XX, YY, ZZ,
+    CCNot, CSwap,
+    U, GPhase,
+)
+
+
+# class Identity(GateOperation):
+#    """Identity gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.identity()
+#
+#
+# class Hadamard(GateOperation):
+#    """Hadamard gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.hadamard()
+#
+#
+# class PauliX(GateOperation):
+#    """Pauli-X gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.paulix()
+#
+#
+# class PauliY(GateOperation):
+#    """Pauli-Y gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.pauliy()
+#
+#
+# class PauliZ(GateOperation):
+#    """Pauli-Z gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.pauliz()
+#
+#
+# class CX(GateOperation):
+#    """Controlled Pauli-X gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cx()
+#
+#
+# class CY(GateOperation):
+#    """Controlled Pauli-Y gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self):
+#        return qp.cy()
+#
+#
+# class CZ(GateOperation):
+#    """Controlled Pauli-Z gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cz()
+#
+#
+# class S(GateOperation):
+#    """S gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.s()
+#
+#
+# class Si(GateOperation):
+#    r"""The adjoint :math:`S^{\dagger}` of the S gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.si()
+#
+#
+# class T(GateOperation):
+#    """T gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.t()
+#
+#
+# class Ti(GateOperation):
+#    r"""The adjoint :math:`T^{\dagger}` of the T gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.ti()
+#
+#
+# class V(GateOperation):
+#    """Square root of the X (not) gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.v()
+#
+#
+# class Vi(GateOperation):
+#    r"""The adjoint :math:`V^{\dagger}` of the square root of the X (not) gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.vi()
+#
+#
+# class PhaseShift(GateOperation):
+#    """Phase shift gate"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.phase_shift(self._angle)
+#
+#
+# class CPhaseShift(GateOperation):
+#    """Controlled phase shift gate"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cphase_shift(self._angle)
+#
+#
+# class CPhaseShift00(GateOperation):
+#    r"""Controlled phase shift gate phasing the :math:`\ket{00}` state"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cphase_shift00(self._angle)
+#
+#
+# class CPhaseShift01(GateOperation):
+#    r"""Controlled phase shift gate phasing the :math:`\ket{01}` state"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cphase_shift01(self._angle)
+#
+#
+# class CPhaseShift10(GateOperation):
+#    r"""Controlled phase shift gate phasing the :math:`\ket{10}` state"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cphase_shift10(self._angle)
+#
+#
+# class RotX(GateOperation):
+#    """X-axis rotation gate"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.rot_x(self._angle)
+#
+#
+# class RotY(GateOperation):
+#    """Y-axis rotation gate"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.rot_y(self._angle)
+#
+#
+# class RotZ(GateOperation):
+#    """Z-axis rotation gate"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.rot_z(self._angle)
+#
+#
+# class Swap(GateOperation):
+#    """Swap gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.swap()
+#
+#
+# class ISwap(GateOperation):
+#    """iSwap gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.iswap()
+#
+#
+# class PSwap(GateOperation):
+#    """Parametrized Swap gate"""
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.pswap(self._angle)
+#
+#
+# class XY(GateOperation):
+#    """XY gate
+#
+#    Reference: https://arxiv.org/abs/1912.04424v1
+#    """
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.xy(self._angle)
+#
+#
+# class XX(GateOperation):
+#    """Ising XX gate
+#
+#    Reference: https://arxiv.org/abs/1707.06356
+#    """
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.xx(self._angle)
+#
+#
+# class YY(GateOperation):
+#    """Ising YY gate
+#
+#    Reference: https://arxiv.org/abs/1707.06356
+#    """
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.yy(self._angle)
+#
+#
+# class ZZ(GateOperation):
+#    """Ising ZZ gate
+#
+#    Reference: https://arxiv.org/abs/1707.06356
+#    """
+#
+#    def __init__(self, targets, angle, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.zz(self._angle)
+#
+#
+# class CCNot(GateOperation):
+#    """Controlled CNot or Toffoli gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.ccnot()
+#
+#
+# class CSwap(GateOperation):
+#    """Controlled Swap gate"""
+#
+#    def __init__(self, targets, ctrl_modifiers=(), power=1):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.cswap()
+#
+#
+# """
+# OpenQASM gate operations
+# """
+#
+#
+# class U(GateOperation):
+#    """
+#    Parameterized primitive gate for OpenQASM simulator
+#    """
+#
+#    def __init__(
+#        self,
+#        targets: Sequence[int],
+#        theta: float,
+#        phi: float,
+#        lambda_: float,
+#        ctrl_modifiers: Sequence[int] = (),
+#        power: float = 1,
+#    ):
+#        super().__init__(
+#            targets=targets,
+#            ctrl_modifiers=ctrl_modifiers,
+#            power=power,
+#        )
+#        self._theta = theta
+#        self._phi = phi
+#        self._lambda = lambda_
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        """
+#        Generate parameterized Unitary matrix.
+#        https://openqasm.com/language/gates.html#built-in-gates
+#
+#        Returns:
+#            qp.ndarray: U Matrix
+#        """
+#        return qp.u(self._theta, self._phi, self._lambda)
+#
+#
+# class GPhase(GateOperation):
+#    """
+#    Global phase operation for OpenQASM simulator
+#    """
+#
+#    def __init__(self, targets: Sequence[int], angle: float):
+#        super().__init__(
+#            targets=targets,
+#        )
+#        self._angle = angle
+#
+#    @property
+#    def _base_matrix(self) -> qp.ndarray:
+#        return qp.gphase(self._angle)
 
 class Unitary(GateOperation):
     """Arbitrary unitary gate"""
@@ -510,7 +576,7 @@ class Unitary(GateOperation):
             ctrl_modifiers=ctrl_modifiers,
             power=power,
         )
-        clone = qp.array(matrix, dtype=complex)
+        clone = np.array(matrix, dtype=complex)
         check_matrix_dimensions(clone, self._targets)
         check_unitary(clone)
         self._matrix = clone
@@ -518,62 +584,6 @@ class Unitary(GateOperation):
     @property
     def _base_matrix(self) -> qp.ndarray:
         return qp.array(self._matrix)
-
-
-"""
-OpenQASM gate operations
-"""
-
-
-class U(GateOperation):
-    """
-    Parameterized primitive gate for OpenQASM simulator
-    """
-
-    def __init__(
-        self,
-        targets: Sequence[int],
-        theta: float,
-        phi: float,
-        lambda_: float,
-        ctrl_modifiers: Sequence[int] = (),
-        power: float = 1,
-    ):
-        super().__init__(
-            targets=targets,
-            ctrl_modifiers=ctrl_modifiers,
-            power=power,
-        )
-        self._theta = theta
-        self._phi = phi
-        self._lambda = lambda_
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        """
-        Generate parameterized Unitary matrix.
-        https://openqasm.com/language/gates.html#built-in-gates
-
-        Returns:
-            qp.ndarray: U Matrix
-        """
-        return qp.u(self._theta, self._phi, self._lambda)
-
-
-class GPhase(GateOperation):
-    """
-    Global phase operation for OpenQASM simulator
-    """
-
-    def __init__(self, targets: Sequence[int], angle: float):
-        super().__init__(
-            targets=targets,
-        )
-        self._angle = angle
-
-    @property
-    def _base_matrix(self) -> qp.ndarray:
-        return qp.gphase(self._angle)
 
 
 @_from_braket_instruction.register(braket_instruction.I)
@@ -731,17 +741,7 @@ def _cswap(instruction) -> CSwap:
     return CSwap([instruction.control, *instruction.targets])
 
 
-# @_from_braket_instruction.register(braket_instruction.U)
-# def _u(instruction) -> U:
-#    return U([instruction.targets], instruction.angle_1, instruction.angle_2, instruction.angle_3)
-#
-#
-# @ _from_braket_instruction.register(braket_instruction.GPhase)
-# def _gphase(instruction) -> GPhase:
-#    return GPhase([instruction.targets], instruction.angle)
-
-
-@ _from_braket_instruction.register(braket_instruction.Unitary)
+@_from_braket_instruction.register(braket_instruction.Unitary)
 def _unitary(instruction) -> Unitary:
     return Unitary(instruction.targets, ir_matrix_to_ndarray(instruction.matrix))
 

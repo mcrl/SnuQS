@@ -4,25 +4,29 @@ import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
 from scipy.linalg import fractional_matrix_power
 
-
-class Operation(ABC):
-    """
-    Encapsulates an operation acting on a set of target qubits.
-    """
-
-    @property
-    @abstractmethod
-    def targets(self) -> tuple[int, ...]:
-        """tuple[int, ...]: The indices of the qubits the operation applies to.
-
-        Note: For an index to be a target of an observable, the observable must have a nontrivial
-        (i.e. non-identity) action on that index. For example, a tensor product observable with a
-        Z factor on qubit j acts trivially on j, so j would not be a target. This does not apply to
-        gate operations.
-        """
+from braket.snuqs._C import (
+    Operation
+)
 
 
-class GateOperation(Operation, ABC):
+# class Operation(ABC):
+#    """
+#    Encapsulates an operation acting on a set of target qubits.
+#    """
+#
+#    @property
+#    @abstractmethod
+#    def targets(self) -> tuple[int, ...]:
+#        """tuple[int, ...]: The indices of the qubits the operation applies to.
+#
+#        Note: For an index to be a target of an observable, the observable must have a nontrivial
+#        (i.e. non-identity) action on that index. For example, a tensor product observable with a
+#        Z factor on qubit j acts trivially on j, so j would not be a target. This does not apply to
+#        gate operations.
+#        """
+
+
+class GateOperation(Operation):
     """
     Encapsulates a unitary quantum gate operation acting on
     a set of target qubits.
@@ -43,7 +47,7 @@ class GateOperation(Operation, ABC):
         """np.ndarray: The matrix representation of the operation."""
 
     @property
-    def matrix(self) -> qp.ndarray:
+    def matrix(self) -> np.ndarray:
         unitary = self._base_matrix
         if int(self._power) == self._power:
             unitary = np.linalg.matrix_power(unitary, int(self._power))
@@ -59,7 +63,7 @@ class GateOperation(Operation, ABC):
         )
 
 
-class KrausOperation(Operation, ABC):
+class KrausOperation(Operation):
     """
     Encapsulates a quantum channel acting on a set of target qubits in the Kraus operator
     representation.
@@ -74,7 +78,7 @@ class KrausOperation(Operation, ABC):
         return self.targets == other.targets and np.allclose(self.matrices, other.matrices)
 
 
-class Observable(Operation, ABC):
+class Observable(Operation):
     """
     Encapsulates an observable to be measured in the computational basis.
     """

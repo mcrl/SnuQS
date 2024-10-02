@@ -14,7 +14,7 @@
 import functools
 import itertools
 import math
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Optional
 
 import numpy as np
@@ -40,7 +40,8 @@ class Identity(Observable):
     """
 
     def __init__(self, targets: Optional[list[int]] = None):
-        self._measured_qubits = _validate_and_clone_single_qubit_target(targets)
+        self._measured_qubits = _validate_and_clone_single_qubit_target(
+            targets)
 
     def _pow(self, power: int) -> Observable:
         return self
@@ -67,7 +68,7 @@ class Identity(Observable):
         return ()
 
 
-class _InvolutoryMatrixObservable(Observable, ABC):
+class _InvolutoryMatrixObservable(Observable):
     r"""
     An observable defined by an involutory matrix.
 
@@ -259,7 +260,8 @@ class Hermitian(Observable):
         self._matrix = clone
         eigendecomposition = Hermitian._eigendecomposition(clone)
         self._eigenvalues = eigendecomposition["eigenvalues"]
-        self._diagonalizing_matrix = eigendecomposition["eigenvectors"].conj().T
+        self._diagonalizing_matrix = eigendecomposition["eigenvectors"].conj(
+        ).T
 
     def _pow(self, power: int) -> Observable:
         return Hermitian(np.linalg.matrix_power(self._matrix, power), self._targets)
@@ -284,7 +286,8 @@ class Hermitian(Observable):
         targets = self._targets
         matrix = self._matrix
         if targets and len(targets) > 1:
-            raise ValueError(f"Matrix must act on 1 qubit, but {matrix} acts on {len(targets)}")
+            raise ValueError(
+                f"Matrix must act on 1 qubit, but {matrix} acts on {len(targets)}")
         return Hermitian(self._matrix, [qubit])
 
     def diagonalizing_gates(self, num_qubits: Optional[int] = None) -> tuple[GateOperation, ...]:
@@ -335,11 +338,13 @@ class TensorProduct(Observable):
         """
         if len(factors) < 2:
             raise ValueError("A tensor product should have at least 2 factors")
-        self._targets = tuple(target for observable in factors for target in observable.targets)
+        self._targets = tuple(
+            target for observable in factors for target in observable.targets)
         self._measured_qubits = tuple(
             qubit for observable in factors for qubit in observable.measured_qubits
         )
-        self._eigenvalues = TensorProduct._compute_eigenvalues(factors, self._measured_qubits)
+        self._eigenvalues = TensorProduct._compute_eigenvalues(
+            factors, self._measured_qubits)
         self._factors = tuple(factors)
 
     def _pow(self, power: int) -> Observable:
@@ -391,7 +396,8 @@ class TensorProduct(Observable):
                     # `group` contains only nonstandard observables, so eigenvalues
                     # must be calculated
                     else functools.reduce(
-                        np.kron, tuple(nonstandard.eigenvalues for nonstandard in group)
+                        np.kron, tuple(
+                            nonstandard.eigenvalues for nonstandard in group)
                     )
                 )
                 eigenvalues = np.kron(eigenvalues, group_eigenvalues)
@@ -406,5 +412,6 @@ def _validate_and_clone_single_qubit_target(
 ) -> Optional[tuple[int, ...]]:
     clone = tuple(targets) if targets else None
     if clone and len(clone) > 1:
-        raise ValueError(f"Observable only acts on one qubit, but found {len(clone)}")
+        raise ValueError(
+            f"Observable only acts on one qubit, but found {len(clone)}")
     return clone
