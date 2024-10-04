@@ -40,9 +40,9 @@ class Vanilla_QAOA:
             num_qubits: The number of nodes (qubits) within the SK graph.
         """
         self.num_qubits = num_qubits
+        self.backend = backend
         self.hamiltonian = self._gen_sk_hamiltonian()
         self.params = self._gen_angles()
-        self.backend = backend
 
     def _gen_sk_hamiltonian(self) -> list[tuple[int, int, float]]:
         """Randomly pick +1 or -1 for each edge weight."""

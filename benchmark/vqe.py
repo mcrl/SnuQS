@@ -26,9 +26,9 @@ class VQE:
     def __init__(self, num_qubits: int, num_layers: int = 1, backend: str = None) -> None:
         self.num_qubits = num_qubits
         self.num_layers = num_layers
+        self.backend = backend
         self.hamiltonian = self._gen_tfim_hamiltonian()
         self._params = self._gen_angles()
-        self.backend = backend
 
     def _gen_tfim_hamiltonian(self) -> list[tuple[str, int | tuple[int, int], int]]:
         r"""
@@ -64,7 +64,7 @@ class VQE:
                 param_counter += 1
             # Entanglement block
             for i in range(self.num_qubits - 1):
-                z_circuit.cx(i, i+1)
+                z_circuit.cv(i, i+1)
             # Ry rotation block
             for i in range(self.num_qubits):
                 z_circuit.ry(i, 2 * params[param_counter])
@@ -199,12 +199,17 @@ class VQE:
         else:
             sim = LocalSimulator(backend=self.backend)
 
-        circ = self.circuit()
-        task = sim.run(circ, shots=shots)
+        circ_z, circ_x = self.circuit()
 
-        result = task.result().measurement_counts
-        score = self.score(result)
+        task = sim.run(circ_z, shots=shots)
+        count_z = task.result().measurement_counts
+
+        task = sim.run(circ_x, shots=shots)
+        count_x = task.result().measurement_counts
+
+        score = self.score([count_z, count_x])
         
-        print(f"Result: {result}")
+        print(f"Result-Z: {count_z}")
+        print(f"Result-X: {count_x}")
         print(f"VQE test score: {score}")
         return score

@@ -14,10 +14,11 @@ from braket.devices import LocalSimulator
 
 
 class QuantumVolume:
-    def __init__(self, num_qubits: int, depth: int = None, seed: Optional[Union[int, np.random.Generator]] = None, classical_permutation: bool = True):
+    def __init__(self, num_qubits: int, depth: int = None, seed: Optional[Union[int, np.random.Generator]] = None, classical_permutation: bool = True, backend = None):
         self.num_qubits = num_qubits
         self.depth = depth or num_qubits
         self.width = num_qubits // 2
+        self.backend = backend
 
         self.rng = seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
         if not seed:

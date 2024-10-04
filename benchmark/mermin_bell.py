@@ -44,11 +44,11 @@ class MerminBell:
         for i in range(self.num_qubits - 1):
             circuit.cnot(i, i + 1)
 
-        measurement_circuit = self._get_measurement_circuit(circuit).get_circuit()
+        measurement_circuit = self._get_measurement_circuit().get_circuit()
         
         return circuit + measurement_circuit
     
-    def _get_measurement_circuit(self, circuit: Circuit) -> stabilizers.MeasurementCircuit:
+    def _get_measurement_circuit(self) -> stabilizers.MeasurementCircuit:
         """
         Return a MeasurementCircuit for simultaneous measurement of N operators.
 
