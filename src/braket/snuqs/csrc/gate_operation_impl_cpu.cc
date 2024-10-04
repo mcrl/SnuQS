@@ -1,5 +1,7 @@
 #include "gate_operation_impl_cpu.h"
 
+#include <spdlog/spdlog.h>
+
 #include <cassert>
 #include <complex>
 

@@ -21,6 +21,8 @@ from braket.snuqs.simulation import Simulation, StateVectorSimulation
 from braket.snuqs.openqasm.circuit import Circuit as OpenQASMCircuit
 from braket.snuqs.openqasm.interpreter import Interpreter
 from braket.snuqs.openqasm.program_context import AbstractProgramContext, ProgramContext
+from braket.snuqs.device import DeviceType
+from braket.snuqs.offload import OffloadType
 from braket.ir.jaqcd import Program as JaqcdProgram
 from braket.ir.jaqcd.shared_models import MultiTarget, OptionalMultiTarget
 from braket.ir.jaqcd.program_v1 import Results
@@ -36,24 +38,31 @@ class BaseSimulator(ABC):
     @staticmethod
     def _validate_device_type(device: str):
         supported_devices = {
-            'cpu',
-            'cuda',
-            'hybrid',
+            'cpu': DeviceType.CPU,
+            'cuda': DeviceType.CUDA,
+            'hybrid': DeviceType.HYBRID,
         }
-        if device is not None and device not in supported_devices:
+        if device is None:
+            return DeviceType.CPU
+
+        if device not in supported_devices:
             raise TypeError(f"Device {device} is not supported")
+
+        return supported_devices[device]
 
     @staticmethod
     def _validate_offload_type(offload: Optional[str], path: Optional[List[str]]):
-        supported_devices = {
-            'cpu',
-            'storage',
+        supported_offloads = {
+            'none': OffloadType.NONE,
+            'cpu': OffloadType.CPU,
+            'storage': OffloadType.STORAGE,
         }
         if offload is None:
-            return
+            return OffloadType.NONE
 
-        if offload not in supported_devices:
+        if offload not in supported_offloads:
             raise TypeError(f"Offload {offload} is not supported")
+        return supported_offloads[offload]
 
     def create_program_context(self) -> AbstractProgramContext:
         return ProgramContext()
@@ -91,16 +100,20 @@ class BaseSimulator(ABC):
             qubit_map (dict): A dictionary mapping original qubits to new qubits.
         """
         if hasattr(instruction, "control"):
-            instruction.control = qubit_map.get(instruction.control, instruction.control)
+            instruction.control = qubit_map.get(
+                instruction.control, instruction.control)
 
         if hasattr(instruction, "controls") and instruction.controls:
-            instruction.controls = [qubit_map.get(q, q) for q in instruction.controls]
+            instruction.controls = [qubit_map.get(
+                q, q) for q in instruction.controls]
 
         if hasattr(instruction, "target"):
-            instruction.target = qubit_map.get(instruction.target, instruction.target)
+            instruction.target = qubit_map.get(
+                instruction.target, instruction.target)
 
         if hasattr(instruction, "targets") and instruction.targets:
-            instruction.targets = [qubit_map.get(q, q) for q in instruction.targets]
+            instruction.targets = [qubit_map.get(
+                q, q) for q in instruction.targets]
 
     @staticmethod
     def _map_circuit_instructions(circuit: OpenQASMCircuit, qubit_map: dict):
@@ -244,7 +257,8 @@ class BaseSimulator(ABC):
         """
         # Get the full measurements
         measurements = [
-            list("{number:0{width}b}".format(number=sample, width=simulation.qubit_count))
+            list("{number:0{width}b}".format(
+                number=sample, width=simulation.qubit_count))
             for sample in simulation.retrieve_samples()
         ]
         #  Gets the subset of measurements from the full measurements
@@ -255,9 +269,11 @@ class BaseSimulator(ABC):
             measured_qubits_not_in_circuit = measured_qubits[~in_circuit_mask]
 
             measurements_array = np.array(measurements)
-            selected_measurements = measurements_array[:, measured_qubits_in_circuit]
+            selected_measurements = measurements_array[:,
+                                                       measured_qubits_in_circuit]
             measurements = np.pad(
-                selected_measurements, ((0, 0), (0, len(measured_qubits_not_in_circuit)))
+                selected_measurements, ((0, 0), (0, len(
+                    measured_qubits_not_in_circuit)))
             ).tolist()
         return measurements
 
@@ -279,8 +295,10 @@ class BaseSimulator(ABC):
                 action=openqasm_ir,
             ),
             resultTypes=results,
-            measurements=self._formatted_measurements(simulation, mapped_measured_qubits),
-            measuredQubits=(measured_qubits or list(range(simulation.qubit_count))),
+            measurements=self._formatted_measurements(
+                simulation, mapped_measured_qubits),
+            measuredQubits=(measured_qubits or list(
+                range(simulation.qubit_count))),
         )
 
     @staticmethod
@@ -305,14 +323,11 @@ class BaseSimulator(ABC):
                      qubit_count: Any = None,
                      shots: int = 0,
                      *,
-                     device: str,
+                     device: Optional[str] = None,
                      offload: Optional[str] = None,
                      path: Optional[List[str]] = None) -> GateModelTaskResult:
-        BaseSimulator._validate_device_type(device)
-        use_cuda = True if device == 'cuda' else False
-
-        BaseSimulator._validate_offload_type(offload, path)
-        offload = True if offload is not None else False
+        device = BaseSimulator._validate_device_type(device)
+        offload = BaseSimulator._validate_offload_type(offload, path)
 
         circuit = self.parse_program(ir).circuit
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(circuit)
@@ -324,9 +339,10 @@ class BaseSimulator(ABC):
 
         operations = circuit.instructions
 
-        simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
+        simulation = self.initialize_simulation(
+            qubit_count=qubit_count, shots=shots)
         simulation.evolve(operations,
-                          use_cuda=use_cuda,
+                          device=device,
                           offload=offload,
                           path=path)
 
@@ -339,7 +355,10 @@ class BaseSimulator(ABC):
                 simulation,
             )
         else:
-            simulation.evolve(circuit.basis_rotation_instructions, use_cuda=use_cuda)
+            simulation.evolve(
+                circuit.basis_rotation_instructions, device=device,
+                offload=offload,
+                path=path)
 
         return self._create_results_obj(
             results, ir, simulation, measured_qubits, mapped_measured_qubits
@@ -349,9 +368,11 @@ class BaseSimulator(ABC):
                   qubit_count: Any = None,
                   shots: int = 0,
                   *,
-                  device: Optional[str],
+                  device: Optional[str] = None,
+                  offload: Optional[str] = None,
                   path: Optional[List[str]] = None) -> GateModelTaskResult:
-        use_cuda = True if device == 'cuda' else False
+        device = BaseSimulator._validate_device_type(device)
+        offload = BaseSimulator._validate_offload_type(offload, path)
 
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(ir)
         qubit_count = len(qubit_map)
@@ -363,8 +384,11 @@ class BaseSimulator(ABC):
             for instruction in ir.basis_rotation_instructions:
                 operations.append(from_braket_instruction(instruction))
 
-        simulation = self.initialize_simulation(qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations, use_cuda=use_cuda)
+        simulation = self.initialize_simulation(
+            qubit_count=qubit_count, shots=shots)
+        simulation.evolve(operations, device=device,
+                          offload=offload,
+                          path=path)
 
         results = []
         if not shots and ir.results:

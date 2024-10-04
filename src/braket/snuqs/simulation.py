@@ -5,6 +5,8 @@ from typing import Optional, List
 
 from braket.snuqs._C import StateVector
 from braket.snuqs._C import evolve as evolve_C, initialize_basis_z as initialize_basis_z_C
+from braket.snuqs.device import DeviceType
+from braket.snuqs.offload import OffloadType
 
 
 class Simulation(ABC):
@@ -86,6 +88,7 @@ class StateVectorSimulation(Simulation):
 
         super().__init__(qubit_count=qubit_count, shots=shots)
         self._state_vector = StateVector(qubit_count)
+        initialize_basis_z_C(self._state_vector)
 
     @property
     def state_vector(self) -> np.ndarray:
@@ -110,19 +113,52 @@ class StateVectorSimulation(Simulation):
 
     def evolve(self,
                operations: list[GateOperation],
-               use_cuda: bool = False,
-               offload: Optional[str] = None,
+               *,
+               device: Optional[DeviceType] = None,
+               offload: Optional[OffloadType] = None,
                path: Optional[List[str]] = None) -> None:
+
+        if offload and offload == 'cpu':
+            return self.evolve_offload_cpu(operations, device)
+        elif offload and offload == 'storage':
+            return self.evolve_offload_storage(operations, device, path)
+
         state_vector = self._state_vector
-
-        initialize_basis_z_C(state_vector)
-
-        if use_cuda:
+        if device == DeviceType.CUDA:
             state_vector.toCUDA()
 
         for operation in operations:
             targets = operation.targets
-            evolve_C(state_vector, operation, targets, use_cuda)
+            evolve_C(state_vector, operation, targets,
+                     device == DeviceType.CUDA)
 
-        if use_cuda:
+        if device == DeviceType.CUDA:
             state_vector.toCPU()
+
+    def _evolve_cpu(self,
+                    operations: list[GateOperation],
+                    device: DeviceType,
+                    offload: Optional[OffloadType] = None,
+                    path: Optional[List[str]] = None) -> None:
+        pass
+
+    def _evolve_cuda(self,
+                     operations: list[GateOperation],
+                     device: DeviceType,
+                     offload: Optional[OffloadType] = None,
+                     path: Optional[List[str]] = None) -> None:
+        pass
+
+    def _evolve_offload_cpu(self,
+                            operations: list[GateOperation],
+                            device: DeviceType,
+                            offload: Optional[OffloadType] = None,
+                            path: Optional[List[str]] = None) -> None:
+        pass
+
+    def _evolve_offload_storage(self,
+                                operations: list[GateOperation],
+                                device: DeviceType,
+                                offload: Optional[OffloadType] = None,
+                                path: Optional[List[str]] = None) -> None:
+        pass
