@@ -2,6 +2,7 @@
 #define _DEVICE_H_
 
 enum class Device {
+  UNKNOWN,
   CPU,
   CUDA,
 };

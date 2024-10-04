@@ -14,17 +14,17 @@ add_library(
   pymodule.cc
   runtime.cc
   state_vector.cc
-  evolution.cc
-  initialization.cc
+  functionals.cc
   operation.cc
-  gate_operation.cc
-  gate_operation_impl_cpu.cc
-  gate_operation_impl_cuda.cu)
+  gate_operations.cc
+  gate_operations_impl_cpu.cc
+  gate_operations_impl_cuda.cu
+  cuda/runtime.cu)
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")
 set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
 
-target_include_directories(_C PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(_C PUBLIC "." "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(_C CUDA::cudart)
 

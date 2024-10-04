@@ -4,16 +4,17 @@
 
 #include <complex>
 
-#include "evolution.h"
-#include "gate_operation.h"
-#include "initialization.h"
+#include "cuda/runtime.h"
+#include "functionals.h"
+#include "gate_operations.h"
 #include "operation.h"
 #include "state_vector.h"
 
 namespace py = pybind11;
 
 #define GATEOP(name)                                                          \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())            \
+  py::class_<name, GateOperation>(m_gate_operations, #name,                   \
+                                  py::buffer_protocol())                      \
       .def_buffer([](name &g) -> py::buffer_info {                            \
         return py::buffer_info(                                               \
             g.data(), sizeof(std::complex<double>),                           \
@@ -24,10 +25,12 @@ namespace py = pybind11;
                     size_t>(),                                                \
            py::arg("targets"), py::kw_only(),                                 \
            py::arg("ctrl_modifiers") = std::vector<size_t>(),                 \
-           py::arg("power") = 1);
+           py::arg("power") = 1)                                              \
+      .def("__repr__", &GateOperation::formatted_string);
 
 #define GATEOP1(name)                                                       \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
+  py::class_<name, GateOperation>(m_gate_operations, #name,                 \
+                                  py::buffer_protocol())                    \
       .def_buffer([](name &g) -> py::buffer_info {                          \
         return py::buffer_info(                                             \
             g.data(), sizeof(std::complex<double>),                         \
@@ -38,10 +41,12 @@ namespace py = pybind11;
                     const std::vector<size_t> &, size_t>(),                 \
            py::arg("targets"), py::arg("angle"), py::kw_only(),             \
            py::arg("ctrl_modifiers") = std::vector<size_t>(),               \
-           py::arg("power") = 1);
+           py::arg("power") = 1)                                            \
+      .def("__repr__", &GateOperation::formatted_string);
 
 #define GATEOP3(name)                                                       \
-  py::class_<name, GateOperation>(m, #name, py::buffer_protocol())          \
+  py::class_<name, GateOperation>(m_gate_operations, #name,                 \
+                                  py::buffer_protocol())                    \
       .def_buffer([](name &g) -> py::buffer_info {                          \
         return py::buffer_info(                                             \
             g.data(), sizeof(std::complex<double>),                         \
@@ -53,7 +58,8 @@ namespace py = pybind11;
            py::arg("targets"), py::arg("angle_1"), py::arg("angle_2"),      \
            py::arg("angle_3"), py::kw_only(),                               \
            py::arg("ctrl_modifiers") = std::vector<size_t>(),               \
-           py::arg("power") = 1);
+           py::arg("power") = 1)                                            \
+      .def("__repr__", &GateOperation::formatted_string);
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
@@ -70,26 +76,21 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>())
-      .def("toCPU", &StateVector::toCPU)
-      .def("toCUDA", &StateVector::toCUDA);
-
-  // Functions
-  m.def("evolve", &evolve);
-  m.def("initialize_zero", &initialize_zero);
-  m.def("initialize_basis_z", &initialize_basis_z);
+      .def("cpu", &StateVector::cpu)
+      .def("cuda", &StateVector::cuda);
 
   // Operation
-  py::class_<Operation>(m, "Operation")
+  auto m_operation = m.def_submodule("operation");
+  py::class_<Operation>(m_operation, "Operation")
       .def(py::init<const std::vector<size_t> &>())
       .def_property("targets", &Operation::get_targets,
                     &Operation::set_targets);
-  //.def_property("_targets", &Operation::get_targets, &Operation::set_targets);
 
   // GateOperation
-  py::class_<GateOperation, Operation>(m, "GateOperation")
+  py::class_<GateOperation, Operation>(m_operation, "GateOperation")
       .def(py::init<const std::vector<size_t> &, const std::vector<size_t> &,
                     size_t>());
-
+  auto m_gate_operations = m.def_submodule("gate_operations");
   GATEOP(Identity);
   GATEOP(Hadamard);
   GATEOP(PauliX);
@@ -123,4 +124,13 @@ PYBIND11_MODULE(_C, m) {
   GATEOP(CSwap);
   GATEOP3(U);
   GATEOP1(GPhase);
+
+  // Functionals
+  auto m_functionals = m.def_submodule("functionals");
+  m_functionals.def("apply", &functionals::apply);
+  m_functionals.def("initialize_zero", &functionals::initialize_zero);
+  m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z);
+
+  auto m_cuda = m.def_submodule("cuda");
+  m_cuda.def("device_count", &cu::device_count);
 }

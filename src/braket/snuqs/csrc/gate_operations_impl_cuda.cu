@@ -3,7 +3,7 @@
 #include <cassert>
 #include <complex>
 
-#include "gate_operation_impl_cuda.h"
+#include "gate_operations_impl_cuda.h"
 #include "utils.h"
 
 static constexpr size_t BLOCKDIM = 256;

@@ -1,5 +1,5 @@
-#ifndef _GATE_OPERATION_H_
-#define _GATE_OPERATION_H_
+#ifndef _GATE_OPERATIONS_H_
+#define _GATE_OPERATIONS_H_
 
 #include <vector>
 
@@ -7,99 +7,99 @@
 
 class Identity : public GateOperation {
  public:
-  Identity(std::vector<size_t> targets,
-           std::vector<size_t> ctrl_modifiers, size_t power);
+  Identity(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+           size_t power);
   virtual ~Identity();
 };
 
 class Hadamard : public GateOperation {
  public:
-  Hadamard(std::vector<size_t> targets,
-           std::vector<size_t> ctrl_modifiers, size_t power);
+  Hadamard(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+           size_t power);
   virtual ~Hadamard();
 };
 
 class PauliX : public GateOperation {
  public:
-  PauliX(std::vector<size_t> targets,
-         std::vector<size_t> ctrl_modifiers, size_t power);
+  PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+         size_t power);
   virtual ~PauliX();
 };
 
 class PauliY : public GateOperation {
  public:
-  PauliY(std::vector<size_t> targets,
-         std::vector<size_t> ctrl_modifiers, size_t power);
+  PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+         size_t power);
   virtual ~PauliY();
 };
 
 class PauliZ : public GateOperation {
  public:
-  PauliZ(std::vector<size_t> targets,
-         std::vector<size_t> ctrl_modifiers, size_t power);
+  PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+         size_t power);
   virtual ~PauliZ();
 };
 
 class CX : public GateOperation {
  public:
-  CX(std::vector<size_t> targets,
-     std::vector<size_t> ctrl_modifiers, size_t power);
+  CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power);
   virtual ~CX();
 };
 
 class CY : public GateOperation {
  public:
-  CY(std::vector<size_t> targets,
-     std::vector<size_t> ctrl_modifiers, size_t power);
+  CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power);
   virtual ~CY();
 };
 
 class CZ : public GateOperation {
  public:
-  CZ(std::vector<size_t> targets,
-     std::vector<size_t> ctrl_modifiers, size_t power);
+  CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power);
   virtual ~CZ();
 };
 
 class S : public GateOperation {
  public:
-  S(std::vector<size_t> targets,
-    std::vector<size_t> ctrl_modifiers, size_t power);
+  S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+    size_t power);
   virtual ~S();
 };
 
 class Si : public GateOperation {
  public:
-  Si(std::vector<size_t> targets,
-     std::vector<size_t> ctrl_modifiers, size_t power);
+  Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power);
   virtual ~Si();
 };
 
 class T : public GateOperation {
  public:
-  T(std::vector<size_t> targets,
-    std::vector<size_t> ctrl_modifiers, size_t power);
+  T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+    size_t power);
   virtual ~T();
 };
 
 class Ti : public GateOperation {
  public:
-  Ti(std::vector<size_t> targets,
-     std::vector<size_t> ctrl_modifiers, size_t power);
+  Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power);
   virtual ~Ti();
 };
 
 class V : public GateOperation {
  public:
-  V(std::vector<size_t> targets,
-    std::vector<size_t> ctrl_modifiers, size_t power);
+  V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+    size_t power);
   virtual ~V();
 };
 
 class Vi : public GateOperation {
  public:
-  Vi(std::vector<size_t> targets,
-     std::vector<size_t> ctrl_modifiers, size_t power);
+  Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+     size_t power);
   virtual ~Vi();
 };
 
@@ -169,15 +169,15 @@ class RotZ : public GateOperation {
 
 class Swap : public GateOperation {
  public:
-  Swap(std::vector<size_t> targets,
-       std::vector<size_t> ctrl_modifiers, size_t power);
+  Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+       size_t power);
   virtual ~Swap();
 };
 
 class ISwap : public GateOperation {
  public:
-  ISwap(std::vector<size_t> targets,
-        std::vector<size_t> ctrl_modifiers, size_t power);
+  ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+        size_t power);
   virtual ~ISwap();
 };
 
@@ -223,15 +223,15 @@ class ZZ : public GateOperation {
 
 class CCNot : public GateOperation {
  public:
-  CCNot(std::vector<size_t> targets,
-        std::vector<size_t> ctrl_modifiers, size_t power);
+  CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+        size_t power);
   virtual ~CCNot();
 };
 
 class CSwap : public GateOperation {
  public:
-  CSwap(std::vector<size_t> targets,
-        std::vector<size_t> ctrl_modifiers, size_t power);
+  CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+        size_t power);
   virtual ~CSwap();
 };
 

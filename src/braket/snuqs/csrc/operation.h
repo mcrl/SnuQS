@@ -2,6 +2,7 @@
 #define _OPERATION_H_
 
 #include <complex>
+#include <string>
 #include <vector>
 
 class Operation {
@@ -28,6 +29,8 @@ class GateOperation : public Operation {
   virtual size_t dim() const;
   virtual std::vector<size_t> shape() const;
   virtual std::vector<size_t> stride() const;
+
+  virtual std::string formatted_string() const;
 
   std::complex<double> *data_ = nullptr;
   std::complex<double> *data_cuda_ = nullptr;

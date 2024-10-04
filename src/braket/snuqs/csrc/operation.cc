@@ -3,6 +3,8 @@
 #include <cuda_runtime.h>
 #include <spdlog/spdlog.h>
 
+#include <sstream>
+
 #include "utils.h"
 
 // Operation
@@ -53,4 +55,16 @@ std::vector<size_t> GateOperation::shape() const {
 std::vector<size_t> GateOperation::stride() const {
   size_t ncols = (1ul << targets_.size());
   return {ncols * sizeof(std::complex<double>), sizeof(std::complex<double>)};
+}
+
+std::string GateOperation::formatted_string() const {
+  std::stringstream ss;
+  ss << "<";
+  ss << "targets: {";
+  for (auto t : targets_) {
+    ss << t << ", ";
+  }
+  ss << "}";
+  ss << ">";
+  return ss.str();
 }

@@ -1,10 +1,9 @@
 from __future__ import annotations
 import numpy as np
-import braket.snuqs.quantumpy as qp
 from abc import ABC, abstractmethod
 from scipy.linalg import fractional_matrix_power
 
-from braket.snuqs._C import (
+from braket.snuqs._C.operation import (
     Operation
 )
 

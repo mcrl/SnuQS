@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, List
 
 from braket.snuqs._C import StateVector
-from braket.snuqs._C import evolve as evolve_C, initialize_basis_z as initialize_basis_z_C
+from braket.snuqs._C.functionals import apply as apply_C, initialize_basis_z as initialize_basis_z_C
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
 
@@ -88,6 +88,7 @@ class StateVectorSimulation(Simulation):
 
         super().__init__(qubit_count=qubit_count, shots=shots)
         self._state_vector = StateVector(qubit_count)
+        self._state_vector.cpu()
         initialize_basis_z_C(self._state_vector)
 
     @property
@@ -141,7 +142,7 @@ class StateVectorSimulation(Simulation):
 
         for operation in operations:
             targets = operation.targets
-            evolve_C(state_vector, operation, targets, False)
+            apply_C(state_vector, operation, targets, False)
 
     def _evolve_cpu_offload_cpu(self, operations: list[GateOperation]) -> None:
         return self._evolve_cpu(operations)
@@ -153,18 +154,29 @@ class StateVectorSimulation(Simulation):
     def _evolve_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
 
-        state_vector.toCUDA()
+        state_vector.cuda()
 
         for operation in operations:
             targets = operation.targets
-            evolve_C(state_vector, operation, targets, True)
+            apply_C(state_vector, operation, targets, True)
 
-        state_vector.toCPU()
+        state_vector.cpu()
 
     def _evolve_cuda_offload_cpu(self, operations: list[GateOperation]) -> None:
-        raise NotImplementedError("Not Implemented")
+        state_vector = self._state_vector
+
+        state_vector.cuda()
+
+        for operation in operations:
+            targets = operation.targets
+            apply_C(state_vector, operation, targets, True)
+
+        state_vector.cpu()
 
     def _evolve_cuda_offload_storage(self,
                                      operations: list[GateOperation],
                                      path: Optional[List[str]] = None) -> None:
         raise NotImplementedError("Not Implemented")
+
+    def _transpile(self, operations: list[GateOperation]):
+        pass
