@@ -118,47 +118,53 @@ class StateVectorSimulation(Simulation):
                offload: Optional[OffloadType] = None,
                path: Optional[List[str]] = None) -> None:
 
-        if offload and offload == 'cpu':
-            return self.evolve_offload_cpu(operations, device)
-        elif offload and offload == 'storage':
-            return self.evolve_offload_storage(operations, device, path)
+        if device is None:
+            device = DeviceType.CPU
+        if offload is None:
+            offload = OffloadType.NONE
 
+        if device == DeviceType.CPU and offload == OffloadType.NONE:
+            return self._evolve_cpu(operations)
+        elif device == DeviceType.CPU and offload == OffloadType.CPU:
+            return self._evolve_cpu_offload_cpu(operations)
+        elif device == DeviceType.CPU and offload == OffloadType.STORAGE:
+            return self._evolve_cpu_offload_storage(operations, path)
+        elif device == DeviceType.CUDA and offload == OffloadType.NONE:
+            return self._evolve_cuda(operations)
+        elif device == DeviceType.CUDA and offload == OffloadType.CPU:
+            return self._evolve_cuda_offload_cpu(operations)
+        elif device == DeviceType.CUDA and offload == OffloadType.STORAGE:
+            return self._evolve_cuda_offload_storage(operations, path)
+
+    def _evolve_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
-        if device == DeviceType.CUDA:
-            state_vector.toCUDA()
 
         for operation in operations:
             targets = operation.targets
-            evolve_C(state_vector, operation, targets,
-                     device == DeviceType.CUDA)
+            evolve_C(state_vector, operation, targets, False)
 
-        if device == DeviceType.CUDA:
-            state_vector.toCPU()
+    def _evolve_cpu_offload_cpu(self, operations: list[GateOperation]) -> None:
+        return self._evolve_cpu(operations)
 
-    def _evolve_cpu(self,
-                    operations: list[GateOperation],
-                    device: DeviceType,
-                    offload: Optional[OffloadType] = None,
-                    path: Optional[List[str]] = None) -> None:
-        pass
+    def _evolve_cpu_offload_storage(self, operations: list[GateOperation],
+                                    path: Optional[List[str]] = None) -> None:
+        raise NotImplementedError("Not Implemented")
 
-    def _evolve_cuda(self,
-                     operations: list[GateOperation],
-                     device: DeviceType,
-                     offload: Optional[OffloadType] = None,
-                     path: Optional[List[str]] = None) -> None:
-        pass
+    def _evolve_cuda(self, operations: list[GateOperation]) -> None:
+        state_vector = self._state_vector
 
-    def _evolve_offload_cpu(self,
-                            operations: list[GateOperation],
-                            device: DeviceType,
-                            offload: Optional[OffloadType] = None,
-                            path: Optional[List[str]] = None) -> None:
-        pass
+        state_vector.toCUDA()
 
-    def _evolve_offload_storage(self,
-                                operations: list[GateOperation],
-                                device: DeviceType,
-                                offload: Optional[OffloadType] = None,
-                                path: Optional[List[str]] = None) -> None:
-        pass
+        for operation in operations:
+            targets = operation.targets
+            evolve_C(state_vector, operation, targets, True)
+
+        state_vector.toCPU()
+
+    def _evolve_cuda_offload_cpu(self, operations: list[GateOperation]) -> None:
+        raise NotImplementedError("Not Implemented")
+
+    def _evolve_cuda_offload_storage(self,
+                                     operations: list[GateOperation],
+                                     path: Optional[List[str]] = None) -> None:
+        raise NotImplementedError("Not Implemented")

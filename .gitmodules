@@ -16,6 +16,3 @@
 [submodule "benchmark/QASMBench"]
 	path = benchmark/QASMBench
 	url = https://github.com/pnnl/QASMBench
-[submodule "src/braket/snuqs/benchmark/amazon-braket-examples"]
-	path = src/braket/snuqs/benchmark/amazon-braket-examples
-	url = https://github.com/amazon-braket/amazon-braket-examples
