@@ -4,8 +4,8 @@
 
 #include <cassert>
 
-#include "gate_operations_impl_cpu.h"
-#include "gate_operations_impl_cuda.h"
+#include "operation/gate_operations_impl_cpu.h"
+#include "operation/gate_operations_impl_cuda.h"
 
 namespace functionals {
 void apply(StateVector &state_vector, GateOperation &op,

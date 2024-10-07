@@ -1,11 +1,11 @@
-#include "operation.h"
+#include "operation/operation.h"
 
 #include <cuda_runtime.h>
 #include <spdlog/spdlog.h>
 
 #include <sstream>
 
-#include "utils.h"
+#include "utils_cuda.h"
 
 // Operation
 Operation::Operation(const std::vector<size_t> &targets) : targets_(targets) {}

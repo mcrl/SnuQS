@@ -1,9 +1,9 @@
 import numpy as np
-from braket.snuqs.operation import GateOperation
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from braket.snuqs._C import StateVector
+from braket.snuqs._C.result import StateVector
+from braket.snuqs._C.operation import GateOperation
 from braket.snuqs._C.functionals import apply as apply_C, initialize_basis_z as initialize_basis_z_C
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType

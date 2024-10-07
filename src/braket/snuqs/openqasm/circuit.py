@@ -21,7 +21,8 @@ from braket.ir.jaqcd.program_v1 import Results
 from braket.ir.jaqcd.shared_models import Observable, OptionalMultiTarget
 
 from braket.snuqs.observables import Hermitian, Identity, TensorProduct
-from braket.snuqs.operation import GateOperation, KrausOperation
+from braket.snuqs._C.operation import GateOperation
+from braket.snuqs.operation import KrausOperation
 from braket.snuqs.result_types import _from_braket_observable
 
 

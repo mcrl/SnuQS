@@ -25,41 +25,41 @@ from braket.snuqs._C.operation import (
 #        """
 
 
-class GateOperation(Operation):
-    """
-    Encapsulates a unitary quantum gate operation acting on
-    a set of target qubits.
-    """
-
-    def __init__(self, targets, *params, ctrl_modifiers=(), power=1):
-        self._targets = tuple(targets)
-        self._ctrl_modifiers = ctrl_modifiers
-        self._power = power
-
-    @property
-    def targets(self) -> tuple[int, ...]:
-        return self._targets
-
-    @property
-    @abstractmethod
-    def _base_matrix(self) -> np.ndarray:
-        """np.ndarray: The matrix representation of the operation."""
-
-    @property
-    def matrix(self) -> np.ndarray:
-        unitary = self._base_matrix
-        if int(self._power) == self._power:
-            unitary = np.linalg.matrix_power(unitary, int(self._power))
-        else:
-            unitary = fractional_matrix_power(unitary, self._power)
-        return unitary
-
-    def __eq__(self, other):
-        possible_parameters = "_angle", "_angle_1", "_angle_2"
-        return self.targets == other.targets and all(
-            getattr(self, param, None) == getattr(other, param, None)
-            for param in possible_parameters
-        )
+# class GateOperation(Operation):
+#    """
+#    Encapsulates a unitary quantum gate operation acting on
+#    a set of target qubits.
+#    """
+#
+#    def __init__(self, targets, *params, ctrl_modifiers=(), power=1):
+#        self._targets = tuple(targets)
+#        self._ctrl_modifiers = ctrl_modifiers
+#        self._power = power
+#
+#    @property
+#    def targets(self) -> tuple[int, ...]:
+#        return self._targets
+#
+#    @property
+#    @abstractmethod
+#    def _base_matrix(self) -> np.ndarray:
+#        """np.ndarray: The matrix representation of the operation."""
+#
+#    @property
+#    def matrix(self) -> np.ndarray:
+#        unitary = self._base_matrix
+#        if int(self._power) == self._power:
+#            unitary = np.linalg.matrix_power(unitary, int(self._power))
+#        else:
+#            unitary = fractional_matrix_power(unitary, self._power)
+#        return unitary
+#
+#    def __eq__(self, other):
+#        possible_parameters = "_angle", "_angle_1", "_angle_2"
+#        return self.targets == other.targets and all(
+#            getattr(self, param, None) == getattr(other, param, None)
+#            for param in possible_parameters
+#        )
 
 
 class KrausOperation(Operation):

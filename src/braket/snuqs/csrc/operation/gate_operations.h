@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "operation.h"
+#include "operation/operation.h"
 
 class Identity : public GateOperation {
  public:

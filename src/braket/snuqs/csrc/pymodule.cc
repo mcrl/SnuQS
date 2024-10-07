@@ -4,11 +4,11 @@
 
 #include <complex>
 
-#include "cuda/runtime.h"
+#include "core/cuda/runtime.h"
 #include "functionals.h"
-#include "gate_operations.h"
-#include "operation.h"
-#include "state_vector.h"
+#include "result/state_vector.h"
+#include "operation/gate_operations.h"
+#include "operation/operation.h"
 
 namespace py = pybind11;
 
@@ -63,22 +63,7 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
-
-  // StateVector
-  py::class_<StateVector>(m, "StateVector", py::buffer_protocol())
-      .def_buffer([](StateVector &sv) -> py::buffer_info {
-        return py::buffer_info(
-            sv.data(),                    /* Pointer to buffer */
-            sizeof(std::complex<double>), /* Size of one scalar */
-            py::format_descriptor<std::complex<double>>::format(), /* Python
-                                                       struct-style format
-                                                       descriptor */
-            sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
-      })
-      .def(py::init<size_t>())
-      .def("cpu", &StateVector::cpu)
-      .def("cuda", &StateVector::cuda);
-
+  
   // Operation
   auto m_operation = m.def_submodule("operation");
   py::class_<Operation>(m_operation, "Operation")
@@ -90,7 +75,7 @@ PYBIND11_MODULE(_C, m) {
   py::class_<GateOperation, Operation>(m_operation, "GateOperation")
       .def(py::init<const std::vector<size_t> &, const std::vector<size_t> &,
                     size_t>());
-  auto m_gate_operations = m.def_submodule("gate_operations");
+  auto m_gate_operations = m_operation.def_submodule("gate_operations");
   GATEOP(Identity);
   GATEOP(Hadamard);
   GATEOP(PauliX);
@@ -131,6 +116,27 @@ PYBIND11_MODULE(_C, m) {
   m_functionals.def("initialize_zero", &functionals::initialize_zero);
   m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z);
 
-  auto m_cuda = m.def_submodule("cuda");
-  m_cuda.def("device_count", &cu::device_count);
+  // StateVector
+  auto m_result = m.def_submodule("result");
+  py::class_<StateVector>(m_result, "StateVector", py::buffer_protocol())
+      .def_buffer([](StateVector &sv) -> py::buffer_info {
+        return py::buffer_info(
+            sv.data(),                    /* Pointer to buffer */
+            sizeof(std::complex<double>), /* Size of one scalar */
+            py::format_descriptor<std::complex<double>>::format(), /* Python
+                                                       struct-style format
+                                                       descriptor */
+            sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
+      })
+      .def(py::init<size_t>())
+      .def("cpu", &StateVector::cpu)
+      .def("cuda", &StateVector::cuda);
+
+
+  auto m_core = m.def_submodule("core");
+  m_core.def("mem_info", &cu::mem_info);
+
+  auto m_core_cuda = m_core.def_submodule("cuda");
+  m_core_cuda.def("mem_info", &cu::mem_info);
+  m_core_cuda.def("device_count", &cu::device_count);
 }

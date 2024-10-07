@@ -1,7 +1,7 @@
 #ifndef _FUNCTIONALS_H_
 #define _FUNCTIONALS_H_
-#include "operation.h"
-#include "state_vector.h"
+#include "operation/operation.h"
+#include "result/state_vector.h"
 namespace functionals {
 void apply(StateVector &state_vector, GateOperation &op,
            std::vector<size_t> targets, bool use_cuda);

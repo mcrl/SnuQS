@@ -1,9 +1,9 @@
-#include "state_vector.h"
+#include "result/state_vector.h"
 
 #include <cuda_runtime.h>
 #include <spdlog/spdlog.h>
 
-#include "utils.h"
+#include "utils_cuda.h"
 
 StateVector::StateVector(size_t num_qubits) : num_qubits_(num_qubits) {}
 

@@ -1,4 +1,4 @@
-#include "gate_operations.h"
+#include "operation/gate_operations.h"
 
 #include <spdlog/spdlog.h>
 

@@ -4,6 +4,7 @@
 #include <cuda_runtime.h>
 
 #include <cstdio>
+
 #define CUDA_CHECK(e)                                                   \
   do {                                                                  \
     cudaError_t r = (e);                                                \
