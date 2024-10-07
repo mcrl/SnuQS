@@ -13,6 +13,7 @@ Identity::Identity(std::vector<size_t> targets,
   data_[1 * 2 + 1] = 1;
 }
 Identity::~Identity() {}
+std::string Identity::name() const { return "Identity"; }
 
 Hadamard::Hadamard(std::vector<size_t> targets,
                    std::vector<size_t> ctrl_modifiers, size_t power)
@@ -23,6 +24,7 @@ Hadamard::Hadamard(std::vector<size_t> targets,
   data_[1 * 2 + 1] = -M_SQRT1_2;
 }
 Hadamard::~Hadamard() {}
+std::string Hadamard::name() const { return "Hadamard"; }
 
 PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
@@ -33,6 +35,7 @@ PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = 0;
 }
 PauliX::~PauliX() {}
+std::string PauliX::name() const { return "PauliX"; }
 
 PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
@@ -43,6 +46,7 @@ PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = 0;
 }
 PauliY::~PauliY() {}
+std::string PauliY::name() const { return "PauliY"; }
 
 PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
@@ -53,6 +57,7 @@ PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = -1;
 }
 PauliZ::~PauliZ() {}
+std::string PauliZ::name() const { return "PauliZ"; }
 
 CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -75,6 +80,7 @@ CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[3 * 4 + 3] = 0;
 }
 CX::~CX() {}
+std::string CX::name() const { return "CX"; }
 
 CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -97,6 +103,7 @@ CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[3 * 4 + 3] = 0;
 }
 CY::~CY() {}
+std::string CY::name() const { return "CY"; }
 
 CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -119,6 +126,7 @@ CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[3 * 4 + 3] = -1;
 }
 CZ::~CZ() {}
+std::string CZ::name() const { return "CZ"; }
 
 S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
@@ -129,6 +137,7 @@ S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = 1i;
 }
 S::~S() {}
+std::string S::name() const { return "S"; }
 
 Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -139,6 +148,7 @@ Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = -1i;
 }
 Si::~Si() {}
+std::string Si::name() const { return "Si"; }
 
 T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
@@ -149,6 +159,7 @@ T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = std::exp(1i * M_PI / 4.);
 }
 T::~T() {}
+std::string T::name() const { return "T"; }
 
 Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -159,6 +170,7 @@ Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = std::exp(-1i * M_PI / 4.);
 }
 Ti::~Ti() {}
+std::string Ti::name() const { return "Ti"; }
 
 V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
@@ -169,6 +181,7 @@ V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = 0.5 + 0.5i;
 }
 V::~V() {}
+std::string V::name() const { return "V"; }
 
 Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -179,6 +192,7 @@ Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[1 * 2 + 1] = 0.5 - 0.5i;
 }
 Vi::~Vi() {}
+std::string Vi::name() const { return "Vi"; }
 
 PhaseShift::PhaseShift(std::vector<size_t> targets, double angle,
                        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -189,6 +203,9 @@ PhaseShift::PhaseShift(std::vector<size_t> targets, double angle,
   data_[1 * 2 + 1] = std::exp(1i * angle);
 }
 PhaseShift::~PhaseShift() {}
+std::string PhaseShift::name() const {
+  return "PhaseShift(" + std::to_string(angle_) + ")";
+}
 
 CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
                          std::vector<size_t> ctrl_modifiers, size_t power)
@@ -211,6 +228,9 @@ CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = std::exp(1i * angle);
 }
 CPhaseShift::~CPhaseShift() {}
+std::string CPhaseShift::name() const {
+  return "CPhaseShift(" + std::to_string(angle_) + ")";
+}
 
 CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -233,6 +253,9 @@ CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = 1;
 }
 CPhaseShift00::~CPhaseShift00() {}
+std::string CPhaseShift00::name() const {
+  return "CPhaseShift00(" + std::to_string(angle_) + ")";
+}
 
 CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -255,6 +278,9 @@ CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = 1;
 }
 CPhaseShift01::~CPhaseShift01() {}
+std::string CPhaseShift01::name() const {
+  return "CPhaseShift01(" + std::to_string(angle_) + ")";
+}
 
 CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -277,6 +303,9 @@ CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = 1;
 }
 CPhaseShift10::~CPhaseShift10() {}
+std::string CPhaseShift10::name() const {
+  return "CPhaseShift10(" + std::to_string(angle_) + ")";
+}
 
 RotX::RotX(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
@@ -289,6 +318,9 @@ RotX::RotX(std::vector<size_t> targets, double angle,
   data_[1 * 2 + 1] = cos_half_angle;
 }
 RotX::~RotX() {}
+std::string RotX::name() const {
+  return "RotX(" + std::to_string(angle_) + ")";
+}
 
 RotY::RotY(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
@@ -301,6 +333,9 @@ RotY::RotY(std::vector<size_t> targets, double angle,
   data_[1 * 2 + 1] = cos_half_angle;
 }
 RotY::~RotY() {}
+std::string RotY::name() const {
+  return "RotY(" + std::to_string(angle_) + ")";
+}
 
 RotZ::RotZ(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
@@ -313,6 +348,9 @@ RotZ::RotZ(std::vector<size_t> targets, double angle,
   data_[1 * 2 + 1] = positive_phase;
 }
 RotZ::~RotZ() {}
+std::string RotZ::name() const {
+  return "RotZ(" + std::to_string(angle_) + ")";
+}
 
 Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
            size_t power)
@@ -335,6 +373,7 @@ Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[3 * 4 + 3] = 1;
 }
 Swap::~Swap() {}
+std::string Swap::name() const { return "Swap"; }
 
 ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
@@ -357,6 +396,7 @@ ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[3 * 4 + 3] = 1;
 }
 ISwap::~ISwap() {}
+std::string ISwap::name() const { return "ISwap"; }
 
 PSwap::PSwap(std::vector<size_t> targets, double angle,
              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -379,6 +419,9 @@ PSwap::PSwap(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = 1;
 }
 PSwap::~PSwap() {}
+std::string PSwap::name() const {
+  return "PSwap(" + std::to_string(angle_) + ")";
+}
 
 XY::XY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -403,6 +446,7 @@ XY::XY(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = 1;
 }
 XY::~XY() {}
+std::string XY::name() const { return "XY(" + std::to_string(angle_) + ")"; }
 
 XX::XX(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -427,6 +471,7 @@ XX::XX(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = cos_angle;
 }
 XX::~XX() {}
+std::string XX::name() const { return "XX(" + std::to_string(angle_) + ")"; }
 
 YY::YY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -451,6 +496,7 @@ YY::YY(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = cos_angle;
 }
 YY::~YY() {}
+std::string YY::name() const { return "YY(" + std::to_string(angle_) + ")"; }
 
 ZZ::ZZ(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -475,6 +521,7 @@ ZZ::ZZ(std::vector<size_t> targets, double angle,
   data_[3 * 4 + 3] = negative_phase;
 }
 ZZ::~ZZ() {}
+std::string ZZ::name() const { return "ZZ(" + std::to_string(angle_) + ")"; }
 
 CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
@@ -545,6 +592,7 @@ CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[7 * 8 + 7] = 0;
 }
 CCNot::~CCNot() {}
+std::string CCNot::name() const { return "CCNot"; }
 
 CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
@@ -615,6 +663,7 @@ CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   data_[7 * 8 + 7] = 1;
 }
 CSwap::~CSwap() {}
+std::string CSwap::name() const { return "CSwap"; }
 
 U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
      std::vector<size_t> ctrl_modifiers, size_t power)
@@ -628,6 +677,7 @@ U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
   data_[1 * 2 + 1] = std::exp(1i * (phi + lambda)) * cos(theta / 2);
 }
 U::~U() {}
+std::string U::name() const { return "U"; }
 
 GPhase::GPhase(std::vector<size_t> targets, double angle,
                std::vector<size_t> ctrl_modifiers, size_t power)
@@ -635,3 +685,6 @@ GPhase::GPhase(std::vector<size_t> targets, double angle,
   data_[0] = std::exp(1i * angle);
 }
 GPhase::~GPhase() {}
+std::string GPhase::name() const {
+  return "GPhase(" + std::to_string(angle_) + ")";
+}

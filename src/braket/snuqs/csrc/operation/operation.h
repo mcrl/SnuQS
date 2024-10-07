@@ -30,6 +30,7 @@ class GateOperation : public Operation {
   virtual std::vector<size_t> shape() const;
   virtual std::vector<size_t> stride() const;
 
+  virtual std::string name() const;
   virtual std::string formatted_string() const;
 
   std::complex<double> *data_ = nullptr;

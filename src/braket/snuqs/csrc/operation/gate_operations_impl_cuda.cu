@@ -6,9 +6,9 @@
 #include "operation/gate_operations_impl_cuda.h"
 #include "utils_cuda.h"
 
-static constexpr size_t BLOCKDIM = 256;
-
 namespace cu {
+
+static constexpr size_t BLOCKDIM = 256;
 
 static __global__ void applyGlobalPhase_kernel(thrust::complex<double> *buffer,
                                                thrust::complex<double> *gate,

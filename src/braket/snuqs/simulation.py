@@ -2,11 +2,12 @@ import numpy as np
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from braket.snuqs._C.result import StateVector
+from braket.snuqs._C.result_types import StateVector
 from braket.snuqs._C.operation import GateOperation
 from braket.snuqs._C.functionals import apply as apply_C, initialize_basis_z as initialize_basis_z_C
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
+from braket.snuqs.transpile import sort_operations, transpile
 
 
 class Simulation(ABC):
@@ -88,8 +89,6 @@ class StateVectorSimulation(Simulation):
 
         super().__init__(qubit_count=qubit_count, shots=shots)
         self._state_vector = StateVector(qubit_count)
-        self._state_vector.cpu()
-        initialize_basis_z_C(self._state_vector)
 
     @property
     def state_vector(self) -> np.ndarray:
@@ -139,12 +138,16 @@ class StateVectorSimulation(Simulation):
 
     def _evolve_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
+        state_vector.cpu()
+        if not state_vector.initialized():
+            initialize_basis_z_C(state_vector)
 
         for operation in operations:
             targets = operation.targets
-            apply_C(state_vector, operation, targets, False)
+            apply_C(state_vector, operation, targets)
 
     def _evolve_cpu_offload_cpu(self, operations: list[GateOperation]) -> None:
+        """CPU offload with CPU simulation is equivalent to CPU simulation"""
         return self._evolve_cpu(operations)
 
     def _evolve_cpu_offload_storage(self, operations: list[GateOperation],
@@ -155,28 +158,25 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
 
         state_vector.cuda()
+        if not state_vector.initialized():
+            initialize_basis_z_C(state_vector)
 
+        print(operations)
+        operations = sort_operations(operations)
+        print(operations)
         for operation in operations:
             targets = operation.targets
-            apply_C(state_vector, operation, targets, True)
+            apply_C(state_vector, operation, targets)
 
         state_vector.cpu()
 
     def _evolve_cuda_offload_cpu(self, operations: list[GateOperation]) -> None:
-        state_vector = self._state_vector
-
-        state_vector.cuda()
-
-        for operation in operations:
-            targets = operation.targets
-            apply_C(state_vector, operation, targets, True)
-
-        state_vector.cpu()
+        print(operations)
+        operations = sort_operations(operations)
+        print(operations)
+        raise NotImplementedError("Not Implemented")
 
     def _evolve_cuda_offload_storage(self,
                                      operations: list[GateOperation],
                                      path: Optional[List[str]] = None) -> None:
         raise NotImplementedError("Not Implemented")
-
-    def _transpile(self, operations: list[GateOperation]):
-        pass

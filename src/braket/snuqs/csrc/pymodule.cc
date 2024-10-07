@@ -5,10 +5,11 @@
 #include <complex>
 
 #include "core/cuda/runtime.h"
-#include "functionals.h"
-#include "result/state_vector.h"
+#include "core/runtime.h"
+#include "functionals/functionals.h"
 #include "operation/gate_operations.h"
 #include "operation/operation.h"
+#include "result_types/state_vector.h"
 
 namespace py = pybind11;
 
@@ -63,7 +64,7 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
-  
+
   // Operation
   auto m_operation = m.def_submodule("operation");
   py::class_<Operation>(m_operation, "Operation")
@@ -117,8 +118,13 @@ PYBIND11_MODULE(_C, m) {
   m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z);
 
   // StateVector
-  auto m_result = m.def_submodule("result");
-  py::class_<StateVector>(m_result, "StateVector", py::buffer_protocol())
+  auto m_result_types = m.def_submodule("result_types");
+  py::class_<ResultType>(m_result_types, "Operation")
+      .def("data", &ResultType::data)
+      .def("dim", &ResultType::dim)
+      .def("shape", &ResultType::shape);
+  py::class_<StateVector, ResultType>(m_result_types, "StateVector",
+                                      py::buffer_protocol())
       .def_buffer([](StateVector &sv) -> py::buffer_info {
         return py::buffer_info(
             sv.data(),                    /* Pointer to buffer */
@@ -129,14 +135,16 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>())
+      .def("initialized", &StateVector::initialized)
       .def("cpu", &StateVector::cpu)
       .def("cuda", &StateVector::cuda);
 
-
   auto m_core = m.def_submodule("core");
-  m_core.def("mem_info", &cu::mem_info);
+  m_core.def("mem_info", &mem_info);
 
   auto m_core_cuda = m_core.def_submodule("cuda");
-  m_core_cuda.def("mem_info", &cu::mem_info);
-  m_core_cuda.def("device_count", &cu::device_count);
+  m_core_cuda.def("mem_info", &cu::mem_info)
+      .def("device_count", &cu::device_count)
+      .def("get_device", &cu::get_device)
+      .def("set_device", &cu::set_device);
 }

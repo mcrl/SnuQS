@@ -12,14 +12,16 @@ include_directories("${PYBIND_INCLUDE_DIRS}")
 add_library(
   _C SHARED
   pymodule.cc
-  functionals.cc
-  result/state_vector.cc
+  core/runtime.cc
+  core/cuda/runtime.cu
+  functionals/functionals.cc
+  initialization/initialization_impl_cpu.cc
+  initialization/initialization_impl_cuda.cu
   operation/operation.cc
   operation/gate_operations.cc
   operation/gate_operations_impl_cpu.cc
   operation/gate_operations_impl_cuda.cu
-  core/runtime.cc
-  core/cuda/runtime.cu)
+  result_types/state_vector.cc)
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")
 set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")

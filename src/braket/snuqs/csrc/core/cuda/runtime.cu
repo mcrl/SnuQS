@@ -12,4 +12,11 @@ int device_count() {
   CUDA_CHECK(cudaGetDeviceCount(&count));
   return count;
 }
+
+void set_device(int device) { CUDA_CHECK(cudaSetDevice(device)); }
+int get_device() {
+  int device;
+  CUDA_CHECK(cudaGetDevice(&device));
+  return device;
+}
 };  // namespace cu

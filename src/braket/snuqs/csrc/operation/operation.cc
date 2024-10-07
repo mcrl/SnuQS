@@ -5,6 +5,7 @@
 
 #include <sstream>
 
+#include "operation/gate_operations.h"
 #include "utils_cuda.h"
 
 // Operation
@@ -57,9 +58,11 @@ std::vector<size_t> GateOperation::stride() const {
   return {ncols * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
+std::string GateOperation::name() const { return "Unknown"; }
 std::string GateOperation::formatted_string() const {
   std::stringstream ss;
   ss << "<";
+  ss << name() << ": ";
   ss << "targets: {";
   for (auto t : targets_) {
     ss << t << ", ";

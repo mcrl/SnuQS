@@ -1,7 +1,7 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-enum class Device {
+enum class DeviceType {
   UNKNOWN,
   CPU,
   CUDA,

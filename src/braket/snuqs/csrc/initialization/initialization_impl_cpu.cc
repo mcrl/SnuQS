@@ -1,0 +1,21 @@
+#include <complex>
+#include "initialization/initialization_impl_cuda.h"
+
+namespace cpu {
+
+void initializeZero(void* _buf, size_t nelems) {
+  auto buf = reinterpret_cast<std::complex<double>*>(_buf);
+  for (size_t i = 0; i < nelems; ++i) {
+    buf[i] = 0;
+  }
+}
+
+void initializeBasis_Z(void* _buf, size_t nelems) {
+  auto buf = reinterpret_cast<std::complex<double>*>(_buf);
+  for (size_t i = 0; i < nelems; ++i) {
+    buf[i] = 0;
+  }
+  buf[0] = 1;
+}
+
+}  // namespace cpu

@@ -1,4 +1,4 @@
-#include "result/state_vector.h"
+#include "result_types/state_vector.h"
 
 #include <cuda_runtime.h>
 #include <spdlog/spdlog.h>
@@ -13,14 +13,14 @@ StateVector::~StateVector() {
 }
 
 void *StateVector::data() {
-  if (device_ != Device::CPU) {
+  if (device_ != DeviceType::CPU) {
     cpu();
   }
   return data_;
 }
 
 void *StateVector::data_cuda() {
-  if (device_ != Device::CUDA) {
+  if (device_ != DeviceType::CUDA) {
     cuda();
   }
   return data_cuda_;
@@ -36,7 +36,7 @@ void StateVector::cpu() {
                           num_elems() * sizeof(std::complex<double>),
                           cudaMemcpyDeviceToHost));
   }
-  device_ = Device::CPU;
+  device_ = DeviceType::CPU;
 }
 
 void StateVector::cuda() {
@@ -50,20 +50,23 @@ void StateVector::cuda() {
                           num_elems() * sizeof(std::complex<double>),
                           cudaMemcpyHostToDevice));
   }
-  device_ = Device::CUDA;
+  device_ = DeviceType::CUDA;
 }
 
 bool StateVector::allocated() const {
-  if (device_ == Device::CPU) {
+  if (device_ == DeviceType::CPU) {
     return (data_ != nullptr);
-  } else if (device_ == Device::CUDA) {
+  } else if (device_ == DeviceType::CUDA) {
     return (data_cuda_ != nullptr);
   } else {
     return (data_ != nullptr) && (data_cuda_ != nullptr);
   }
   return false;
 }
-Device StateVector::device() const { return device_; }
+
+void StateVector::set_initialized() { initialized_ = true; }
+bool StateVector::initialized() const { return initialized_; }
+DeviceType StateVector::device() const { return device_; }
 size_t StateVector::dim() const { return 1; }
 size_t StateVector::num_elems() const { return (1ul << num_qubits_); }
 size_t StateVector::num_qubits() const { return num_qubits_; }
