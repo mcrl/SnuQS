@@ -137,7 +137,11 @@ PYBIND11_MODULE(_C, m) {
       .def(py::init<size_t>())
       .def("initialized", &StateVector::initialized)
       .def("cpu", &StateVector::cpu)
-      .def("cuda", &StateVector::cuda);
+      .def("cuda", &StateVector::cuda)
+      .def("copy", &StateVector::copy)
+      .def("copy_slice", &StateVector::copy_slice)
+      .def("cut", &StateVector::cut)
+      .def("slice", &StateVector::slice);
 
   auto m_core = m.def_submodule("core");
   m_core.def("mem_info", &mem_info);

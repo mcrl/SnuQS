@@ -340,7 +340,12 @@ class BaseSimulator(ABC):
         operations = circuit.instructions
 
         simulation = self.initialize_simulation(
-            qubit_count=qubit_count, shots=shots)
+            qubit_count=qubit_count,
+            shots=shots,
+            device=device,
+            offload=offload,
+            path=path)
+
         simulation.evolve(operations,
                           device=device,
                           offload=offload,
@@ -587,8 +592,17 @@ class StateVectorSimulator(BaseSimulator):
             }
         )
 
-    def initialize_simulation(self, **kwargs) -> StateVectorSimulation:
+    def initialize_simulation(self,
+                              qubit_count: Optional[int] = None,
+                              shots: Optional[int] = None,
+                              device: Optional[str] = None,
+                              offload: Optional[str] = None,
+                              path: Optional[List[str]] = None) -> StateVectorSimulation:
         """Initializes simulation with keyword arguments"""
-        qubit_count = kwargs.get("qubit_count")
-        shots = kwargs.get("shots")
-        return StateVectorSimulation(qubit_count, shots)
+        if device is None:
+            device = DeviceType.CPU
+        if offload is None:
+            offload = OffloadType.NONE
+        return StateVectorSimulation(qubit_count, shots,
+                                     device, offload, path=path
+                                     )

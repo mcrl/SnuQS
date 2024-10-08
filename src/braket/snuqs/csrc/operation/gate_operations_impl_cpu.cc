@@ -11,6 +11,7 @@ static void applyGlobalPhase(std::complex<double> *buffer,
                              std::vector<size_t> targets, size_t nqubits,
                              size_t nelems) {
   std::complex<double> gphase = gate[0];
+#pragma omp parallel for
   for (size_t i = 0; i < nelems; ++i) {
     buffer[i] = buffer[i] * gphase;
   }
@@ -22,6 +23,7 @@ static void applyOneQubitGate(std::complex<double> *buffer,
                               size_t nelems) {
   size_t target = targets[0];
   size_t st = (1ull << (nqubits - target - 1));
+#pragma omp parallel for
   for (size_t i = 0; i < nelems; ++i) {
     if ((i & st) == 0) {
       std::complex<double> a0 = buffer[i];
@@ -42,6 +44,7 @@ static void applyTwoQubitGate(std::complex<double> *buffer,
   size_t target1 = nqubits - t0 - 1;
   size_t st0 = (1ull << target0);
   size_t st1 = (1ull << target1);
+#pragma omp parallel for
   for (size_t i = 0; i < nelems; ++i) {
     if ((i & st0) == 0 && (i & st1) == 0) {
       std::complex<double> a0 = buffer[i + 0];
@@ -73,6 +76,7 @@ static void applyThreeQubitGate(std::complex<double> *buffer,
   size_t st0 = (1ull << target0);
   size_t st1 = (1ull << target1);
   size_t st2 = (1ull << target2);
+#pragma omp parallel for
   for (size_t i = 0; i < nelems; ++i) {
     if ((i & st0) == 0 && (i & st1) == 0 && (i & st2) == 0) {
       std::complex<double> a0 = buffer[i + 0];

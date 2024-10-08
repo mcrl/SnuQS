@@ -1,13 +1,15 @@
 import numpy as np
+import math
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
 from braket.snuqs._C.result_types import StateVector
 from braket.snuqs._C.operation import GateOperation
-from braket.snuqs._C.functionals import apply as apply_C, initialize_basis_z as initialize_basis_z_C
+from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_zero
+from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
-from braket.snuqs.transpile import sort_operations, transpile
+from braket.snuqs.transpile import transpile_for_hybrid
 
 
 class Simulation(ABC):
@@ -77,7 +79,10 @@ class Simulation(ABC):
 
 
 class StateVectorSimulation(Simulation):
-    def __init__(self, qubit_count: int, shots: int):
+    def __init__(self, qubit_count: int, shots: int,
+                 device: DeviceType,
+                 offload: OffloadType,
+                 path: Optional[List[str]] = None):
         r"""
         Args:
             qubit_count (int): The number of qubits being simulated.
@@ -88,9 +93,59 @@ class StateVectorSimulation(Simulation):
         """
 
         super().__init__(qubit_count=qubit_count, shots=shots)
-        self._state_vector = StateVector(qubit_count)
+        self._initialize_memory_objects(
+            qubit_count, shots, device, offload, path)
 
-    @property
+    def _initialize_memory_objects(self, qubit_count: int, shots: int,
+                                   device: DeviceType,
+                                   offload: OffloadType,
+                                   path: Optional[List[str]] = None):
+        match offload:
+            case OffloadType.NONE:
+                self._initialize_memory_objects_no_offload(
+                    qubit_count, shots, device)
+            case OffloadType.CPU:
+                self._initialize_memory_objects_cpu_offload(
+                    qubit_count, shots, device)
+            case OffloadType.STORAGE:
+                self._initialize_memory_objects_storage_offload(
+                    qubit_count, shots, device, path)
+            case _:
+                raise NotImplementedError("Not Implemented")
+
+    def _initialize_memory_objects_no_offload(self, qubit_count: int, shots: int,
+                                              device: DeviceType):
+        self._state_vector = StateVector(qubit_count)
+        match device:
+            case DeviceType.CPU:
+                self._state_vector.cpu()
+                initialize_basis_z(self._state_vector)
+            case DeviceType.CUDA:
+                self._state_vector.cuda()
+                initialize_basis_z(self._state_vector)
+            case DeviceType.HYBRID:
+                free, _ = mem_info_cuda()
+                self._max_qubit_count_cuda = min(
+                    qubit_count, int(math.log(free / 16, 2)))
+                self._state_vector_cuda = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda.cuda()
+
+                self._state_vector.cpu()
+                self._state_vector.cut(self._max_qubit_count_cuda)
+                initialize_basis_z(self._state_vector)
+            case _:
+                raise NotImplementedError("Not Implemented")
+
+    def _initialize_memory_objects_cpu_offload(self, qubit_count: int, shots: int,
+                                               device: DeviceType):
+        raise NotImplementedError("Not Implemented")
+
+    def _initialize_memory_objects_storage_offload(self, qubit_count: int, shots: int,
+                                                   device: DeviceType, path: List[str]):
+        raise NotImplementedError("Not Implemented")
+
+    @ property
     def state_vector(self) -> np.ndarray:
         """
         np.ndarray: The state vector specifying the current state of the simulation.
@@ -100,7 +155,7 @@ class StateVectorSimulation(Simulation):
         """
         return np.array(self._state_vector, copy=False)
 
-    @property
+    @ property
     def probabilities(self) -> np.ndarray:
         """
         np.ndarray: The probabilities of each computational basis state of the current state
@@ -117,66 +172,132 @@ class StateVectorSimulation(Simulation):
                device: Optional[DeviceType] = None,
                offload: Optional[OffloadType] = None,
                path: Optional[List[str]] = None) -> None:
-
         if device is None:
             device = DeviceType.CPU
         if offload is None:
             offload = OffloadType.NONE
 
-        if device == DeviceType.CPU and offload == OffloadType.NONE:
-            return self._evolve_cpu(operations)
-        elif device == DeviceType.CPU and offload == OffloadType.CPU:
-            return self._evolve_cpu_offload_cpu(operations)
-        elif device == DeviceType.CPU and offload == OffloadType.STORAGE:
-            return self._evolve_cpu_offload_storage(operations, path)
-        elif device == DeviceType.CUDA and offload == OffloadType.NONE:
-            return self._evolve_cuda(operations)
-        elif device == DeviceType.CUDA and offload == OffloadType.CPU:
-            return self._evolve_cuda_offload_cpu(operations)
-        elif device == DeviceType.CUDA and offload == OffloadType.STORAGE:
-            return self._evolve_cuda_offload_storage(operations, path)
+        match offload:
+            case OffloadType.NONE:
+                self._evolve_no_offload(operations, device)
+            case OffloadType.CPU:
+                self._evolve_cpu_offload(operations, device)
+            case OffloadType.STORAGE:
+                self._evolve_storage_offload(operations, device, path)
+            case _:
+                raise NotImplementedError("Not Implemented")
 
-    def _evolve_cpu(self, operations: list[GateOperation]) -> None:
+    def _evolve_no_offload(self,
+                           operations: list[GateOperation],
+                           device: DeviceType):
+        match device:
+            case DeviceType.CPU:
+                self._evolve_no_offload_cpu(operations)
+            case DeviceType.CUDA:
+                self._evolve_no_offload_cuda(operations)
+            case DeviceType.HYBRID:
+                self._evolve_no_offload_hybrid(operations)
+            case _:
+                raise NotImplementedError("Not Implemented")
+
+    def _evolve_cpu_offload(self,
+                            operations: list[GateOperation],
+                            device: DeviceType):
+        match device:
+            case DeviceType.CPU:
+                self._evolve_cpu_offload_cpu(operations)
+            case DeviceType.CUDA:
+                self._evolve_cpu_offload_cuda(operations)
+            case DeviceType.HYBRID:
+                self._evolve_cpu_offload_hybrid(operations)
+            case _:
+                raise NotImplementedError("Not Implemented")
+
+    def _evolve_storage_offload(self,
+                                operations: list[GateOperation],
+                                device: DeviceType,
+                                path: List[str]) -> None:
+        match device:
+            case DeviceType.CPU:
+                self._evolve_storage_offload_cpu(operations, path)
+            case DeviceType.CUDA:
+                self._evolve_storage_offload_cuda(operations, path)
+            case DeviceType.HYBRID:
+                self._evolve_storage_offload_hybrid(operations, path)
+            case _:
+                raise NotImplementedError("Not Implemented")
+
+    #
+    # No offload
+    #
+    def _evolve_no_offload_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
-        state_vector.cpu()
-        if not state_vector.initialized():
-            initialize_basis_z_C(state_vector)
-
         for operation in operations:
             targets = operation.targets
-            apply_C(state_vector, operation, targets)
+            apply(state_vector, operation, targets)
+
+    def _evolve_no_offload_cuda(self, operations: list[GateOperation]) -> None:
+        state_vector = self._state_vector
+        for operation in operations:
+            targets = operation.targets
+            apply(state_vector, operation, targets)
+
+    def _evolve_no_offload_hybrid(self, operations: list[GateOperation]) -> None:
+        state_vector = self._state_vector
+        state_vector_cuda = self._state_vector_cuda
+
+        list_of_subcircuits = transpile_for_hybrid(
+            operations, self._qubit_count, self._max_qubit_count_cuda)
+
+        for s, subcircuits in enumerate(list_of_subcircuits):
+            # Always start from local subcircuits
+            targets = subcircuits[0][0].targets
+            applying_local = len(targets) == 0 or max(
+                targets) < self._max_qubit_count_cuda
+            for i, subcircuit in enumerate(subcircuits):
+                state_vector.slice(i)
+                if applying_local:
+                    if s != 0 or i == 0:
+                        state_vector_cuda.copy_slice(state_vector)
+                    else:
+                        initialize_zero(state_vector_cuda)
+                    for operation in operations:
+                        targets = operation.targets
+                        apply(state_vector_cuda, operation, targets)
+                    state_vector.copy_slice(state_vector_cuda)
+                else:
+                    for operation in operations:
+                        targets = operation.targets
+                        apply(state_vector, operation, targets)
+
+    #
+    # CPU offload
+    #
 
     def _evolve_cpu_offload_cpu(self, operations: list[GateOperation]) -> None:
         """CPU offload with CPU simulation is equivalent to CPU simulation"""
         return self._evolve_cpu(operations)
 
-    def _evolve_cpu_offload_storage(self, operations: list[GateOperation],
-                                    path: Optional[List[str]] = None) -> None:
+    def _evolve_cpu_offload_cuda(self, operations: list[GateOperation]) -> None:
         raise NotImplementedError("Not Implemented")
 
-    def _evolve_cuda(self, operations: list[GateOperation]) -> None:
-        state_vector = self._state_vector
+    def _evolve_cpu_offload_hybrid(self, operations: list[GateOperation]) -> None:
+        """CPU offload with Hybrid simulation is equivalent to Hybrid simulation"""
+        return self._evolve_no_offload_hybrid(operations)
 
-        state_vector.cuda()
-        if not state_vector.initialized():
-            initialize_basis_z_C(state_vector)
-
-        print(operations)
-        operations = sort_operations(operations)
-        print(operations)
-        for operation in operations:
-            targets = operation.targets
-            apply_C(state_vector, operation, targets)
-
-        state_vector.cpu()
-
-    def _evolve_cuda_offload_cpu(self, operations: list[GateOperation]) -> None:
-        print(operations)
-        operations = sort_operations(operations)
-        print(operations)
+    #
+    # Storage offload
+    #
+    def _evolve_storage_offload_cpu(self, operations: list[GateOperation],
+                                    path: List[str] = None) -> None:
         raise NotImplementedError("Not Implemented")
 
-    def _evolve_cuda_offload_storage(self,
+    def _evolve_storage_offload_cuda(self,
                                      operations: list[GateOperation],
-                                     path: Optional[List[str]] = None) -> None:
+                                     path: List[str] = None) -> None:
+        raise NotImplementedError("Not Implemented")
+
+    def _evolve_storage_offload_hybrid(self,
+                                       operations: list[GateOperation],
+                                       path: List[str] = None) -> None:
         raise NotImplementedError("Not Implemented")
