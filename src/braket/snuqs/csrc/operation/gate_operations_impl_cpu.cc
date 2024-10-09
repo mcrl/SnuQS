@@ -33,13 +33,6 @@ static void applyOneQubitGate(std::complex<double> *buffer,
       std::complex<double> a1 = buffer[i + st];
       buffer[i] = gate[0 * 2 + 0] * a0 + gate[0 * 2 + 1] * a1;
       buffer[i + st] = gate[1 * 2 + 0] * a0 + gate[1 * 2 + 1] * a1;
-      if (i == 0) {
-        auto b0 = buffer[i];
-        auto b1 = buffer[i + st];
-        spdlog::info("st: {}, a0: {}+{}i, a1: {}+{}i -> a0: {}+{}i, a1: {}+{}i",
-                     st, a0.real(), a0.imag(), a1.real(), a1.imag(), b0.real(),
-                     b0.imag(), b1.real(), b1.imag());
-      }
     }
   }
 }

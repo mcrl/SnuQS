@@ -136,6 +136,7 @@ class StateVectorSimulation(Simulation):
                 self._state_vector.cpu()
                 self._state_vector.cut(self._max_qubit_count_cuda)
                 initialize_basis_z(self._state_vector)
+                self._state_vector.glue()
                 print("First element: ",
                       np.array(self._state_vector, copy=False)[0],
                       np.array(self._state_vector, copy=False)[1])
@@ -245,6 +246,10 @@ class StateVectorSimulation(Simulation):
 
     def _evolve_no_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
+
+        print(operations)
+        operations = pseudo_sort_operations_descending(operations)
+        print(operations)
         state_vector.cuda()
         for operation in operations:
             targets = operation.targets
@@ -264,33 +269,23 @@ class StateVectorSimulation(Simulation):
             applying_local = len(targets) == 0 or min(targets) >= (
                 self._qubit_count - self._max_qubit_count_cuda)
             if applying_local:
+                state_vector.cut(self._max_qubit_count_cuda)
                 for i, subcircuit in enumerate(subcircuit_slices):
-                    print(f"slice: {i}", flush=True)
-                    print(state_vector, flush=True)
-
                     state_vector.slice(i)
                     if applying_local:
-                        print("applying local", flush=True)
                         if s != 0 or i == 0:
-                            print("\tcopying slice from state_vector", flush=True)
                             state_vector_cuda.copy(state_vector)
                         else:
-                            print("\tinitializing zero", flush=True)
                             initialize_zero(state_vector_cuda)
                         for operation in subcircuit:
-                            print("\t", operation, flush=True)
                             targets = operation.targets
                             apply(state_vector_cuda, operation,
                                   self._qubit_count, targets)
-                        print("\tcopying slice from state_vector_cuda", flush=True)
                         state_vector.copy(state_vector_cuda)
                 state_vector.glue()
             else:
-                print("applying nonlocal", flush=True)
-
                 subcircuit = subcircuit_slices[0]
                 for operation in subcircuit:
-                    print("\t", operation, flush=True)
                     targets = operation.targets
                     apply(state_vector, operation, self._qubit_count, targets)
 

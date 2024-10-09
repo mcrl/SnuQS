@@ -16,14 +16,14 @@ void *StateVector::data() { return ptr(); }
 
 void *StateVector::ptr() {
   if (ptr_ == nullptr) {
-    ptr_ = std::move(std::make_shared<Memory>(1ul << num_qubits_));
+    ptr_ = std::move(std::make_shared<Memory>(1ul << num_effective_qubits_));
   }
   return &ptr_->buffer()[slice_index_ * (1ul << num_effective_qubits_)];
 }
 
 void *StateVector::ptr_cuda() {
   if (ptr_cuda_ == nullptr) {
-    ptr_cuda_ = std::make_shared<MemoryCUDA>(1ul << num_qubits_);
+    ptr_cuda_ = std::make_shared<MemoryCUDA>(1ul << num_effective_qubits_);
   }
   return &ptr_cuda_->buffer()[slice_index_ * (1ul << num_effective_qubits_)];
 }
@@ -33,6 +33,8 @@ void StateVector::cpu() {
     assert(ptr_cuda_ != nullptr);
     CUDA_CHECK(cudaMemcpy(ptr(), ptr_cuda(), num_elems() * ptr_->itemsize(),
                           cudaMemcpyDeviceToHost));
+  } else {
+    ptr();
   }
   device_ = DeviceType::CPU;
 }
@@ -42,6 +44,8 @@ void StateVector::cuda() {
     assert(ptr_ != nullptr);
     CUDA_CHECK(cudaMemcpy(ptr_cuda(), ptr(), num_elems() * ptr_->itemsize(),
                           cudaMemcpyHostToDevice));
+  } else {
+    ptr_cuda();
   }
   device_ = DeviceType::CUDA;
 }
@@ -83,6 +87,7 @@ bool StateVector::allocated() const {
 }
 
 void StateVector::cut(size_t num_effective_qubits) {
+  assert(allocated());
   num_effective_qubits_ = num_effective_qubits;
 }
 

@@ -1,31 +1,71 @@
 from braket.snuqs._C.operation import GateOperation
 from functools import cmp_to_key
 
-def compare_oppos_tuple(oppos1, oppos2):
+def pseudo_lt(oppos1, oppos2):
     op1, pos1 = oppos1
-    op2, pos2 = oppos1
+    op2, pos2 = oppos2
 
-    if len(op1) == 0 and len(op2) == 0:
-        return -1 if pos1 < pos2 else 1
+    if len(op1.targets) == 0 and len(op2.targets) == 0:
+        return pos1 < pos2
 
-    if len(op1) == 0:
-        return -1
-    if len(op2) == 0:
-        return 1
+    if len(op1.targets) == 0:
+        return True
+    if len(op2.targets) == 0:
+        return False
+    if len(set(op1.targets) & set(op2.targets)) != 0:
+        return pos1 < pos2
 
-    for t1 in op1.targets:
-        for t2 in op2.targets:
-            if t1 == t2:
-                return -1 if pos1 < pos2 else 1
+    return max(op1.targets) < max(op2.targets)
+def pseudo_gt(oppos1, oppos2):
+    op1, pos1 = oppos1
+    op2, pos2 = oppos2
+
+    if len(op1.targets) == 0 and len(op2.targets) == 0:
+        return pos1 < pos2
+
+    if len(op1.targets) == 0:
+        return True
+    if len(op2.targets) == 0:
+        return False
+    if len(set(op1.targets) & set(op2.targets)) != 0:
+        return pos1 < pos2
+
+    return min(op1.targets) > min(op2.targets)
 
 def pseudo_sort_operations_ascending(operations: list[GateOperation]):
-    oppos_tuples = [(op, i) for i, op in enumerate(operations)]
-    return [op for op, pos in sorted(oppos_tuples, key=cmp_to_key(compare_oppos_tuple))]
+    sorted_operations = operations.copy()
+    for i in range(1, len(operations)):
+        op1 = sorted_operations[i]
+
+        j = i-1
+        while j >= 0:
+            op2 = sorted_operations[j]
+            if pseudo_lt((op1, i), (op2, j)):
+                sorted_operations[j+1] = sorted_operations[j]
+            else:
+                break
+            j -= 1
+        if i != j+1:
+            sorted_operations[j+1] = op1
+    return sorted_operations
 
 
 def pseudo_sort_operations_descending(operations: list[GateOperation]):
-    oppos_tuples = [(op, i) for i, op in enumerate(operations)]
-    return [op for op, pos in sorted(oppos_tuples, key=cmp_to_key(compare_oppos_tuple), reverse=True)]
+    sorted_operations = operations.copy()
+    for i in range(1, len(operations)):
+        op1 = sorted_operations[i]
+
+        j = i-1
+        while j >= 0:
+            op2 = sorted_operations[j]
+            if pseudo_gt((op1, i), (op2, j)):
+                sorted_operations[j+1] = sorted_operations[j]
+            else:
+                break
+            j -= 1
+        if i != j+1:
+            sorted_operations[j+1] = op1
+    return sorted_operations
 
 
 def select_new_permutation(operations: list[GateOperation],
@@ -93,19 +133,25 @@ def subcircuit_partition_hybrid(operations: list[GateOperation],
         if accumulating_local == is_local_gate:
             current_operations.append(op)
         else:
-            subcircuits.append(current_operations)
+            if len(current_operations) != 0:
+                subcircuits.append(current_operations)
             current_operations = [op]
             accumulating_local = not accumulating_local
 
-    subcircuits.append(current_operations)
+    if len(current_operations) != 0:
+        subcircuits.append(current_operations)
     return subcircuits
 
 
-def transpile_for_hybrid(operations: list[GateOperation], qubit_count: int, local_qubit_count: int) -> list[list[GateOperation]]:
+def transpile_for_hybrid(operations: list[GateOperation],
+                         qubit_count: int,
+                         local_qubit_count: int) -> list[list[GateOperation]]:
     assert local_qubit_count <= qubit_count
     subcircuits = subcircuit_partition_hybrid(operations,
                                               qubit_count,
                                               local_qubit_count)
+    print(subcircuits)
+    print(subcircuits[0])
 
     slice_count = 2**(qubit_count - local_qubit_count)
     return [[subcircuit] * slice_count for subcircuit in subcircuits]

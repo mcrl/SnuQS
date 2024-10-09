@@ -6,10 +6,10 @@ from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
-MIN_QUBIT = 31
-MAX_QUBIT = 31
-MAX_GATE = 20
-NUM_ITER = 100
+MIN_QUBIT = 15
+MAX_QUBIT = 15
+MAX_GATE = 500
+NUM_ITER = 1000
 
 
 class RandomInstruction:
@@ -130,7 +130,7 @@ class BraketTest(unittest.TestCase):
 
     def run_snuqs(self, circ):
         option = {
-            'device': 'hybrid',
+            'device': 'cuda',
             # 'offload': 'cpu',
             # 'path': [ '/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1', ],
         }
