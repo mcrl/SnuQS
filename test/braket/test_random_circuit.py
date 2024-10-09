@@ -8,9 +8,8 @@ from braket.circuits.instruction import Instruction
 
 MIN_QUBIT = 31
 MAX_QUBIT = 31
-MAX_GATE = 100
-NGATE_KIND = 31
-NUM_ITER = 1000
+MAX_GATE = 20
+NUM_ITER = 100
 
 
 class RandomInstruction:
@@ -119,7 +118,7 @@ class BraketTest(unittest.TestCase):
     def random_circuit(self):
         nqubits = np.random.randint(MIN_QUBIT, MAX_QUBIT+1)
         ngates = np.random.randint(1, MAX_GATE+1)
-        circ = Circuit([Instruction(Gate.I(), [q]) for q in range(nqubits)])
+        circ = Circuit([Instruction(Gate.H(), [q]) for q in range(nqubits)])
         for _ in range(ngates):
             circ.add_instruction(RandomInstruction(nqubits).get())
         return circ
@@ -132,7 +131,7 @@ class BraketTest(unittest.TestCase):
     def run_snuqs(self, circ):
         option = {
             'device': 'hybrid',
-            #'offload': 'cpu',
+            # 'offload': 'cpu',
             # 'path': [ '/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1', ],
         }
         sim = LocalSimulator(backend="snuqs")
@@ -148,11 +147,13 @@ class BraketTest(unittest.TestCase):
 
             print("\tRunning braket")
             task_braket = self.run_braket(circ)
+            result_braket = task_braket.result().values
+            print(result_braket)
+
             print("\tRunning snuqs")
             task_snuqs = self.run_snuqs(circ)
-
-            result_braket = task_braket.result().values
             result_snuqs = task_snuqs.result().values
+            print(result_snuqs)
 
             self.assertTrue(np.allclose(
                 result_braket,

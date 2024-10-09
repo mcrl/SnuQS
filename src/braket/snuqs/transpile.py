@@ -1,24 +1,31 @@
 from braket.snuqs._C.operation import GateOperation
 from functools import cmp_to_key
 
-def sort_operations(operations: list[GateOperation]):
-    def compare_gates(x, y):
-        if len(x.targets) == 0 and len(y.targets) == 0:
-            return 0
-        elif len(x.targets) == 0:
-            return -1
-        elif len(y.targets) == 0:
-            return 1
+def compare_oppos_tuple(oppos1, oppos2):
+    op1, pos1 = oppos1
+    op2, pos2 = oppos1
 
-        if len(set(x.targets) & set(y.targets)) != 0:
-            return 0
+    if len(op1) == 0 and len(op2) == 0:
+        return -1 if pos1 < pos2 else 1
 
-        if max(y.targets) < max(x.targets):
-            return 1
+    if len(op1) == 0:
+        return -1
+    if len(op2) == 0:
+        return 1
 
-        return 0
+    for t1 in op1.targets:
+        for t2 in op2.targets:
+            if t1 == t2:
+                return -1 if pos1 < pos2 else 1
 
-    return sorted(operations, key=cmp_to_key(compare_gates))
+def pseudo_sort_operations_ascending(operations: list[GateOperation]):
+    oppos_tuples = [(op, i) for i, op in enumerate(operations)]
+    return [op for op, pos in sorted(oppos_tuples, key=cmp_to_key(compare_oppos_tuple))]
+
+
+def pseudo_sort_operations_descending(operations: list[GateOperation]):
+    oppos_tuples = [(op, i) for i, op in enumerate(operations)]
+    return [op for op, pos in sorted(oppos_tuples, key=cmp_to_key(compare_oppos_tuple), reverse=True)]
 
 
 def select_new_permutation(operations: list[GateOperation],
@@ -31,13 +38,14 @@ def select_new_permutation(operations: list[GateOperation],
     candidates = local_qubits[len(nonlocal_qubits):] + \
         nonlocal_qubits + local_qubits[:len(nonlocal_qubits)]
     return candidates
-    # return list(reversed(candidates))
 
 
-def subcircuit_partition(operations: list[GateOperation], qubit_count: int, local_qubit_count: int) -> list[list[GateOperation]]:
+def subcircuit_partition(operations: list[GateOperation],
+                         qubit_count: int,
+                         local_qubit_count: int) -> list[list[GateOperation]]:
     assert local_qubit_count <= qubit_count
     slice_count = 2**(qubit_count-local_qubit_count)
-    operations = sort_operations(operations)
+    operations = pseudo_sort_operations_descending(operations)
 
     print(operations)
     perm = list(range(qubit_count))
@@ -67,17 +75,21 @@ def subcircuit_partition(operations: list[GateOperation], qubit_count: int, loca
     print(subcircuits)
     return subcircuits
 
-def subcircuit_partition_hybrid(operations: list[GateOperation], qubit_count: int, local_qubit_count: int) -> list[list[GateOperation]]:
+def subcircuit_partition_hybrid(operations: list[GateOperation],
+                                qubit_count: int,
+                                local_qubit_count: int) -> list[list[GateOperation]]:
     assert local_qubit_count <= qubit_count
-    operations = sort_operations(operations)
+#    print(operations)
+#    operations = pseudo_sort_operations_descending(operations)
+#    print(operations)
 
     accumulating_local = True
     subcircuits = []
     current_operations = []
 
     for i, op in enumerate(operations):
-        is_local_gate = (len(op.targets) == 0 or max(
-            op.targets) < local_qubit_count)
+        is_local_gate = (len(op.targets) == 0 or min(
+            op.targets) >= (qubit_count-local_qubit_count))
         if accumulating_local == is_local_gate:
             current_operations.append(op)
         else:

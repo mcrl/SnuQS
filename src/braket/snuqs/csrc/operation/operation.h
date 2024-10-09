@@ -21,7 +21,8 @@ class GateOperation : public Operation {
   virtual ~GateOperation();
 
   virtual void *data();
-  virtual void *data_cuda();
+  void *ptr();
+  void *ptr_cuda();
   virtual size_t num_elems() const;
   std::vector<size_t> ctrl_modifiers_;
   size_t power_;
@@ -29,12 +30,13 @@ class GateOperation : public Operation {
   virtual size_t dim() const;
   virtual std::vector<size_t> shape() const;
   virtual std::vector<size_t> stride() const;
+  virtual void slice(size_t idx);
 
   virtual std::string name() const;
   virtual std::string formatted_string() const;
 
-  std::complex<double> *data_ = nullptr;
-  std::complex<double> *data_cuda_ = nullptr;
+  std::complex<double> *ptr_ = nullptr;
+  std::complex<double> *ptr_cuda_ = nullptr;
   bool copied_to_cuda = false;
 };
 

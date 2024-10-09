@@ -22,25 +22,26 @@ GateOperation::GateOperation(const std::vector<size_t> &targets,
                              size_t power)
     : Operation(targets), ctrl_modifiers_(ctrl_modifiers), power_(power) {
   size_t ncols = (1ul << targets_.size());
-  data_ = new std::complex<double>[ncols * ncols];
+  ptr_ = new std::complex<double>[ncols * ncols];
   CUDA_CHECK(
-      cudaMalloc(&data_cuda_, sizeof(std::complex<double>) * ncols * ncols));
+      cudaMalloc(&ptr_cuda_, sizeof(std::complex<double>) * ncols * ncols));
 }
 
 GateOperation::~GateOperation() {
-  CUDA_CHECK(cudaFree(data_cuda_));
-  delete[] data_;
+  CUDA_CHECK(cudaFree(ptr_cuda_));
+  delete[] ptr_;
 }
 
-void *GateOperation::data() { return data_; }
-void *GateOperation::data_cuda() {
+void *GateOperation::data() { return ptr_; }
+void *GateOperation::ptr() { return ptr_; }
+void *GateOperation::ptr_cuda() {
   if (!copied_to_cuda) {
-    CUDA_CHECK(cudaMemcpy(data_cuda_, data_,
+    CUDA_CHECK(cudaMemcpy(ptr_cuda_, ptr_,
                           num_elems() * sizeof(std::complex<double>),
                           cudaMemcpyHostToDevice));
     copied_to_cuda = true;
   }
-  return data_cuda_;
+  return ptr_cuda_;
 }
 
 size_t GateOperation::num_elems() const {
@@ -57,6 +58,8 @@ std::vector<size_t> GateOperation::stride() const {
   size_t ncols = (1ul << targets_.size());
   return {ncols * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
+
+void GateOperation::slice(size_t idx) { assert(false); }
 
 std::string GateOperation::name() const { return "Unknown"; }
 std::string GateOperation::formatted_string() const {

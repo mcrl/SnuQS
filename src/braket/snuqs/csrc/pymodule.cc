@@ -127,7 +127,7 @@ PYBIND11_MODULE(_C, m) {
                                       py::buffer_protocol())
       .def_buffer([](StateVector &sv) -> py::buffer_info {
         return py::buffer_info(
-            sv.data(),                    /* Pointer to buffer */
+            sv.ptr(),                     /* Pointer to buffer */
             sizeof(std::complex<double>), /* Size of one scalar */
             py::format_descriptor<std::complex<double>>::format(), /* Python
                                                        struct-style format
@@ -139,9 +139,10 @@ PYBIND11_MODULE(_C, m) {
       .def("cpu", &StateVector::cpu)
       .def("cuda", &StateVector::cuda)
       .def("copy", &StateVector::copy)
-      .def("copy_slice", &StateVector::copy_slice)
       .def("cut", &StateVector::cut)
-      .def("slice", &StateVector::slice);
+      .def("glue", &StateVector::glue)
+      .def("slice", &StateVector::slice)
+      .def("__repr__", &StateVector::formatted_string);
 
   auto m_core = m.def_submodule("core");
   m_core.def("mem_info", &mem_info);

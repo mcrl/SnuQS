@@ -1,5 +1,6 @@
+#include "operation/initialization_impl_cpu.h"
+
 #include <complex>
-#include "initialization/initialization_impl_cuda.h"
 
 namespace cpu {
 

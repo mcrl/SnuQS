@@ -9,7 +9,7 @@ from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_ze
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
-from braket.snuqs.transpile import transpile_for_hybrid
+from braket.snuqs.transpile import transpile_for_hybrid, pseudo_sort_operations_descending, pseudo_sort_operations_ascending
 
 
 class Simulation(ABC):
@@ -115,12 +115,13 @@ class StateVectorSimulation(Simulation):
 
     def _initialize_memory_objects_no_offload(self, qubit_count: int, shots: int,
                                               device: DeviceType):
-        self._state_vector = StateVector(qubit_count)
         match device:
             case DeviceType.CPU:
+                self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
                 initialize_basis_z(self._state_vector)
             case DeviceType.CUDA:
+                self._state_vector = StateVector(qubit_count)
                 self._state_vector.cuda()
                 initialize_basis_z(self._state_vector)
             case DeviceType.HYBRID:
@@ -131,9 +132,13 @@ class StateVectorSimulation(Simulation):
                     self._max_qubit_count_cuda)
                 self._state_vector_cuda.cuda()
 
+                self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
                 self._state_vector.cut(self._max_qubit_count_cuda)
                 initialize_basis_z(self._state_vector)
+                print("First element: ",
+                      np.array(self._state_vector, copy=False)[0],
+                      np.array(self._state_vector, copy=False)[1])
             case _:
                 raise NotImplementedError("Not Implemented")
 
@@ -232,15 +237,20 @@ class StateVectorSimulation(Simulation):
     #
     def _evolve_no_offload_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
+
+        state_vector.cpu()
         for operation in operations:
             targets = operation.targets
-            apply(state_vector, operation, targets)
+            apply(state_vector, operation, self._qubit_count, targets)
 
     def _evolve_no_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
+        state_vector.cuda()
         for operation in operations:
             targets = operation.targets
-            apply(state_vector, operation, targets)
+            apply(state_vector, operation, self._qubit_count, targets)
+
+        state_vector.cpu()
 
     def _evolve_no_offload_hybrid(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
@@ -249,31 +259,44 @@ class StateVectorSimulation(Simulation):
         list_of_subcircuits = transpile_for_hybrid(
             operations, self._qubit_count, self._max_qubit_count_cuda)
 
-        for s, subcircuits in enumerate(list_of_subcircuits):
-            # Always start from local subcircuits
-            targets = subcircuits[0][0].targets
-            applying_local = len(targets) == 0 or max(
-                targets) < self._max_qubit_count_cuda
-            for i, subcircuit in enumerate(subcircuits):
-                state_vector.slice(i)
-                if applying_local:
-                    if s != 0 or i == 0:
-                        state_vector_cuda.copy_slice(state_vector)
-                    else:
-                        initialize_zero(state_vector_cuda)
-                    for operation in operations:
-                        targets = operation.targets
-                        apply(state_vector_cuda, operation, targets)
-                    state_vector.copy_slice(state_vector_cuda)
-                else:
-                    for operation in operations:
-                        targets = operation.targets
-                        apply(state_vector, operation, targets)
+        for s, subcircuit_slices in enumerate(list_of_subcircuits):
+            targets = subcircuit_slices[0][0].targets
+            applying_local = len(targets) == 0 or min(targets) >= (
+                self._qubit_count - self._max_qubit_count_cuda)
+            if applying_local:
+                for i, subcircuit in enumerate(subcircuit_slices):
+                    print(f"slice: {i}", flush=True)
+                    print(state_vector, flush=True)
+
+                    state_vector.slice(i)
+                    if applying_local:
+                        print("applying local", flush=True)
+                        if s != 0 or i == 0:
+                            print("\tcopying slice from state_vector", flush=True)
+                            state_vector_cuda.copy(state_vector)
+                        else:
+                            print("\tinitializing zero", flush=True)
+                            initialize_zero(state_vector_cuda)
+                        for operation in subcircuit:
+                            print("\t", operation, flush=True)
+                            targets = operation.targets
+                            apply(state_vector_cuda, operation,
+                                  self._qubit_count, targets)
+                        print("\tcopying slice from state_vector_cuda", flush=True)
+                        state_vector.copy(state_vector_cuda)
+                state_vector.glue()
+            else:
+                print("applying nonlocal", flush=True)
+
+                subcircuit = subcircuit_slices[0]
+                for operation in subcircuit:
+                    print("\t", operation, flush=True)
+                    targets = operation.targets
+                    apply(state_vector, operation, self._qubit_count, targets)
 
     #
     # CPU offload
     #
-
     def _evolve_cpu_offload_cpu(self, operations: list[GateOperation]) -> None:
         """CPU offload with CPU simulation is equivalent to CPU simulation"""
         return self._evolve_cpu(operations)

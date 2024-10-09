@@ -15,16 +15,19 @@ add_library(
   core/runtime.cc
   core/cuda/runtime.cu
   functionals/functionals.cc
-  initialization/initialization_impl_cpu.cc
-  initialization/initialization_impl_cuda.cu
   operation/operation.cc
   operation/gate_operations.cc
   operation/gate_operations_impl_cpu.cc
   operation/gate_operations_impl_cuda.cu
+  operation/initialization_impl_cpu.cc
+  operation/initialization_impl_cuda.cu
   result_types/state_vector.cc)
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")
 set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
+
+target_compile_options(_C PUBLIC -fopenmp)
+# add_link_options(_C PUBLIC -fopenmp)
 
 target_include_directories(_C PUBLIC "." "${CMAKE_CURRENT_SOURCE_DIR}/include")
 

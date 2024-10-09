@@ -1,6 +1,6 @@
 #include <thrust/complex.h>
 
-#include "initialization/initialization_impl_cuda.h"
+#include "operation/initialization_impl_cuda.h"
 #include "utils_cuda.h"
 namespace cu {
 
