@@ -247,9 +247,7 @@ class StateVectorSimulation(Simulation):
     def _evolve_no_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
 
-        print(operations)
         operations = pseudo_sort_operations_descending(operations)
-        print(operations)
         state_vector.cuda()
         for operation in operations:
             targets = operation.targets
