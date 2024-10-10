@@ -9,7 +9,7 @@ from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_ze
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
-from braket.snuqs.transpile import transpile, transpile_for_hybrid, pseudo_sort_operations_descending, pseudo_sort_operations_ascending
+from braket.snuqs.transpile import transpile, pseudo_sort_operations_descending, pseudo_sort_operations_ascending
 
 
 class Simulation(ABC):
@@ -337,8 +337,12 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
 
-        list_of_subcircuits = transpile_for_hybrid(
-            operations, self._qubit_count, self._max_qubit_count_cuda)
+        list_of_subcircuits = transpile(operations,
+                                        self._qubit_count,
+                                        self._max_qubit_count_cuda,
+                                        DeviceType.HYBRID,
+                                        OffloadType.CPU
+                                        )
 
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets

@@ -8,7 +8,7 @@ from braket.circuits.instruction import Instruction
 
 MIN_QUBIT = 31
 MAX_QUBIT = 31
-MAX_GATE = 20
+MAX_GATE = 40
 NUM_ITER = 1000
 
 
