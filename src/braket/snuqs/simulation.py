@@ -274,6 +274,7 @@ class StateVectorSimulation(Simulation):
     def _evolve_no_offload_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
 
+        operations = pseudo_sort_operations_descending(operations)
         state_vector.cpu()
         for operation in operations:
             targets = operation.targets

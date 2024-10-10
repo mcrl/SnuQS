@@ -156,13 +156,14 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
                                 qubit_count: int,
                                 local_qubit_count: int):
     assert local_qubit_count <= qubit_count
-    operations = pseudo_sort_operations_descending(operations)
 
     accumulating_local = True
     subcircuits = []
     current_operations = []
 
-    for i, op in enumerate(operations):
+    operations = pseudo_sort_operations_descending(operations)
+    for i in range(len(operations)):
+        op = operations[i]
         is_local_gate = (len(op.targets) == 0 or min(
             op.targets) >= (qubit_count-local_qubit_count))
         if accumulating_local == is_local_gate:
@@ -170,6 +171,12 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
         else:
             if len(current_operations) != 0:
                 subcircuits.append(current_operations)
+            if accumulating_local:
+                operations[i +
+                           1:] = pseudo_sort_operations_ascending(operations[i+1:])
+            else:
+                operations[i +
+                           1:] = pseudo_sort_operations_descending(operations[i+1:])
             current_operations = [op]
             accumulating_local = not accumulating_local
 
