@@ -9,10 +9,11 @@ Now we are currently working on updates for AWS cluster supports with Amazon bra
 
 ## Prerequisite
 ### Local System
-
-- Python >= 3.11.9
+- python >= 3.11.9
     * Python 3.12 may not work.
-- CUDA >= 12.4
+- cuda >= 12.4
+- cmake >= 3.29.0
+- pybind11 >= 2.12.0
 - amazon-braket-sdk-python == v1.9.5.post0
 - amazon-braket-schemas-python == v1.22.0
 - amazon-braket-default-simulator-python ==  v1.26.0
