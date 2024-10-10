@@ -1,5 +1,8 @@
 from braket.snuqs._C.operation import GateOperation
 from functools import cmp_to_key
+from braket.snuqs.device import DeviceType
+from braket.snuqs.offload import OffloadType
+from typing import Optional
 
 def pseudo_lt(oppos1, oppos2):
     op1, pos1 = oppos1
@@ -16,6 +19,7 @@ def pseudo_lt(oppos1, oppos2):
         return pos1 < pos2
 
     return max(op1.targets) < max(op2.targets)
+
 def pseudo_gt(oppos1, oppos2):
     op1, pos1 = oppos1
     op2, pos2 = oppos2
@@ -80,48 +84,21 @@ def select_new_permutation(operations: list[GateOperation],
     return candidates
 
 
-def subcircuit_partition(operations: list[GateOperation],
-                         qubit_count: int,
-                         local_qubit_count: int) -> list[list[GateOperation]]:
-    assert local_qubit_count <= qubit_count
-    slice_count = 2**(qubit_count-local_qubit_count)
-    operations = pseudo_sort_operations_descending(operations)
+def transpile_no_offload_cpu(operations: list[GateOperation],
+                             qubit_count: int,
+                             local_qubit_count: int):
+    return operations
 
-    print(operations)
-    perm = list(range(qubit_count))
-    local_perm = perm[:local_qubit_count]
-    subcircuits = []
-    current_operations = []
-    for i, op in enumerate(operations):
-        is_local_gate = (len(op.targets) == 0 or all(
-            t in local_perm for t in op.targets))
-        if is_local_gate:
-            current_operations.append(op)
-        else:
-            subcircuits.append(current_operations)
-            new_perm = select_new_permutation(
-                operations[i:], qubit_count, local_qubit_count, perm)
+def transpile_no_offload_cuda(operations: list[GateOperation],
+                              qubit_count: int,
+                              local_qubit_count: int):
+    return operations
 
-            print(new_perm)
-            assert (len(perm) == len(new_perm))
-            qubit_map = {x: y for x, y in zip(perm, new_perm)}
-            for k in range(i, len(operations)):
-                operations[k].targets = [qubit_map[t]
-                                         for t in operations[k].targets]
-            local_perm = new_perm[:local_qubit_count]
-            current_operations = [op]
-
-    subcircuits.append(current_operations)
-    print(subcircuits)
-    return subcircuits
-
-def subcircuit_partition_hybrid(operations: list[GateOperation],
+def transpile_no_offload_hybrid(operations: list[GateOperation],
                                 qubit_count: int,
-                                local_qubit_count: int) -> list[list[GateOperation]]:
+                                local_qubit_count: int):
     assert local_qubit_count <= qubit_count
-#    print(operations)
-#    operations = pseudo_sort_operations_descending(operations)
-#    print(operations)
+    operations = pseudo_sort_operations_descending(operations)
 
     accumulating_local = True
     subcircuits = []
@@ -140,18 +117,88 @@ def subcircuit_partition_hybrid(operations: list[GateOperation],
 
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
-    return subcircuits
-
-
-def transpile_for_hybrid(operations: list[GateOperation],
-                         qubit_count: int,
-                         local_qubit_count: int) -> list[list[GateOperation]]:
-    assert local_qubit_count <= qubit_count
-    subcircuits = subcircuit_partition_hybrid(operations,
-                                              qubit_count,
-                                              local_qubit_count)
-    print(subcircuits)
-    print(subcircuits[0])
 
     slice_count = 2**(qubit_count - local_qubit_count)
     return [[subcircuit] * slice_count for subcircuit in subcircuits]
+
+def transpile_no_offload(operations: list[GateOperation],
+                         qubit_count: int,
+                         local_qubit_count: int,
+                         device: DeviceType):
+    match device:
+        case DeviceType.CPU:
+            return transpile_no_offload_cpu(operations,
+                                            qubit_count,
+                                            local_qubit_count)
+        case DeviceType.CUDA:
+            return transpile_no_offload_cuda(operations,
+                                             qubit_count,
+                                             local_qubit_count)
+        case DeviceType.HYBRID:
+            return transpile_no_offload_hybrid(operations,
+                                               qubit_count,
+                                               local_qubit_count)
+        case _:
+            raise NotImplementedError("Not Implemented")
+
+def transpile_cpu_offload_cpu(operations: list[GateOperation],
+                              qubit_count: int,
+                              local_qubit_count: int):
+    return transpile_no_offload_cpu(operations, qubit_count, local_qubit_count)
+
+def transpile_cpu_offload_cuda(operations: list[GateOperation],
+                               qubit_count: int,
+                               local_qubit_count: int):
+    raise NotImplementedError("Not Implemented")
+
+def transpile_cpu_offload_hybrid(operations: list[GateOperation],
+                                 qubit_count: int,
+                                 local_qubit_count: int):
+    return transpile_no_offload_hybrid(operations, qubit_count, local_qubit_count)
+
+def transpile_cpu_offload(operations: list[GateOperation],
+                          qubit_count: int,
+                          local_qubit_count: int,
+                          device: DeviceType):
+    match device:
+        case DeviceType.CPU:
+            return transpile_cpu_offload_cpu(operations, qubit_count, local_qubit_count)
+        case DeviceType.CUDA:
+            return transpile_cpu_offload_cuda(operations, qubit_count, local_qubit_count)
+        case DeviceType.HYBRID:
+            return transpile_cpu_offload_hybrid(operations, qubit_count, local_qubit_count)
+        case _:
+            raise NotImplementedError("Not Implemented")
+
+def transpile_storage_offload(operations: list[GateOperation],
+                              qubit_count: int,
+                              local_qubit_count: int,
+                              device: DeviceType,
+                              path: Optional[list[str]] = None):
+    raise NotImplementedError("Not Implemented")
+
+def transpile(operations: list[GateOperation],
+              qubit_count: int,
+              local_qubit_count: int,
+              device: DeviceType,
+              offload: OffloadType,
+              path: Optional[list[str]] = None):
+    match offload:
+        case OffloadType.NONE:
+            return transpile_no_offload(operations,
+                                        qubit_count,
+                                        local_qubit_count,
+                                        device)
+        case OffloadType.CPU:
+            return transpile_cpu_offload(operations,
+                                         qubit_count,
+                                         local_qubit_count,
+                                         device)
+        case OffloadType.STORAGE:
+            return transpile_storage_offload(operations,
+                                             qubit_count,
+                                             local_qubit_count,
+                                             device,
+                                             path)
+        case _:
+            raise NotImplementedError("Not Implemented")

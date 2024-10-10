@@ -9,7 +9,7 @@ from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_ze
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
-from braket.snuqs.transpile import transpile_for_hybrid, pseudo_sort_operations_descending, pseudo_sort_operations_ascending
+from braket.snuqs.transpile import transpile, transpile_for_hybrid, pseudo_sort_operations_descending, pseudo_sort_operations_ascending
 
 
 class Simulation(ABC):
@@ -96,6 +96,10 @@ class StateVectorSimulation(Simulation):
         self._initialize_memory_objects(
             qubit_count, shots, device, offload, path)
 
+    def max_qubit_count_cuda(self):
+        free, _ = mem_info_cuda()
+        return min(self.qubit_count, int(math.log(free / 16, 2)))
+
     def _initialize_memory_objects(self, qubit_count: int, shots: int,
                                    device: DeviceType,
                                    offload: OffloadType,
@@ -120,10 +124,12 @@ class StateVectorSimulation(Simulation):
                 self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
                 initialize_basis_z(self._state_vector)
+
             case DeviceType.CUDA:
                 self._state_vector = StateVector(qubit_count)
                 self._state_vector.cuda()
                 initialize_basis_z(self._state_vector)
+
             case DeviceType.HYBRID:
                 free, _ = mem_info_cuda()
                 self._max_qubit_count_cuda = min(
@@ -137,15 +143,44 @@ class StateVectorSimulation(Simulation):
                 self._state_vector.cut(self._max_qubit_count_cuda)
                 initialize_basis_z(self._state_vector)
                 self._state_vector.glue()
-                print("First element: ",
-                      np.array(self._state_vector, copy=False)[0],
-                      np.array(self._state_vector, copy=False)[1])
+
             case _:
                 raise NotImplementedError("Not Implemented")
 
     def _initialize_memory_objects_cpu_offload(self, qubit_count: int, shots: int,
                                                device: DeviceType):
-        raise NotImplementedError("Not Implemented")
+        match device:
+            case DeviceType.CPU:
+                self._state_vector = StateVector(qubit_count)
+                self._state_vector.cpu()
+                initialize_basis_z(self._state_vector)
+
+            case DeviceType.CUDA:
+                self._max_qubit_count_cuda = self.max_qubit_count_cuda()
+                self._state_vector_cuda = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda.cuda()
+
+                self._state_vector = StateVector(qubit_count)
+                self._state_vector.cpu()
+                self._state_vector.cut(self._max_qubit_count_cuda)
+                initialize_basis_z(self._state_vector)
+                self._state_vector.glue()
+
+            case DeviceType.HYBRID:
+                self._max_qubit_count_cuda = self.max_qubit_count_cuda()
+                self._state_vector_cuda = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda.cuda()
+
+                self._state_vector = StateVector(qubit_count)
+                self._state_vector.cpu()
+                self._state_vector.cut(self._max_qubit_count_cuda)
+                initialize_basis_z(self._state_vector)
+                self._state_vector.glue()
+
+            case _:
+                raise NotImplementedError("Not Implemented")
 
     def _initialize_memory_objects_storage_offload(self, qubit_count: int, shots: int,
                                                    device: DeviceType, path: List[str]):
@@ -259,8 +294,12 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
 
-        list_of_subcircuits = transpile_for_hybrid(
-            operations, self._qubit_count, self._max_qubit_count_cuda)
+        list_of_subcircuits = transpile(operations,
+                                        self._qubit_count,
+                                        self._max_qubit_count_cuda,
+                                        DeviceType.HYBRID,
+                                        OffloadType.NONE
+                                        )
 
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
@@ -295,7 +334,36 @@ class StateVectorSimulation(Simulation):
         return self._evolve_cpu(operations)
 
     def _evolve_cpu_offload_cuda(self, operations: list[GateOperation]) -> None:
-        raise NotImplementedError("Not Implemented")
+        state_vector = self._state_vector
+        state_vector_cuda = self._state_vector_cuda
+
+        list_of_subcircuits = transpile_for_hybrid(
+            operations, self._qubit_count, self._max_qubit_count_cuda)
+
+        for s, subcircuit_slices in enumerate(list_of_subcircuits):
+            targets = subcircuit_slices[0][0].targets
+            applying_local = len(targets) == 0 or min(targets) >= (
+                self._qubit_count - self._max_qubit_count_cuda)
+            if applying_local:
+                state_vector.cut(self._max_qubit_count_cuda)
+                for i, subcircuit in enumerate(subcircuit_slices):
+                    state_vector.slice(i)
+                    if applying_local:
+                        if s != 0 or i == 0:
+                            state_vector_cuda.copy(state_vector)
+                        else:
+                            initialize_zero(state_vector_cuda)
+                        for operation in subcircuit:
+                            targets = operation.targets
+                            apply(state_vector_cuda, operation,
+                                  self._qubit_count, targets)
+                        state_vector.copy(state_vector_cuda)
+                state_vector.glue()
+            else:
+                subcircuit = subcircuit_slices[0]
+                for operation in subcircuit:
+                    targets = operation.targets
+                    apply(state_vector, operation, self._qubit_count, targets)
 
     def _evolve_cpu_offload_hybrid(self, operations: list[GateOperation]) -> None:
         """CPU offload with Hybrid simulation is equivalent to Hybrid simulation"""
