@@ -145,12 +145,12 @@ def build_permutation_gates(perm: list[int],
 def transpile_no_offload_cpu(operations: list[GateOperation],
                              qubit_count: int,
                              local_qubit_count: int):
-    return operations
+    return pseudo_sort_operations_descending(operations)
 
 def transpile_no_offload_cuda(operations: list[GateOperation],
                               qubit_count: int,
                               local_qubit_count: int):
-    return operations
+    return pseudo_sort_operations_descending(operations)
 
 def transpile_no_offload_hybrid(operations: list[GateOperation],
                                 qubit_count: int,

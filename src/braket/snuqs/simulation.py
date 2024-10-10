@@ -9,7 +9,7 @@ from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_ze
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
-from braket.snuqs.transpile import transpile, pseudo_sort_operations_descending, pseudo_sort_operations_ascending
+from braket.snuqs.transpile import transpile
 
 
 class Simulation(ABC):
@@ -274,7 +274,12 @@ class StateVectorSimulation(Simulation):
     def _evolve_no_offload_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
 
-        operations = pseudo_sort_operations_descending(operations)
+        operations = transpile(operations,
+                               self._qubit_count,
+                               self._max_qubit_count_cuda,
+                               DeviceType.CPU,
+                               OffloadType.NONE
+                               )
         state_vector.cpu()
         for operation in operations:
             targets = operation.targets
@@ -283,7 +288,12 @@ class StateVectorSimulation(Simulation):
     def _evolve_no_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
 
-        operations = pseudo_sort_operations_descending(operations)
+        operations = transpile(operations,
+                               self._qubit_count,
+                               self._max_qubit_count_cuda,
+                               DeviceType.CPU,
+                               OffloadType.NONE
+                               )
         state_vector.cuda()
         for operation in operations:
             targets = operation.targets
