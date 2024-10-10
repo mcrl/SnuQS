@@ -12,10 +12,10 @@ install_requires = [
     'ninja==1.11.1.1',
     'amazon-braket-sdk==1.87.1',
     'amazon-braket-schemas==1.22.1',
-    'qiskit==1.2.4',
-    'qiskit-ibm-runtime==0.30.0',
-    'mqt.bench==1.1.6',
-    'qiskit_braket_provider==0.4.1',
+#    'qiskit==1.2.4',
+#    'qiskit-ibm-runtime==0.30.0',
+#    'mqt.bench==1.1.6',
+#    'qiskit_braket_provider==0.4.1',
 ]
 
 

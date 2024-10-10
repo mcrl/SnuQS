@@ -351,34 +351,9 @@ class StateVectorSimulation(Simulation):
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
                                         self._max_qubit_count_cuda,
-                                        DeviceType.HYBRID,
+                                        DeviceType.CUDA,
                                         OffloadType.CPU
                                         )
-
-        for s, subcircuit_slices in enumerate(list_of_subcircuits):
-            targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(targets) >= (
-                self._qubit_count - self._max_qubit_count_cuda)
-            if applying_local:
-                state_vector.cut(self._max_qubit_count_cuda)
-                for i, subcircuit in enumerate(subcircuit_slices):
-                    state_vector.slice(i)
-                    if applying_local:
-                        if s != 0 or i == 0:
-                            state_vector_cuda.copy(state_vector)
-                        else:
-                            initialize_zero(state_vector_cuda)
-                        for operation in subcircuit:
-                            targets = operation.targets
-                            apply(state_vector_cuda, operation,
-                                  self._qubit_count, targets)
-                        state_vector.copy(state_vector_cuda)
-                state_vector.glue()
-            else:
-                subcircuit = subcircuit_slices[0]
-                for operation in subcircuit:
-                    targets = operation.targets
-                    apply(state_vector, operation, self._qubit_count, targets)
 
     def _evolve_cpu_offload_hybrid(self, operations: list[GateOperation]) -> None:
         """CPU offload with Hybrid simulation is equivalent to Hybrid simulation"""

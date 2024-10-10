@@ -6,6 +6,7 @@ namespace cpu {
 
 void initializeZero(void* _buf, size_t nelems) {
   auto buf = reinterpret_cast<std::complex<double>*>(_buf);
+#pragma omp parallel for
   for (size_t i = 0; i < nelems; ++i) {
     buf[i] = 0;
   }
@@ -13,6 +14,7 @@ void initializeZero(void* _buf, size_t nelems) {
 
 void initializeBasis_Z(void* _buf, size_t nelems) {
   auto buf = reinterpret_cast<std::complex<double>*>(_buf);
+#pragma omp parallel for
   for (size_t i = 0; i < nelems; ++i) {
     buf[i] = 0;
   }
