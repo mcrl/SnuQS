@@ -6,6 +6,7 @@ from typing import Optional
 from braket.snuqs._C.operation.gate_operations import (
     Swap,
 )
+from braket.snuqs.dag import GateDAG
 
 def pseudo_lt(oppos1, oppos2):
     op1, pos1 = oppos1
@@ -75,10 +76,10 @@ def pseudo_sort_operations_descending(operations: list[GateOperation]):
     return sorted_operations
 
 
-def select_new_permutation(idx: int,
-                           operations: list[GateOperation],
-                           qubit_count: int,
-                           local_qubit_count: int) -> list[int]:
+def select_permutation_heuristic(idx: int,
+                                 operations: list[GateOperation],
+                                 qubit_count: int,
+                                 local_qubit_count: int) -> list[int]:
     counts = [0 for i in range(qubit_count)]
     for op in operations[idx+1:]:
         for t in op.targets:
@@ -99,46 +100,87 @@ def select_new_permutation(idx: int,
                for t in operations[idx].targets)
     return new_perm
 
+def select_permutation(idx: int,
+                       operations: list[GateOperation],
+                       qubit_count: int,
+                       local_qubit_count: int) -> list[int]:
+    return select_permutation_heuristic(idx,
+                                        operations,
+                                        qubit_count,
+                                        local_qubit_count)
+
 def build_permutation_gates(new_perm: list[int],
                             qubit_count: int,
                             local_qubit_count: int) -> list[GateOperation]:
+    perm_gates = []
+    perm_map = {i: i for i in range(qubit_count)}
+    new_perm_map = {q: i for i, q, in enumerate(new_perm)}
 
-    permutation_gates = []
-    slice_qubit_count = qubit_count-local_qubit_count
-    perm_local_qubits = list(range(slice_qubit_count, qubit_count))
-    perm_nonlocal_qubits = list(range(slice_qubit_count))
-    new_perm_local_qubits = list(range(slice_qubit_count, qubit_count))
-    new_perm_nonlocal_qubits = list(range(slice_qubit_count))
+    for q in range(qubit_count):
+        i = perm_map[q]
+        j = new_perm_map[q]
+        if i != j:
+            for _q, _i in perm_map.items():
+                if _i == j:
+                    perm_map[_q] = i
+                    break
+            perm_map[q] = j
+            perm_gates.append(Swap([i, j]))
 
-    from_local_to_nonlocal = list(set(
-        perm_local_qubits) & set(new_perm_nonlocal_qubits))
-    from_nonlocal_to_local = list(set(
-        perm_nonlocal_qubits) & set(new_perm_local_qubits))
-    assert (len(from_local_to_nonlocal) == len(from_nonlocal_to_local))
+    slice_qubit_count = qubit_count - local_qubit_count
+    reordered_gates = []
+    for i in range(len(perm_gates)):
+        p = perm_gates[i]
+        l, h = sorted(p.targets)
+        if l < slice_qubit_count and h >= slice_qubit_count:
+            if h != slice_qubit_count:
+                reordered_gates.append(Swap([h, slice_qubit_count]))
+            p.targets = [l, slice_qubit_count]
+            reordered_gates.append(p)
+            if h != slice_qubit_count:
+                reordered_gates.append(Swap([h, slice_qubit_count]))
+        else:
+            reordered_gates.append(p)
 
-    interm_perm = list(range(qubit_count))
-    dist = local_qubit_count-len(from_local_to_nonlocal)
-    for i in range(len(from_local_to_nonlocal)):
-        t0 = from_local_to_nonlocal[i]
-        t1 = dist+i
-        if t0 != t1:
-            permutation_gates.append(Swap([t0, t1]))
-            interm_perm[dist +
-                        i], interm_perm[i] = interm_perm[i], interm_perm[dist+t]
+    return reordered_gates
 
-    # FIXME: All-to-all??
-    for i in range(len(from_local_to_nonlocal)):
-        t0 = dist+i
-        t1 = local_qubit_count+i
-        permutation_gates.append(Swap([t0, t1]))
 
-    for i in range(local_qubit_count):
-        permutation_gates.append(Swap([new_perm[i], interm_perm[i]]))
-        for j, q in enumerate(interm_perm):
-            if q == new_perm[i]:
-                interm_perm[i], interm_perm[j] = interm_perm[j], interm_perm[i]
-
-    return permutation_gates
+#    permutation_gates = []
+#    slice_qubit_count = qubit_count-local_qubit_count
+#    perm_local_qubits = list(range(slice_qubit_count, qubit_count))
+#    perm_nonlocal_qubits = list(range(slice_qubit_count))
+#    new_perm_local_qubits = list(range(slice_qubit_count, qubit_count))
+#    new_perm_nonlocal_qubits = list(range(slice_qubit_count))
+#
+#    from_local_to_nonlocal = list(set(
+#        perm_local_qubits) & set(new_perm_nonlocal_qubits))
+#    from_nonlocal_to_local = list(set(
+#        perm_nonlocal_qubits) & set(new_perm_local_qubits))
+#    assert (len(from_local_to_nonlocal) == len(from_nonlocal_to_local))
+#
+#    interm_perm = list(range(qubit_count))
+#    dist = local_qubit_count-len(from_local_to_nonlocal)
+#    for i in range(len(from_local_to_nonlocal)):
+#        t0 = from_local_to_nonlocal[i]
+#        t1 = dist+i
+#        if t0 != t1:
+#            permutation_gates.append(Swap([t0, t1]))
+#            interm_perm[dist +
+#                        i], interm_perm[i] = interm_perm[i], interm_perm[dist+t]
+#
+#    # FIXME: All-to-all??
+#    for i in range(len(from_local_to_nonlocal)):
+#        t0 = dist+i
+#        t1 = local_qubit_count+i
+#        permutation_gates.append(Swap([t0, t1]))
+#
+#    for i in range(local_qubit_count):
+#        permutation_gates.append(Swap([new_perm[i], interm_perm[i]]))
+#        for j, q in enumerate(interm_perm):
+#            if q == new_perm[i]:
+#                interm_perm[i], interm_perm[j] = interm_perm[j], interm_perm[i]
+#
+#    return permutation_gates
 
 
 def transpile_no_offload_cpu(operations: list[GateOperation],
@@ -193,24 +235,30 @@ def transpile_cpu_offload_cpu(operations: list[GateOperation],
 def transpile_cpu_offload_cuda(operations: list[GateOperation],
                                qubit_count: int,
                                local_qubit_count: int):
+    dag = GateDAG(qubit_count, operations)
+    dag.topological_sort(
+        lambda x: print(f"Before {x}"),
+        None,
+    )
+
     assert local_qubit_count <= qubit_count
-    slice_count = 2**(qubit_count - local_qubit_count)
+    slice_qubit_count = qubit_count - local_qubit_count
     subcircuits = []
     current_operations = []
 
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
-    descending = True
-    print(operations)
+
     for i, op in enumerate(operations):
         is_local_gate = (len(op.targets) == 0 or min(
-            op.targets) >= (qubit_count-local_qubit_count))
+            op.targets) >= (slice_qubit_count))
+
         if is_local_gate:
             current_operations.append(op)
         else:
             if len(current_operations) != 0:
                 subcircuits.append(current_operations)
-            new_perm = select_new_permutation(
+            new_perm = select_permutation(
                 i, operations, qubit_count, local_qubit_count)
 
             assert all(t in new_perm[qubit_count-local_qubit_count:]
@@ -224,20 +272,14 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
                 _op.targets = [new_perm_inverse[t] for t in _op.targets]
 
             current_operations.append(op)
-            if descending:
-                descending = not descending
-                operations = pseudo_sort_operations_ascending(operations)
-            else:
-                descending = not descending
-                operations = pseudo_sort_operations_descending(operations)
+            operations = pseudo_sort_operations_descending(operations)
 
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
     if len(cleanup_operations) != 0:
         subcircuits.append(cleanup_operations)
 
-    print(subcircuits)
-    return [[subcircuit] * slice_count for subcircuit in subcircuits]
+    return [[subcircuit] * (2**slice_qubit_count) for subcircuit in subcircuits]
 
 def transpile_cpu_offload_hybrid(operations: list[GateOperation],
                                  qubit_count: int,
