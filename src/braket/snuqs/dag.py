@@ -3,8 +3,8 @@ from braket.snuqs._C.operation import GateOperation
 class GateDAGNode:
     def __init__(self, _id, obj):
         self.obj = obj
-        self.adj = []
-        self.adj_reversed = []
+        self.out_nodes = []
+        self.in_nodes = []
         self.visited = False
         self.id = _id
         self.call_id = -1
@@ -12,11 +12,11 @@ class GateDAGNode:
     def __repr__(self):
         return f"<Node {self.id} {self.obj}> {self.call_id}"
 
-    def add_link(self, other):
-        self.adj.append(other)
+    def add_out_node(self, other):
+        self.out_nodes.append(other)
 
-    def add_link_reversed(self, other):
-        self.adj_reversed.append(other)
+    def add_in_node(self, other):
+        self.in_nodes.append(other)
 
 
 class GateDAG:
@@ -29,8 +29,8 @@ class GateDAG:
         for op in self.operations:
             for t in op.obj.targets:
                 if op_map[t] is not None:
-                    op_map[t].add_link(op)
-                    op.add_link_reversed(op_map[t])
+                    op_map[t].add_out_node(op)
+                    op.add_in_node(op_map[t])
                 op_map[t] = op
 
     def DFS(self, before, after):
@@ -48,8 +48,8 @@ class GateDAG:
             before(op)
 
         call_id += 1
-        for op in op.adj:
-            if len(op.adj_reversed) == 0 and not op.visited:
+        for op in op.out_nodes:
+            if len(op.in_nodes) == 0 and not op.visited:
                 call_id = self._DFS(op, before, after, call_id)
 
         if after:
@@ -62,9 +62,9 @@ class GateDAG:
         if before:
             before(op)
 
-        for op in op.adj_reversed:
+        for op in op.in_nodes:
             if not op.visited:
-                call_id = self._DFS(op, before, after, call_id+1)
+                call_id = self._DFS_reversed(op, before, after, call_id+1)
 
         if after:
             after(op)
@@ -75,6 +75,6 @@ class GateDAG:
             op.visited = False
 
         for op in self.operations:
-            if len(op.adj) == 0 and not op.visited:
+            if len(op.out_nodes) == 0 and not op.visited:
                 print(f"Exploring {op}")
                 self._DFS_reversed(op, before, after, 0)
