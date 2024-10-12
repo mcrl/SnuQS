@@ -14,6 +14,7 @@ Identity::Identity(std::vector<size_t> targets,
 }
 Identity::~Identity() {}
 std::string Identity::name() const { return "Identity"; }
+bool Identity::sliceable() const { return true; }
 
 Hadamard::Hadamard(std::vector<size_t> targets,
                    std::vector<size_t> ctrl_modifiers, size_t power)
@@ -25,6 +26,7 @@ Hadamard::Hadamard(std::vector<size_t> targets,
 }
 Hadamard::~Hadamard() {}
 std::string Hadamard::name() const { return "Hadamard"; }
+bool Hadamard::sliceable() const { return false; }
 
 PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
@@ -36,6 +38,7 @@ PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 PauliX::~PauliX() {}
 std::string PauliX::name() const { return "PauliX"; }
+bool PauliX::sliceable() const { return true; }
 
 PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
@@ -47,6 +50,7 @@ PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 PauliY::~PauliY() {}
 std::string PauliY::name() const { return "PauliY"; }
+bool PauliY::sliceable() const { return true; }
 
 PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
@@ -58,6 +62,7 @@ PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 PauliZ::~PauliZ() {}
 std::string PauliZ::name() const { return "PauliZ"; }
+bool PauliZ::sliceable() const { return true; }
 
 CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -81,6 +86,7 @@ CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 CX::~CX() {}
 std::string CX::name() const { return "CX"; }
+bool CX::sliceable() const { return true; }
 
 CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -104,6 +110,7 @@ CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 CY::~CY() {}
 std::string CY::name() const { return "CY"; }
+bool CY::sliceable() const { return true; }
 
 CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -127,6 +134,7 @@ CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 CZ::~CZ() {}
 std::string CZ::name() const { return "CZ"; }
+bool CZ::sliceable() const { return true; }
 
 S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
@@ -138,6 +146,7 @@ S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 S::~S() {}
 std::string S::name() const { return "S"; }
+bool S::sliceable() const { return true; }
 
 Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -149,6 +158,7 @@ Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 Si::~Si() {}
 std::string Si::name() const { return "Si"; }
+bool Si::sliceable() const { return true; }
 
 T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
@@ -160,6 +170,7 @@ T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 T::~T() {}
 std::string T::name() const { return "T"; }
+bool T::sliceable() const { return true; }
 
 Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -171,6 +182,7 @@ Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 Ti::~Ti() {}
 std::string Ti::name() const { return "Ti"; }
+bool Ti::sliceable() const { return true; }
 
 V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
@@ -182,6 +194,7 @@ V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 V::~V() {}
 std::string V::name() const { return "V"; }
+bool V::sliceable() const { return false; }
 
 Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
@@ -193,6 +206,7 @@ Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 Vi::~Vi() {}
 std::string Vi::name() const { return "Vi"; }
+bool Vi::sliceable() const { return false; }
 
 PhaseShift::PhaseShift(std::vector<size_t> targets, double angle,
                        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -206,6 +220,7 @@ PhaseShift::~PhaseShift() {}
 std::string PhaseShift::name() const {
   return "PhaseShift(" + std::to_string(angle_) + ")";
 }
+bool PhaseShift::sliceable() const { return true; }
 
 CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
                          std::vector<size_t> ctrl_modifiers, size_t power)
@@ -231,6 +246,7 @@ CPhaseShift::~CPhaseShift() {}
 std::string CPhaseShift::name() const {
   return "CPhaseShift(" + std::to_string(angle_) + ")";
 }
+bool CPhaseShift::sliceable() const { return true; }
 
 CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -256,6 +272,7 @@ CPhaseShift00::~CPhaseShift00() {}
 std::string CPhaseShift00::name() const {
   return "CPhaseShift00(" + std::to_string(angle_) + ")";
 }
+bool CPhaseShift00::sliceable() const { return true; }
 
 CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -281,6 +298,7 @@ CPhaseShift01::~CPhaseShift01() {}
 std::string CPhaseShift01::name() const {
   return "CPhaseShift01(" + std::to_string(angle_) + ")";
 }
+bool CPhaseShift01::sliceable() const { return true; }
 
 CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -306,6 +324,7 @@ CPhaseShift10::~CPhaseShift10() {}
 std::string CPhaseShift10::name() const {
   return "CPhaseShift10(" + std::to_string(angle_) + ")";
 }
+bool CPhaseShift10::sliceable() const { return true; }
 
 RotX::RotX(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
@@ -321,6 +340,7 @@ RotX::~RotX() {}
 std::string RotX::name() const {
   return "RotX(" + std::to_string(angle_) + ")";
 }
+bool RotX::sliceable() const { return false; }
 
 RotY::RotY(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
@@ -336,6 +356,7 @@ RotY::~RotY() {}
 std::string RotY::name() const {
   return "RotY(" + std::to_string(angle_) + ")";
 }
+bool RotY::sliceable() const { return false; }
 
 RotZ::RotZ(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
@@ -351,6 +372,7 @@ RotZ::~RotZ() {}
 std::string RotZ::name() const {
   return "RotZ(" + std::to_string(angle_) + ")";
 }
+bool RotZ::sliceable() const { return true; }
 
 Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
            size_t power)
@@ -374,6 +396,7 @@ Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 Swap::~Swap() {}
 std::string Swap::name() const { return "Swap"; }
+bool Swap::sliceable() const { return false; }
 
 ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
@@ -397,6 +420,7 @@ ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 ISwap::~ISwap() {}
 std::string ISwap::name() const { return "ISwap"; }
+bool ISwap::sliceable() const { return false; }
 
 PSwap::PSwap(std::vector<size_t> targets, double angle,
              std::vector<size_t> ctrl_modifiers, size_t power)
@@ -422,6 +446,7 @@ PSwap::~PSwap() {}
 std::string PSwap::name() const {
   return "PSwap(" + std::to_string(angle_) + ")";
 }
+bool PSwap::sliceable() const { return false; }
 
 XY::XY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -447,6 +472,7 @@ XY::XY(std::vector<size_t> targets, double angle,
 }
 XY::~XY() {}
 std::string XY::name() const { return "XY(" + std::to_string(angle_) + ")"; }
+bool XY::sliceable() const { return false; }
 
 XX::XX(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -472,6 +498,7 @@ XX::XX(std::vector<size_t> targets, double angle,
 }
 XX::~XX() {}
 std::string XX::name() const { return "XX(" + std::to_string(angle_) + ")"; }
+bool XX::sliceable() const { return false; }
 
 YY::YY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -497,6 +524,7 @@ YY::YY(std::vector<size_t> targets, double angle,
 }
 YY::~YY() {}
 std::string YY::name() const { return "YY(" + std::to_string(angle_) + ")"; }
+bool YY::sliceable() const { return false; }
 
 ZZ::ZZ(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
@@ -522,6 +550,7 @@ ZZ::ZZ(std::vector<size_t> targets, double angle,
 }
 ZZ::~ZZ() {}
 std::string ZZ::name() const { return "ZZ(" + std::to_string(angle_) + ")"; }
+bool ZZ::sliceable() const { return true; }
 
 CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
@@ -593,6 +622,7 @@ CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 CCNot::~CCNot() {}
 std::string CCNot::name() const { return "CCNot"; }
+bool CCNot::sliceable() const { return true; }
 
 CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
@@ -664,6 +694,7 @@ CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
 }
 CSwap::~CSwap() {}
 std::string CSwap::name() const { return "CSwap"; }
+bool CSwap::sliceable() const { return false; }
 
 U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
      std::vector<size_t> ctrl_modifiers, size_t power)
@@ -678,6 +709,7 @@ U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
 }
 U::~U() {}
 std::string U::name() const { return "U"; }
+bool U::sliceable() const { return false; }
 
 GPhase::GPhase(std::vector<size_t> targets, double angle,
                std::vector<size_t> ctrl_modifiers, size_t power)
@@ -688,3 +720,4 @@ GPhase::~GPhase() {}
 std::string GPhase::name() const {
   return "GPhase(" + std::to_string(angle_) + ")";
 }
+bool GPhase::sliceable() const { return true; }

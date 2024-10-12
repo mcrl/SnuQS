@@ -59,7 +59,9 @@ std::vector<size_t> GateOperation::stride() const {
   return {ncols * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
+bool GateOperation::sliceable() const { return false; }
 void GateOperation::slice(size_t idx) { assert(false); }
+bool GateOperation::symmetric() const { return false; }
 
 std::string GateOperation::name() const { return "Unknown"; }
 std::string GateOperation::formatted_string() const {

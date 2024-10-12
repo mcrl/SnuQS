@@ -75,7 +75,9 @@ PYBIND11_MODULE(_C, m) {
   // GateOperation
   py::class_<GateOperation, Operation>(m_operation, "GateOperation")
       .def(py::init<const std::vector<size_t> &, const std::vector<size_t> &,
-                    size_t>());
+                    size_t>())
+      .def("sliceable", &GateOperation::sliceable);
+
   auto m_gate_operations = m_operation.def_submodule("gate_operations");
   GATEOP(Identity);
   GATEOP(Hadamard);

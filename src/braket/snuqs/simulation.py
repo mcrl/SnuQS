@@ -131,16 +131,13 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(self._state_vector)
 
             case DeviceType.HYBRID:
-                free, _ = mem_info_cuda()
-                self._max_qubit_count_cuda = min(
-                    qubit_count, int(math.log(free / 16, 2)))
                 self._state_vector_cuda = StateVector(
-                    self._max_qubit_count_cuda)
+                    self.max_qubit_count_cuda())
                 self._state_vector_cuda.cuda()
 
                 self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
-                self._state_vector.cut(self._max_qubit_count_cuda)
+                self._state_vector.cut(self.max_qubit_count_cuda())
                 initialize_basis_z(self._state_vector)
                 self._state_vector.glue()
 
@@ -156,26 +153,24 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(self._state_vector)
 
             case DeviceType.CUDA:
-                self._max_qubit_count_cuda = self.max_qubit_count_cuda()
                 self._state_vector_cuda = StateVector(
-                    self._max_qubit_count_cuda)
+                    self.max_qubit_count_cuda())
                 self._state_vector_cuda.cuda()
 
                 self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
-                self._state_vector.cut(self._max_qubit_count_cuda)
+                self._state_vector.cut(self.max_qubit_count_cuda())
                 initialize_basis_z(self._state_vector)
                 self._state_vector.glue()
 
             case DeviceType.HYBRID:
-                self._max_qubit_count_cuda = self.max_qubit_count_cuda()
                 self._state_vector_cuda = StateVector(
-                    self._max_qubit_count_cuda)
+                    self.max_qubit_count_cuda())
                 self._state_vector_cuda.cuda()
 
                 self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
-                self._state_vector.cut(self._max_qubit_count_cuda)
+                self._state_vector.cut(self.max_qubit_count_cuda())
                 initialize_basis_z(self._state_vector)
                 self._state_vector.glue()
 
@@ -276,7 +271,7 @@ class StateVectorSimulation(Simulation):
 
         operations = transpile(operations,
                                self._qubit_count,
-                               self._max_qubit_count_cuda,
+                               self.max_qubit_count_cuda(),
                                DeviceType.CPU,
                                OffloadType.NONE
                                )
@@ -290,7 +285,7 @@ class StateVectorSimulation(Simulation):
 
         operations = transpile(operations,
                                self._qubit_count,
-                               self._max_qubit_count_cuda,
+                               self.max_qubit_count_cuda(),
                                DeviceType.CPU,
                                OffloadType.NONE
                                )
@@ -307,7 +302,7 @@ class StateVectorSimulation(Simulation):
 
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
-                                        self._max_qubit_count_cuda,
+                                        self.max_qubit_count_cuda(),
                                         DeviceType.HYBRID,
                                         OffloadType.NONE
                                         )
@@ -315,9 +310,9 @@ class StateVectorSimulation(Simulation):
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
             applying_local = len(targets) == 0 or min(targets) >= (
-                self._qubit_count - self._max_qubit_count_cuda)
+                self._qubit_count - self.max_qubit_count_cuda())
             if applying_local:
-                state_vector.cut(self._max_qubit_count_cuda)
+                state_vector.cut(self.max_qubit_count_cuda())
                 for i, subcircuit in enumerate(subcircuit_slices):
                     state_vector.slice(i)
                     if applying_local:
@@ -350,7 +345,7 @@ class StateVectorSimulation(Simulation):
 
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
-                                        self._max_qubit_count_cuda,
+                                        self.max_qubit_count_cuda(),
                                         DeviceType.CUDA,
                                         OffloadType.CPU
                                         )

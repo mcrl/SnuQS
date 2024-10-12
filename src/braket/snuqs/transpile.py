@@ -19,8 +19,16 @@ def pseudo_lt(oppos1, oppos2):
         return True
     if len(op2.targets) == 0:
         return False
+
     if len(set(op1.targets) & set(op2.targets)) != 0:
         return pos1 < pos2
+
+    if op1.sliceable() and op2.sliceable():
+        return pos1 < pos2
+    if op1.sliceable():
+        return True
+    if op2.sliceable():
+        return False
 
     return max(op1.targets) < max(op2.targets)
 
@@ -37,6 +45,13 @@ def pseudo_gt(oppos1, oppos2):
         return False
     if len(set(op1.targets) & set(op2.targets)) != 0:
         return pos1 < pos2
+
+    if op1.sliceable() and op2.sliceable():
+        return pos1 < pos2
+    if op1.sliceable():
+        return True
+    if op2.sliceable():
+        return False
 
     return min(op1.targets) > min(op2.targets)
 
@@ -145,44 +160,6 @@ def build_permutation_gates(new_perm: list[int],
     return reordered_gates
 
 
-#    permutation_gates = []
-#    slice_qubit_count = qubit_count-local_qubit_count
-#    perm_local_qubits = list(range(slice_qubit_count, qubit_count))
-#    perm_nonlocal_qubits = list(range(slice_qubit_count))
-#    new_perm_local_qubits = list(range(slice_qubit_count, qubit_count))
-#    new_perm_nonlocal_qubits = list(range(slice_qubit_count))
-#
-#    from_local_to_nonlocal = list(set(
-#        perm_local_qubits) & set(new_perm_nonlocal_qubits))
-#    from_nonlocal_to_local = list(set(
-#        perm_nonlocal_qubits) & set(new_perm_local_qubits))
-#    assert (len(from_local_to_nonlocal) == len(from_nonlocal_to_local))
-#
-#    interm_perm = list(range(qubit_count))
-#    dist = local_qubit_count-len(from_local_to_nonlocal)
-#    for i in range(len(from_local_to_nonlocal)):
-#        t0 = from_local_to_nonlocal[i]
-#        t1 = dist+i
-#        if t0 != t1:
-#            permutation_gates.append(Swap([t0, t1]))
-#            interm_perm[dist +
-#                        i], interm_perm[i] = interm_perm[i], interm_perm[dist+t]
-#
-#    # FIXME: All-to-all??
-#    for i in range(len(from_local_to_nonlocal)):
-#        t0 = dist+i
-#        t1 = local_qubit_count+i
-#        permutation_gates.append(Swap([t0, t1]))
-#
-#    for i in range(local_qubit_count):
-#        permutation_gates.append(Swap([new_perm[i], interm_perm[i]]))
-#        for j, q in enumerate(interm_perm):
-#            if q == new_perm[i]:
-#                interm_perm[i], interm_perm[j] = interm_perm[j], interm_perm[i]
-#
-#    return permutation_gates
-
-
 def transpile_no_offload_cpu(operations: list[GateOperation],
                              qubit_count: int,
                              local_qubit_count: int):
@@ -205,7 +182,7 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
     operations = pseudo_sort_operations_descending(operations)
     for i in range(len(operations)):
         op = operations[i]
-        is_local_gate = (len(op.targets) == 0 or min(
+        is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
             op.targets) >= (qubit_count-local_qubit_count))
         if accumulating_local == is_local_gate:
             current_operations.append(op)
@@ -235,11 +212,7 @@ def transpile_cpu_offload_cpu(operations: list[GateOperation],
 def transpile_cpu_offload_cuda(operations: list[GateOperation],
                                qubit_count: int,
                                local_qubit_count: int):
-    dag = GateDAG(qubit_count, operations)
-    dag.topological_sort(
-        lambda x: print(f"Before {x}"),
-        None,
-    )
+    # dag = GateDAG(qubit_count, operations)
 
     assert local_qubit_count <= qubit_count
     slice_qubit_count = qubit_count - local_qubit_count
@@ -248,10 +221,13 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
 
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
+    print(operations)
 
     for i, op in enumerate(operations):
-        is_local_gate = (len(op.targets) == 0 or min(
+        is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
             op.targets) >= (slice_qubit_count))
+
+        print(f"{op} is local? : {is_local_gate}")
 
         if is_local_gate:
             current_operations.append(op)
@@ -268,10 +244,12 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
             cleanup_operations += reversed(current_operations)
             new_perm_inverse = {q: i for i, q in enumerate(new_perm)}
 
-            for _op in operations[i:]:
+            for j in range(i, len(operations)):
+                _op = operations[j]
                 _op.targets = [new_perm_inverse[t] for t in _op.targets]
+                operations[j] = _op
 
-            current_operations.append(op)
+            current_operations.append(operations[i])
             operations = pseudo_sort_operations_descending(operations)
 
     if len(current_operations) != 0:
@@ -279,6 +257,8 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
     if len(cleanup_operations) != 0:
         subcircuits.append(cleanup_operations)
 
+    print(operations)
+    print(subcircuits)
     return [[subcircuit] * (2**slice_qubit_count) for subcircuit in subcircuits]
 
 def transpile_cpu_offload_hybrid(operations: list[GateOperation],

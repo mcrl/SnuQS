@@ -35,6 +35,9 @@ class GateOperation : public Operation {
   virtual std::string name() const;
   virtual std::string formatted_string() const;
 
+  virtual bool symmetric() const;
+  virtual bool sliceable() const;
+
   std::complex<double> *ptr_ = nullptr;
   std::complex<double> *ptr_cuda_ = nullptr;
   bool copied_to_cuda = false;
