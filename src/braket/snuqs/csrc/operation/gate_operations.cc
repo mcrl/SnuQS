@@ -721,3 +721,27 @@ std::string GPhase::name() const {
   return "GPhase(" + std::to_string(angle_) + ")";
 }
 bool GPhase::sliceable() const { return true; }
+
+SwapA2A::SwapA2A(std::vector<size_t> targets,
+                 std::vector<size_t> ctrl_modifiers, size_t power)
+    : GateOperation(targets, ctrl_modifiers, power) {
+  ptr_[0 * 4 + 0] = 1;
+  ptr_[0 * 4 + 1] = 0;
+  ptr_[0 * 4 + 2] = 0;
+  ptr_[0 * 4 + 3] = 0;
+  ptr_[1 * 4 + 0] = 0;
+  ptr_[1 * 4 + 1] = 0;
+  ptr_[1 * 4 + 2] = 1;
+  ptr_[1 * 4 + 3] = 0;
+  ptr_[2 * 4 + 0] = 0;
+  ptr_[2 * 4 + 1] = 1;
+  ptr_[2 * 4 + 2] = 0;
+  ptr_[2 * 4 + 3] = 0;
+  ptr_[3 * 4 + 0] = 0;
+  ptr_[3 * 4 + 1] = 0;
+  ptr_[3 * 4 + 2] = 0;
+  ptr_[3 * 4 + 3] = 1;
+}
+SwapA2A::~SwapA2A() {}
+std::string SwapA2A::name() const { return "SwapA2A"; }
+bool SwapA2A::sliceable() const { return false; }

@@ -320,4 +320,13 @@ class GPhase : public GateOperation {
   virtual bool sliceable() const override;
 };
 
+class SwapA2A : public GateOperation {
+ public:
+  SwapA2A(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
+          size_t power);
+  virtual ~SwapA2A();
+  virtual std::string name() const override;
+  virtual bool sliceable() const override;
+};
+
 #endif  //_GATE_OPERATION_H_
