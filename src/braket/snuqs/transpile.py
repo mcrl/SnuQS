@@ -220,6 +220,7 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
 
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
+    print(operations)
 
     for i, op in enumerate(operations):
         is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(

@@ -164,6 +164,8 @@ class BraketTest(unittest.TestCase):
             result_snuqs = task_snuqs.result().values
             print("\t\t=> Done")
 
+            print(result_braket)
+            print(result_snuqs)
             self.assertTrue(np.allclose(
                 result_braket,
                 result_snuqs,
