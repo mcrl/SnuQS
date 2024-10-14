@@ -6,67 +6,57 @@ using namespace std::complex_literals;
 
 Identity::Identity(std::vector<size_t> targets,
                    std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("Identity", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = 1;
 }
 Identity::~Identity() {}
-std::string Identity::name() const { return "Identity"; }
-bool Identity::sliceable() const { return true; }
 
 Hadamard::Hadamard(std::vector<size_t> targets,
                    std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("Hadamard", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = M_SQRT1_2;
   ptr_[0 * 2 + 1] = M_SQRT1_2;
   ptr_[1 * 2 + 0] = M_SQRT1_2;
   ptr_[1 * 2 + 1] = -M_SQRT1_2;
 }
 Hadamard::~Hadamard() {}
-std::string Hadamard::name() const { return "Hadamard"; }
-bool Hadamard::sliceable() const { return false; }
 
 PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("PauliX", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 0;
   ptr_[0 * 2 + 1] = 1;
   ptr_[1 * 2 + 0] = 1;
   ptr_[1 * 2 + 1] = 0;
 }
 PauliX::~PauliX() {}
-std::string PauliX::name() const { return "PauliX"; }
-bool PauliX::sliceable() const { return true; }
 
 PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("PauliY", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 0;
   ptr_[0 * 2 + 1] = -1i;
   ptr_[1 * 2 + 0] = 1i;
   ptr_[1 * 2 + 1] = 0;
 }
 PauliY::~PauliY() {}
-std::string PauliY::name() const { return "PauliY"; }
-bool PauliY::sliceable() const { return true; }
 
 PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("PauliZ", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = -1;
 }
 PauliZ::~PauliZ() {}
-std::string PauliZ::name() const { return "PauliZ"; }
-bool PauliZ::sliceable() const { return true; }
 
 CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("CX", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -85,12 +75,10 @@ CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[3 * 4 + 3] = 0;
 }
 CX::~CX() {}
-std::string CX::name() const { return "CX"; }
-bool CX::sliceable() const { return true; }
 
 CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("CY", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -109,12 +97,10 @@ CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[3 * 4 + 3] = 0;
 }
 CY::~CY() {}
-std::string CY::name() const { return "CY"; }
-bool CY::sliceable() const { return true; }
 
 CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("CZ", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -133,98 +119,82 @@ CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[3 * 4 + 3] = -1;
 }
 CZ::~CZ() {}
-std::string CZ::name() const { return "CZ"; }
-bool CZ::sliceable() const { return true; }
 
 S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("S", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = 1i;
 }
 S::~S() {}
-std::string S::name() const { return "S"; }
-bool S::sliceable() const { return true; }
 
 Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("Si", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = -1i;
 }
 Si::~Si() {}
-std::string Si::name() const { return "Si"; }
-bool Si::sliceable() const { return true; }
 
 T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("T", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = std::exp(1i * M_PI / 4.);
 }
 T::~T() {}
-std::string T::name() const { return "T"; }
-bool T::sliceable() const { return true; }
 
 Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("Ti", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = std::exp(-1i * M_PI / 4.);
 }
 Ti::~Ti() {}
-std::string Ti::name() const { return "Ti"; }
-bool Ti::sliceable() const { return true; }
 
 V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("V", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 0.5 + 0.5i;
   ptr_[0 * 2 + 1] = 0.5 - 0.5i;
   ptr_[1 * 2 + 0] = 0.5 - 0.5i;
   ptr_[1 * 2 + 1] = 0.5 + 0.5i;
 }
 V::~V() {}
-std::string V::name() const { return "V"; }
-bool V::sliceable() const { return false; }
 
 Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("Vi", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 0.5 - 0.5i;
   ptr_[0 * 2 + 1] = 0.5 + 0.5i;
   ptr_[1 * 2 + 0] = 0.5 + 0.5i;
   ptr_[1 * 2 + 1] = 0.5 - 0.5i;
 }
 Vi::~Vi() {}
-std::string Vi::name() const { return "Vi"; }
-bool Vi::sliceable() const { return false; }
 
 PhaseShift::PhaseShift(std::vector<size_t> targets, double angle,
                        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("PhaseShift", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
   ptr_[1 * 2 + 1] = std::exp(1i * angle);
 }
 PhaseShift::~PhaseShift() {}
-std::string PhaseShift::name() const {
-  return "PhaseShift(" + std::to_string(angle_) + ")";
-}
-bool PhaseShift::sliceable() const { return true; }
 
 CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
                          std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("CPhaseShift", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -243,14 +213,11 @@ CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = std::exp(1i * angle);
 }
 CPhaseShift::~CPhaseShift() {}
-std::string CPhaseShift::name() const {
-  return "CPhaseShift(" + std::to_string(angle_) + ")";
-}
-bool CPhaseShift::sliceable() const { return true; }
 
 CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("CPhaseShift00", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0 * 4 + 0] = std::exp(1i * angle);
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -269,14 +236,11 @@ CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = 1;
 }
 CPhaseShift00::~CPhaseShift00() {}
-std::string CPhaseShift00::name() const {
-  return "CPhaseShift00(" + std::to_string(angle_) + ")";
-}
-bool CPhaseShift00::sliceable() const { return true; }
 
 CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("CPhaseShift01", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -295,14 +259,11 @@ CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = 1;
 }
 CPhaseShift01::~CPhaseShift01() {}
-std::string CPhaseShift01::name() const {
-  return "CPhaseShift01(" + std::to_string(angle_) + ")";
-}
-bool CPhaseShift01::sliceable() const { return true; }
 
 CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("CPhaseShift10", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -321,14 +282,11 @@ CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = 1;
 }
 CPhaseShift10::~CPhaseShift10() {}
-std::string CPhaseShift10::name() const {
-  return "CPhaseShift10(" + std::to_string(angle_) + ")";
-}
-bool CPhaseShift10::sliceable() const { return true; }
 
 RotX::RotX(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("RotX", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   double cos_half_angle = cos(angle_ / 2);
   std::complex<double> i_sin_hanlf_angle = 1i * sin(angle_ / 2);
   ptr_[0 * 2 + 0] = cos_half_angle;
@@ -337,14 +295,11 @@ RotX::RotX(std::vector<size_t> targets, double angle,
   ptr_[1 * 2 + 1] = cos_half_angle;
 }
 RotX::~RotX() {}
-std::string RotX::name() const {
-  return "RotX(" + std::to_string(angle_) + ")";
-}
-bool RotX::sliceable() const { return false; }
 
 RotY::RotY(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("RotY", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   double cos_half_angle = cos(angle_ / 2);
   std::complex<double> sin_hanlf_angle = sin(angle_ / 2);
   ptr_[0 * 2 + 0] = cos_half_angle;
@@ -353,14 +308,11 @@ RotY::RotY(std::vector<size_t> targets, double angle,
   ptr_[1 * 2 + 1] = cos_half_angle;
 }
 RotY::~RotY() {}
-std::string RotY::name() const {
-  return "RotY(" + std::to_string(angle_) + ")";
-}
-bool RotY::sliceable() const { return false; }
 
 RotZ::RotZ(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("RotZ", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   std::complex<double> positive_phase = std::exp(1i * angle_ / 2.);
   std::complex<double> negative_phase = std::exp(-1i * angle_ / 2.);
   ptr_[0 * 2 + 0] = negative_phase;
@@ -369,14 +321,10 @@ RotZ::RotZ(std::vector<size_t> targets, double angle,
   ptr_[1 * 2 + 1] = positive_phase;
 }
 RotZ::~RotZ() {}
-std::string RotZ::name() const {
-  return "RotZ(" + std::to_string(angle_) + ")";
-}
-bool RotZ::sliceable() const { return true; }
 
 Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
            size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("Swap", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -395,12 +343,10 @@ Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[3 * 4 + 3] = 1;
 }
 Swap::~Swap() {}
-std::string Swap::name() const { return "Swap"; }
-bool Swap::sliceable() const { return false; }
 
 ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("ISwap", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -419,12 +365,11 @@ ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[3 * 4 + 3] = 1;
 }
 ISwap::~ISwap() {}
-std::string ISwap::name() const { return "ISwap"; }
-bool ISwap::sliceable() const { return false; }
 
 PSwap::PSwap(std::vector<size_t> targets, double angle,
              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("PSwap", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -443,14 +388,11 @@ PSwap::PSwap(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = 1;
 }
 PSwap::~PSwap() {}
-std::string PSwap::name() const {
-  return "PSwap(" + std::to_string(angle_) + ")";
-}
-bool PSwap::sliceable() const { return false; }
 
 XY::XY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("XY", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
   ptr_[0 * 4 + 0] = 1;
@@ -471,12 +413,11 @@ XY::XY(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = 1;
 }
 XY::~XY() {}
-std::string XY::name() const { return "XY(" + std::to_string(angle_) + ")"; }
-bool XY::sliceable() const { return false; }
 
 XX::XX(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("XX", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
   ptr_[0 * 4 + 0] = cos_angle;
@@ -497,12 +438,11 @@ XX::XX(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = cos_angle;
 }
 XX::~XX() {}
-std::string XX::name() const { return "XX(" + std::to_string(angle_) + ")"; }
-bool XX::sliceable() const { return false; }
 
 YY::YY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("YY", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
   ptr_[0 * 4 + 0] = cos_angle;
@@ -523,12 +463,11 @@ YY::YY(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = cos_angle;
 }
 YY::~YY() {}
-std::string YY::name() const { return "YY(" + std::to_string(angle_) + ")"; }
-bool YY::sliceable() const { return false; }
 
 ZZ::ZZ(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("ZZ", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   std::complex<double> positive_phase = std::exp(1i * angle_ / 2.);
   std::complex<double> negative_phase = std::exp(-1i * angle_ / 2.);
   ptr_[0 * 4 + 0] = negative_phase;
@@ -549,12 +488,10 @@ ZZ::ZZ(std::vector<size_t> targets, double angle,
   ptr_[3 * 4 + 3] = negative_phase;
 }
 ZZ::~ZZ() {}
-std::string ZZ::name() const { return "ZZ(" + std::to_string(angle_) + ")"; }
-bool ZZ::sliceable() const { return true; }
 
 CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("CCNot", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 8 + 0] = 1;
   ptr_[0 * 8 + 1] = 0;
   ptr_[0 * 8 + 2] = 0;
@@ -621,12 +558,10 @@ CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[7 * 8 + 7] = 0;
 }
 CCNot::~CCNot() {}
-std::string CCNot::name() const { return "CCNot"; }
-bool CCNot::sliceable() const { return true; }
 
 CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("CSwap", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 8 + 0] = 1;
   ptr_[0 * 8 + 1] = 0;
   ptr_[0 * 8 + 2] = 0;
@@ -693,12 +628,10 @@ CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
   ptr_[7 * 8 + 7] = 1;
 }
 CSwap::~CSwap() {}
-std::string CSwap::name() const { return "CSwap"; }
-bool CSwap::sliceable() const { return false; }
 
 U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
      std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power),
+    : GateOperation("U", targets, {theta, phi, lambda}, ctrl_modifiers, power),
       theta_(theta),
       phi_(phi),
       lambda_(lambda) {
@@ -708,23 +641,18 @@ U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
   ptr_[1 * 2 + 1] = std::exp(1i * (phi + lambda)) * cos(theta / 2);
 }
 U::~U() {}
-std::string U::name() const { return "U"; }
-bool U::sliceable() const { return false; }
 
 GPhase::GPhase(std::vector<size_t> targets, double angle,
                std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power), angle_(angle) {
+    : GateOperation("GPhase", targets, {angle}, ctrl_modifiers, power),
+      angle_(angle) {
   ptr_[0] = std::exp(1i * angle);
 }
 GPhase::~GPhase() {}
-std::string GPhase::name() const {
-  return "GPhase(" + std::to_string(angle_) + ")";
-}
-bool GPhase::sliceable() const { return true; }
 
 SwapA2A::SwapA2A(std::vector<size_t> targets,
                  std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation(targets, ctrl_modifiers, power) {
+    : GateOperation("SwapA2A", targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -743,5 +671,3 @@ SwapA2A::SwapA2A(std::vector<size_t> targets,
   ptr_[3 * 4 + 3] = 1;
 }
 SwapA2A::~SwapA2A() {}
-std::string SwapA2A::name() const { return "SwapA2A"; }
-bool SwapA2A::sliceable() const { return false; }

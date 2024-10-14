@@ -174,6 +174,7 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
                                 qubit_count: int,
                                 local_qubit_count: int):
     assert local_qubit_count <= qubit_count
+    slice_qubit_count = qubit_count - local_qubit_count
 
     accumulating_local = True
     subcircuits = []
@@ -182,8 +183,8 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
     operations = pseudo_sort_operations_descending(operations)
     for i in range(len(operations)):
         op = operations[i]
-        is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
-            op.targets) >= (qubit_count-local_qubit_count))
+        is_local_gate = (op.sliceable() or len(op.targets) == 0
+                         or min(op.targets) >= slice_qubit_count)
         if accumulating_local == is_local_gate:
             current_operations.append(op)
         else:
@@ -212,8 +213,6 @@ def transpile_cpu_offload_cpu(operations: list[GateOperation],
 def transpile_cpu_offload_cuda(operations: list[GateOperation],
                                qubit_count: int,
                                local_qubit_count: int):
-    # dag = GateDAG(qubit_count, operations)
-
     assert local_qubit_count <= qubit_count
     slice_qubit_count = qubit_count - local_qubit_count
     subcircuits = []
@@ -221,27 +220,37 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
 
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
-    print(operations)
 
     for i, op in enumerate(operations):
         is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
-            op.targets) >= (slice_qubit_count))
-
-        print(f"{op} is local? : {is_local_gate}")
+            op.targets) >= slice_qubit_count)
 
         if is_local_gate:
             current_operations.append(op)
         else:
-            if len(current_operations) != 0:
-                subcircuits.append(current_operations)
             new_perm = select_permutation(
                 i, operations, qubit_count, local_qubit_count)
 
             assert all(t in new_perm[qubit_count-local_qubit_count:]
                        for t in op.targets)
-            current_operations = build_permutation_gates(
+            perm_gates = build_permutation_gates(
                 new_perm, qubit_count, local_qubit_count)
-            cleanup_operations += reversed(current_operations)
+            cleanup_operations += reversed(perm_gates)
+
+            accumulating_local = True
+            for p in perm_gates:
+                is_local_gate = min(p.targets) >= slice_qubit_count
+                if accumulating_local == is_local_gate:
+                    current_operations.append(p)
+                else:
+                    if len(current_operations) != 0:
+                        subcircuits.append(current_operations)
+                    current_operations = [p]
+                    accumulating_local = not accumulating_local
+
+            if len(current_operations) != 0:
+                subcircuits.append(current_operations)
+
             new_perm_inverse = {q: i for i, q in enumerate(new_perm)}
 
             for j in range(i, len(operations)):
@@ -250,16 +259,29 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
                 operations[j] = _op
 
             current_operations.append(operations[i])
-            operations = pseudo_sort_operations_descending(operations)
+            operations[i +
+                       1:] = pseudo_sort_operations_descending(operations[i+1:])
 
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
-    if len(cleanup_operations) != 0:
-        subcircuits.append(cleanup_operations)
 
-    print(operations)
-    print(subcircuits)
-    return [[subcircuit] * (2**slice_qubit_count) for subcircuit in subcircuits]
+    current_operations = []
+    accumulating_local = True
+    for p in cleanup_operations:
+        is_local_gate = min(p.targets) >= slice_qubit_count
+        if accumulating_local == is_local_gate:
+            current_operations.append(p)
+        else:
+            if len(current_operations) != 0:
+                subcircuits.append(current_operations)
+            current_operations = [p]
+            accumulating_local = not accumulating_local
+
+    if len(current_operations) != 0:
+        subcircuits.append(current_operations)
+
+    slice_count = 2**(qubit_count - local_qubit_count)
+    return [[subcircuit] * slice_count for subcircuit in subcircuits]
 
 def transpile_cpu_offload_hybrid(operations: list[GateOperation],
                                  qubit_count: int,

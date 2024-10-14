@@ -17,10 +17,16 @@ void Operation::set_targets(const std::vector<size_t> &targets) {
 }
 
 // GateOperation
-GateOperation::GateOperation(const std::vector<size_t> &targets,
+GateOperation::GateOperation(const std::string &name,
+                             const std::vector<size_t> &targets,
+                             const std::vector<double> &angles,
                              const std::vector<size_t> &ctrl_modifiers,
                              size_t power)
-    : Operation(targets), ctrl_modifiers_(ctrl_modifiers), power_(power) {
+    : Operation(targets),
+      angles_(angles),
+      ctrl_modifiers_(ctrl_modifiers),
+      power_(power),
+      name_(name) {
   size_t ncols = (1ul << targets_.size());
   ptr_ = new std::complex<double>[ncols * ncols];
   CUDA_CHECK(
@@ -59,11 +65,51 @@ std::vector<size_t> GateOperation::stride() const {
   return {ncols * sizeof(std::complex<double>), sizeof(std::complex<double>)};
 }
 
-bool GateOperation::sliceable() const { return false; }
-void GateOperation::slice(size_t idx) { assert(false); }
-bool GateOperation::symmetric() const { return false; }
+std::shared_ptr<GateOperation> GateOperation::slice(size_t idx) const {
+  auto g = std::make_shared<GateOperation>(name_, targets_, angles_,
+                                           ctrl_modifiers_, power_);
+  return g;
+}
 
-std::string GateOperation::name() const { return "Unknown"; }
+bool GateOperation::diagonal() const {
+  size_t ncols = (1ul << targets_.size());
+  for (size_t i = 0; i < ncols; ++i) {
+    for (size_t j = 0; j < ncols; ++j) {
+      if ((i != j) && (ptr_[i] == ptr_[j])) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool GateOperation::anti_diagonal() const {
+  size_t ncols = (1ul << targets_.size());
+  for (size_t i = 0; i < ncols; ++i) {
+    for (size_t j = 0; j < ncols; ++j) {
+      if ((i != (ncols - 1 - j)) && (ptr_[i] == ptr_[j])) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+bool GateOperation::sliceable() const { return diagonal(); }
+
+std::string GateOperation::name() const {
+  if (angles_.size() == 0) {
+    return name_;
+  } else {
+    std::stringstream ss;
+    ss << name_ << "(";
+    for (size_t i = 0; i < angles_.size(); ++i) {
+      ss << angles_[i];
+      if (i < angles_.size() - 1) ss << ", ";
+    }
+    ss << ")";
+    return ss.str();
+  }
+}
 std::string GateOperation::formatted_string() const {
   std::stringstream ss;
   ss << "<";
@@ -76,3 +122,12 @@ std::string GateOperation::formatted_string() const {
   ss << ">";
   return ss.str();
 }
+
+// GateOperationSliced
+GateOperationSliced::GateOperationSliced(
+    const std::string &name, const std::vector<size_t> &targets,
+    const std::vector<double> &angles,
+    const std::vector<size_t> &ctrl_modifiers, size_t power)
+    : GateOperation(name, targets, angles, ctrl_modifiers, power) {}
+bool GateOperationSliced::sliceable() const { return false; }
+GateOperationSliced::~GateOperationSliced() {}

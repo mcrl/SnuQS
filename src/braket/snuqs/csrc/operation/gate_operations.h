@@ -11,8 +11,6 @@ class Identity : public GateOperation {
   Identity(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
            size_t power);
   virtual ~Identity();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class Hadamard : public GateOperation {
@@ -20,8 +18,6 @@ class Hadamard : public GateOperation {
   Hadamard(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
            size_t power);
   virtual ~Hadamard();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class PauliX : public GateOperation {
@@ -29,8 +25,6 @@ class PauliX : public GateOperation {
   PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
          size_t power);
   virtual ~PauliX();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class PauliY : public GateOperation {
@@ -38,8 +32,6 @@ class PauliY : public GateOperation {
   PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
          size_t power);
   virtual ~PauliY();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class PauliZ : public GateOperation {
@@ -47,8 +39,6 @@ class PauliZ : public GateOperation {
   PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
          size_t power);
   virtual ~PauliZ();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CX : public GateOperation {
@@ -56,8 +46,6 @@ class CX : public GateOperation {
   CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power);
   virtual ~CX();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CY : public GateOperation {
@@ -65,8 +53,6 @@ class CY : public GateOperation {
   CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power);
   virtual ~CY();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CZ : public GateOperation {
@@ -74,8 +60,6 @@ class CZ : public GateOperation {
   CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power);
   virtual ~CZ();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class S : public GateOperation {
@@ -83,8 +67,6 @@ class S : public GateOperation {
   S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
     size_t power);
   virtual ~S();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class Si : public GateOperation {
@@ -92,8 +74,6 @@ class Si : public GateOperation {
   Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power);
   virtual ~Si();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class T : public GateOperation {
@@ -101,8 +81,6 @@ class T : public GateOperation {
   T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
     size_t power);
   virtual ~T();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class Ti : public GateOperation {
@@ -110,8 +88,6 @@ class Ti : public GateOperation {
   Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power);
   virtual ~Ti();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class V : public GateOperation {
@@ -119,8 +95,6 @@ class V : public GateOperation {
   V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
     size_t power);
   virtual ~V();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class Vi : public GateOperation {
@@ -128,8 +102,6 @@ class Vi : public GateOperation {
   Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power);
   virtual ~Vi();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class PhaseShift : public GateOperation {
@@ -138,8 +110,6 @@ class PhaseShift : public GateOperation {
              std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~PhaseShift();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CPhaseShift : public GateOperation {
@@ -148,8 +118,6 @@ class CPhaseShift : public GateOperation {
               std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~CPhaseShift();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CPhaseShift00 : public GateOperation {
@@ -158,8 +126,6 @@ class CPhaseShift00 : public GateOperation {
                 std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~CPhaseShift00();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CPhaseShift01 : public GateOperation {
@@ -168,8 +134,6 @@ class CPhaseShift01 : public GateOperation {
                 std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~CPhaseShift01();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CPhaseShift10 : public GateOperation {
@@ -178,8 +142,6 @@ class CPhaseShift10 : public GateOperation {
                 std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~CPhaseShift10();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class RotX : public GateOperation {
@@ -188,8 +150,6 @@ class RotX : public GateOperation {
        std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~RotX();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class RotY : public GateOperation {
@@ -198,8 +158,6 @@ class RotY : public GateOperation {
        std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~RotY();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class RotZ : public GateOperation {
@@ -208,8 +166,6 @@ class RotZ : public GateOperation {
        std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~RotZ();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class Swap : public GateOperation {
@@ -217,8 +173,6 @@ class Swap : public GateOperation {
   Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power);
   virtual ~Swap();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class ISwap : public GateOperation {
@@ -226,8 +180,6 @@ class ISwap : public GateOperation {
   ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
         size_t power);
   virtual ~ISwap();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class PSwap : public GateOperation {
@@ -236,8 +188,6 @@ class PSwap : public GateOperation {
         std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~PSwap();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class XY : public GateOperation {
@@ -246,8 +196,6 @@ class XY : public GateOperation {
      std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~XY();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class XX : public GateOperation {
@@ -256,8 +204,6 @@ class XX : public GateOperation {
      std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~XX();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class YY : public GateOperation {
@@ -266,8 +212,6 @@ class YY : public GateOperation {
      std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~YY();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class ZZ : public GateOperation {
@@ -276,8 +220,6 @@ class ZZ : public GateOperation {
      std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~ZZ();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CCNot : public GateOperation {
@@ -285,8 +227,6 @@ class CCNot : public GateOperation {
   CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
         size_t power);
   virtual ~CCNot();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class CSwap : public GateOperation {
@@ -294,8 +234,6 @@ class CSwap : public GateOperation {
   CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
         size_t power);
   virtual ~CSwap();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class U : public GateOperation {
@@ -306,8 +244,6 @@ class U : public GateOperation {
   double theta_;
   double phi_;
   double lambda_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class GPhase : public GateOperation {
@@ -316,8 +252,6 @@ class GPhase : public GateOperation {
          std::vector<size_t> ctrl_modifiers, size_t power);
   virtual ~GPhase();
   double angle_;
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 class SwapA2A : public GateOperation {
@@ -325,8 +259,6 @@ class SwapA2A : public GateOperation {
   SwapA2A(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
           size_t power);
   virtual ~SwapA2A();
-  virtual std::string name() const override;
-  virtual bool sliceable() const override;
 };
 
 #endif  //_GATE_OPERATION_H_
