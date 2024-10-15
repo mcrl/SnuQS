@@ -190,6 +190,7 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
         else:
             if len(current_operations) != 0:
                 subcircuits.append(current_operations)
+                current_operations = []
             if accumulating_local:
                 operations[i +
                            1:] = pseudo_sort_operations_ascending(operations[i+1:])
@@ -201,6 +202,7 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
 
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
+        current_operations = []
 
     slice_count = 2**(qubit_count - local_qubit_count)
     return [[subcircuit] * slice_count for subcircuit in subcircuits]
@@ -249,11 +251,8 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
                     current_operations = [p]
                     accumulating_local = not accumulating_local
 
-            if len(current_operations) != 0:
-                subcircuits.append(current_operations)
 
             new_perm_inverse = {q: i for i, q in enumerate(new_perm)}
-
             for j in range(i, len(operations)):
                 _op = operations[j]
                 _op.targets = [new_perm_inverse[t] for t in _op.targets]
@@ -263,8 +262,14 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
             operations[i +
                        1:] = pseudo_sort_operations_descending(operations[i+1:])
 
+            if len(current_operations) != 0:
+                subcircuits.append(current_operations)
+                current_operations = []
+
+    print("A", subcircuits)
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
+    print("B", subcircuits)
 
     current_operations = []
     accumulating_local = True
