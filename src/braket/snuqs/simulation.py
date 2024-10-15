@@ -342,6 +342,7 @@ class StateVectorSimulation(Simulation):
     def _evolve_no_offload_hybrid(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
+        slice_qubit_count = self._qubit_count - self._max_qubit_count_cuda
 
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
@@ -353,8 +354,8 @@ class StateVectorSimulation(Simulation):
 
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(targets) >= (
-                self._qubit_count - self._max_qubit_count_cuda)
+            applying_local = len(targets) == 0 or min(
+                targets) >= slice_qubit_count
             if applying_local:
                 state_vector.cut(self._max_qubit_count_cuda)
                 for i, subcircuit in enumerate(subcircuit_slices):
@@ -385,6 +386,7 @@ class StateVectorSimulation(Simulation):
     def _evolve_cpu_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
+        slice_qubit_count = self._qubit_count - self._max_qubit_count_cuda
 
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
@@ -395,8 +397,8 @@ class StateVectorSimulation(Simulation):
                                         )
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(targets) >= (
-                self._qubit_count - self._max_qubit_count_cuda)
+            applying_local = len(targets) == 0 or min(
+                targets) >= slice_qubit_count
             if applying_local:
                 state_vector.cut(self._max_qubit_count_cuda)
                 for i, subcircuit in enumerate(subcircuit_slices):
@@ -437,8 +439,8 @@ class StateVectorSimulation(Simulation):
                                         )
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(targets) >= (
-                self._qubit_count - self._max_qubit_count_cuda)
+            applying_local = len(targets) == 0 or min(
+                targets) >= slice_qubit_count
             if applying_local:
                 state_vector.cut(self._max_qubit_count_cuda)
                 for i, subcircuit in enumerate(subcircuit_slices):
