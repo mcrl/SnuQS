@@ -8,6 +8,7 @@ from braket.snuqs._C.operation.gate_operations import (
 )
 from braket.snuqs.dag import GateDAG
 
+
 def pseudo_lt(oppos1, oppos2):
     op1, pos1 = oppos1
     op2, pos2 = oppos2
@@ -219,12 +220,11 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
     slice_qubit_count = qubit_count - local_qubit_count
     subcircuits = []
     current_operations = []
-
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
-    print(operations)
 
-    for i, op in enumerate(operations):
+    for i in len(range(operations)):
+        op = operations[i]
         is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
             op.targets) >= slice_qubit_count)
 
@@ -251,7 +251,6 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
                     current_operations = [p]
                     accumulating_local = not accumulating_local
 
-
             new_perm_inverse = {q: i for i, q in enumerate(new_perm)}
             for j in range(i, len(operations)):
                 _op = operations[j]
@@ -266,10 +265,8 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
                 subcircuits.append(current_operations)
                 current_operations = []
 
-    print("A", subcircuits)
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
-    print("B", subcircuits)
 
     current_operations = []
     accumulating_local = True
@@ -298,6 +295,7 @@ def transpile_cpu_offload_hybrid(operations: list[GateOperation],
 
 def transpile_no_offload(operations: list[GateOperation],
                          qubit_count: int,
+                         max_qubit_count: int,
                          local_qubit_count: int,
                          device: DeviceType):
     match device:
@@ -318,6 +316,7 @@ def transpile_no_offload(operations: list[GateOperation],
 
 def transpile_cpu_offload(operations: list[GateOperation],
                           qubit_count: int,
+                          max_qubit_count: int,
                           local_qubit_count: int,
                           device: DeviceType):
     match device:
@@ -336,15 +335,125 @@ def transpile_cpu_offload(operations: list[GateOperation],
         case _:
             raise NotImplementedError("Not Implemented")
 
+def transpile_storage_offload_cpu(operations: list[GateOperation],
+                                  qubit_count: int,
+                                  max_qubit_count: int,
+                                  local_qubit_count: int):
+    assert max_qubit_count <= qubit_count
+    assert local_qubit_count <= qubit_count
+    assert local_qubit_count <= max_qubit_count
+
+    slice_qubit_count = qubit_count - max_qubit_count
+    subcircuits = []
+    current_operations = []
+    cleanup_operations = []
+    operations = pseudo_sort_operations_descending(operations)
+
+    print(operations)
+    for i in range(len(operations)):
+        op = operations[i]
+        is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
+            op.targets) >= slice_qubit_count)
+
+        if is_local_gate:
+            current_operations.append(op)
+        else:
+            new_perm = select_permutation(
+                i, operations, qubit_count, max_qubit_count)
+
+            assert all(t in new_perm[qubit_count-max_qubit_count:]
+                       for t in op.targets)
+            perm_gates = build_permutation_gates(
+                new_perm, qubit_count, max_qubit_count)
+            cleanup_operations += reversed(perm_gates)
+
+            accumulating_local = True
+            for p in perm_gates:
+                is_local_gate = min(p.targets) >= slice_qubit_count
+                if accumulating_local == is_local_gate:
+                    current_operations.append(p)
+                else:
+                    if len(current_operations) != 0:
+                        subcircuits.append(current_operations)
+                    current_operations = [p]
+                    accumulating_local = not accumulating_local
+
+            new_perm_inverse = {q: i for i, q in enumerate(new_perm)}
+            for j in range(i, len(operations)):
+                _op = operations[j]
+                _op.targets = [new_perm_inverse[t] for t in _op.targets]
+                operations[j] = _op
+
+            current_operations.append(operations[i])
+            operations[i +
+                       1:] = pseudo_sort_operations_descending(operations[i+1:])
+
+            if len(current_operations) != 0:
+                subcircuits.append(current_operations)
+                current_operations = []
+
+    if len(current_operations) != 0:
+        subcircuits.append(current_operations)
+
+    current_operations = []
+    accumulating_local = True
+    for p in cleanup_operations:
+        is_local_gate = min(p.targets) >= slice_qubit_count
+        if accumulating_local == is_local_gate:
+            current_operations.append(p)
+        else:
+            if len(current_operations) != 0:
+                subcircuits.append(current_operations)
+            current_operations = [p]
+            accumulating_local = not accumulating_local
+
+    if len(current_operations) != 0:
+        subcircuits.append(current_operations)
+
+    print(subcircuits)
+    slice_count = 2**(qubit_count - max_qubit_count)
+    return [[subcircuit] * slice_count for subcircuit in subcircuits]
+
+def transpile_storage_offload_cuda(operations: list[GateOperation],
+                                   qubit_count: int,
+                                   max_qubit_count: int,
+                                   local_qubit_count: int):
+    raise NotImplementedError("Not Implemented")
+
+def transpile_storage_offload_hybrid(operations: list[GateOperation],
+                                     qubit_count: int,
+                                     local_qubit_count: int,
+                                     max_qubit_count: int):
+    raise NotImplementedError("Not Implemented")
+
 def transpile_storage_offload(operations: list[GateOperation],
                               qubit_count: int,
+                              max_qubit_count: int,
                               local_qubit_count: int,
                               device: DeviceType,
                               path: Optional[list[str]] = None):
-    raise NotImplementedError("Not Implemented")
+    match device:
+        case DeviceType.CPU:
+            return transpile_storage_offload_cpu(operations,
+                                                 qubit_count,
+                                                 max_qubit_count,
+                                                 local_qubit_count)
+        case DeviceType.CUDA:
+            return transpile_storage_offload_cuda(operations,
+                                                  qubit_count,
+                                                  max_qubit_count,
+                                                  local_qubit_count)
+        case DeviceType.HYBRID:
+            return transpile_storage_offload_hybrid(operations,
+                                                    qubit_count,
+                                                    max_qubit_count,
+                                                    local_qubit_count)
+        case _:
+            raise NotImplementedError("Not Implemented")
 
 def transpile(operations: list[GateOperation],
               qubit_count: int,
+              max_qubit_count: int,
               local_qubit_count: int,
               device: DeviceType,
               offload: OffloadType,
@@ -353,16 +462,19 @@ def transpile(operations: list[GateOperation],
         case OffloadType.NONE:
             return transpile_no_offload(operations,
                                         qubit_count,
+                                        max_qubit_count,
                                         local_qubit_count,
                                         device)
         case OffloadType.CPU:
             return transpile_cpu_offload(operations,
                                          qubit_count,
+                                         max_qubit_count,
                                          local_qubit_count,
                                          device)
         case OffloadType.STORAGE:
             return transpile_storage_offload(operations,
                                              qubit_count,
+                                             max_qubit_count,
                                              local_qubit_count,
                                              device,
                                              path)

@@ -7,6 +7,7 @@ from braket.snuqs._C.result_types import StateVector
 from braket.snuqs._C.operation import GateOperation
 from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_zero
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
+from braket.snuqs._C.core import mem_info
 from braket.snuqs.device import DeviceType
 from braket.snuqs.offload import OffloadType
 from braket.snuqs.transpile import transpile
@@ -93,9 +94,15 @@ class StateVectorSimulation(Simulation):
         """
 
         super().__init__(qubit_count=qubit_count, shots=shots)
+        free, _ = mem_info()
+        self._max_qubit_count = min(
+            self.qubit_count, int(math.log(free / 16, 2)))
         free, _ = mem_info_cuda()
         self._max_qubit_count_cuda = min(
             self.qubit_count, int(math.log(free / 16, 2)))
+
+        print(
+            f"max_qubit_count: {self._max_qubit_count}, max_qubit_count_cuda: {self._max_qubit_count_cuda}")
         self._initialize_memory_objects(
             qubit_count, shots, device, offload, path)
 
@@ -178,7 +185,42 @@ class StateVectorSimulation(Simulation):
 
     def _initialize_memory_objects_storage_offload(self, qubit_count: int, shots: int,
                                                    device: DeviceType, path: List[str]):
-        raise NotImplementedError("Not Implemented")
+        match device:
+            case DeviceType.CPU:
+                assert (qubit_count >= self._max_qubit_count)
+                self._state_vector = StateVector(
+                    qubit_count, self._max_qubit_count)
+                self._state_vector.cpu()
+                self._state_vector.cut(self._max_qubit_count_cuda)
+                initialize_basis_z(self._state_vector)
+                self._state_vector.glue()
+
+            case DeviceType.CUDA:
+                self._state_vector_cuda = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda.cuda()
+
+                self._state_vector = StateVector(
+                    self.qubit_count, self._max_qubit_count)
+                self._state_vector.cpu()
+                self._state_vector.cut(self._max_qubit_count_cuda)
+                initialize_basis_z(self._state_vector)
+                self._state_vector.glue()
+
+            case DeviceType.HYBRID:
+                self._state_vector_cuda = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda.cuda()
+
+                self._state_vector = StateVector(
+                    self.qubit_count, self._max_qubit_count)
+                self._state_vector.cpu()
+                self._state_vector.cut(self._max_qubit_count_cuda)
+                initialize_basis_z(self._state_vector)
+                self._state_vector.glue()
+
+            case _:
+                raise NotImplementedError("Not Implemented")
 
     @ property
     def state_vector(self) -> np.ndarray:
@@ -270,6 +312,7 @@ class StateVectorSimulation(Simulation):
 
         operations = transpile(operations,
                                self._qubit_count,
+                               self._max_qubit_count,
                                self._max_qubit_count_cuda,
                                DeviceType.CPU,
                                OffloadType.NONE
@@ -284,6 +327,7 @@ class StateVectorSimulation(Simulation):
 
         operations = transpile(operations,
                                self._qubit_count,
+                               self._max_qubit_count,
                                self._max_qubit_count_cuda,
                                DeviceType.CPU,
                                OffloadType.NONE
@@ -301,6 +345,7 @@ class StateVectorSimulation(Simulation):
 
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
+                                        self._max_qubit_count,
                                         self._max_qubit_count_cuda,
                                         DeviceType.HYBRID,
                                         OffloadType.NONE
@@ -343,17 +388,16 @@ class StateVectorSimulation(Simulation):
 
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
+                                        self._max_qubit_count,
                                         self._max_qubit_count_cuda,
                                         DeviceType.CUDA,
                                         OffloadType.CPU
                                         )
-        print(list_of_subcircuits)
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
             applying_local = len(targets) == 0 or min(targets) >= (
                 self._qubit_count - self._max_qubit_count_cuda)
             if applying_local:
-                print("Apply local")
                 state_vector.cut(self._max_qubit_count_cuda)
                 for i, subcircuit in enumerate(subcircuit_slices):
                     state_vector.slice(i)
@@ -362,17 +406,14 @@ class StateVectorSimulation(Simulation):
                     else:
                         initialize_zero(state_vector_cuda)
                     for operation in subcircuit:
-                        print(f"\tslice {i}, {operation}")
                         targets = operation.targets
                         apply(state_vector_cuda, operation,
                               self._qubit_count, targets)
                     state_vector.copy(state_vector_cuda)
                 state_vector.glue()
             else:
-                print("Apply nonlocal")
                 subcircuit = subcircuit_slices[0]
                 for operation in subcircuit:
-                    print(f"\t{operation}")
                     targets = operation.targets
                     apply(state_vector, operation, self._qubit_count, targets)
 
@@ -385,6 +426,42 @@ class StateVectorSimulation(Simulation):
     #
     def _evolve_storage_offload_cpu(self, operations: list[GateOperation],
                                     path: List[str] = None) -> None:
+        state_vector = self._state_vector
+        slice_qubit_count = self._qubit_count - self._max_qubit_count
+        list_of_subcircuits = transpile(operations,
+                                        self._qubit_count,
+                                        self._max_qubit_count,
+                                        self._max_qubit_count_cuda,
+                                        DeviceType.CPU,
+                                        OffloadType.STORAGE
+                                        )
+        for s, subcircuit_slices in enumerate(list_of_subcircuits):
+            targets = subcircuit_slices[0][0].targets
+            applying_local = len(targets) == 0 or min(targets) >= (
+                self._qubit_count - self._max_qubit_count_cuda)
+            if applying_local:
+                state_vector.cut(self._max_qubit_count_cuda)
+                for i, subcircuit in enumerate(subcircuit_slices):
+                    state_vector.slice(i)
+                    if s != 0 or i == 0:
+                        state_vector.upload()
+                    else:
+                        initialize_zero(state_vector)
+                    for operation in subcircuit:
+                        targets = operation.targets
+                        print(operation)
+                        assert len(targets) == 0 or (
+                            min(targets) >= slice_qubit_count)
+                        apply(state_vector, operation,
+                              self._qubit_count, targets)
+                    state_vector.download()
+                state_vector.glue()
+            else:
+                subcircuit = subcircuit_slices[0]
+                for operation in subcircuit:
+                    targets = operation.targets
+                    print("Trying to apply", operation)
+                    # apply(state_vector, operation, self._qubit_count, targets)
         raise NotImplementedError("Not Implemented")
 
     def _evolve_storage_offload_cuda(self,

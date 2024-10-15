@@ -13,7 +13,8 @@
 class StateVector : public ResultType {
  public:
   StateVector(size_t num_qubits);
-  ~StateVector();
+  StateVector(size_t num_qubits, size_t num_effective_qubits);
+  virtual ~StateVector();
   virtual void *data() override;
   virtual size_t dim() const override;
   virtual std::vector<size_t> shape() const override;
@@ -24,6 +25,8 @@ class StateVector : public ResultType {
   void cpu();
   void cuda();
   void copy(StateVector &from);
+  void upload();
+  void download();
   bool allocated() const;
   size_t num_elems() const;
   size_t num_qubits() const;

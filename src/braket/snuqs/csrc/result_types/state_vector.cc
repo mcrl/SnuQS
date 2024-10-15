@@ -3,12 +3,16 @@
 #include <cuda_runtime.h>
 #include <spdlog/spdlog.h>
 
+#include <cmath>
 #include <sstream>
 
 #include "utils_cuda.h"
 
 StateVector::StateVector(size_t num_qubits)
     : num_qubits_(num_qubits), num_effective_qubits_(num_qubits) {}
+
+StateVector::StateVector(size_t num_qubits, size_t num_effective_qubits)
+    : num_qubits_(num_qubits), num_effective_qubits_(num_effective_qubits) {}
 
 StateVector::~StateVector() {}
 
@@ -72,6 +76,14 @@ void StateVector::copy(StateVector &from) {
   } else {
     assert(false);
   }
+}
+
+void StateVector::upload() {
+  size_t num_elems = slice_index_ * (1ul << num_effective_qubits_);
+}
+
+void StateVector::download() {
+  size_t num_elems = slice_index_ * (1ul << num_effective_qubits_);
 }
 
 bool StateVector::allocated() const {

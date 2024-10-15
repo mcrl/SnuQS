@@ -139,10 +139,13 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>())
+      .def(py::init<size_t, size_t>())
       .def("initialized", &StateVector::initialized)
       .def("cpu", &StateVector::cpu)
       .def("cuda", &StateVector::cuda)
       .def("copy", &StateVector::copy)
+      .def("upload", &StateVector::upload)
+      .def("download", &StateVector::download)
       .def("cut", &StateVector::cut)
       .def("glue", &StateVector::glue)
       .def("slice", &StateVector::slice)
