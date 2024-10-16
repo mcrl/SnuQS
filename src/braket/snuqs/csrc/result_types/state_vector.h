@@ -46,6 +46,7 @@ class StateVector : public ResultType {
   size_t slice_index_ = 0;
   std::shared_ptr<Memory> ptr_ = nullptr;
   std::shared_ptr<MemoryCUDA> ptr_cuda_ = nullptr;
+  std::vector<size_t> slice_perm_;
   DeviceType device_ = DeviceType::UNKNOWN;
   bool initialized_ = false;
 };

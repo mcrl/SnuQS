@@ -9,10 +9,18 @@
 #include "utils_cuda.h"
 
 StateVector::StateVector(size_t num_qubits)
-    : num_qubits_(num_qubits), num_effective_qubits_(num_qubits) {}
+    : num_qubits_(num_qubits), num_effective_qubits_(num_qubits) {
+  for (size_t i = 0; i < (num_qubits_ - num_effective_qubits_); ++i) {
+    slice_perm_[i] = i;
+  }
+}
 
 StateVector::StateVector(size_t num_qubits, size_t num_effective_qubits)
-    : num_qubits_(num_qubits), num_effective_qubits_(num_effective_qubits) {}
+    : num_qubits_(num_qubits), num_effective_qubits_(num_effective_qubits) {
+  for (size_t i = 0; i < (num_qubits_ - num_effective_qubits_); ++i) {
+    slice_perm_[i] = i;
+  }
+}
 
 StateVector::~StateVector() {}
 
@@ -101,6 +109,10 @@ bool StateVector::allocated() const {
 void StateVector::cut(size_t num_effective_qubits) {
   assert(allocated());
   num_effective_qubits_ = num_effective_qubits;
+
+  for (size_t i = 0; i < (num_qubits_ - num_effective_qubits_); ++i) {
+    slice_perm_[i] = i;
+  }
 }
 
 void StateVector::glue() {

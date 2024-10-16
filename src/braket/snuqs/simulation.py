@@ -95,16 +95,23 @@ class StateVectorSimulation(Simulation):
 
         super().__init__(qubit_count=qubit_count, shots=shots)
         free, _ = mem_info()
-        self._max_qubit_count = min(
-            self.qubit_count, int(math.log(free / 16, 2)))
-        free, _ = mem_info_cuda()
-        self._max_qubit_count_cuda = min(
-            self.qubit_count, int(math.log(free / 16, 2)))
+        self._max_qubit_count = self._compute_max_qubit_count()
+        self._max_qubit_count_cuda = self._compute_max_qubit_count_cuda()
 
         print(
             f"max_qubit_count: {self._max_qubit_count}, max_qubit_count_cuda: {self._max_qubit_count_cuda}")
         self._initialize_memory_objects(
             qubit_count, shots, device, offload, path)
+
+    def _compute_max_qubit_count(self):
+        free, _ = mem_info()
+        return min(
+            self.qubit_count, int(math.log(free / 16, 2)))
+
+    def _compute_max_qubit_count_cuda(self):
+        free, _ = mem_info_cuda()
+        return min(
+            self.qubit_count, int(math.log(free / 16, 2)))
 
     def _initialize_memory_objects(self, qubit_count: int, shots: int,
                                    device: DeviceType,

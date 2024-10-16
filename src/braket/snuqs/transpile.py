@@ -223,7 +223,7 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
 
-    for i in len(range(operations)):
+    for i in range(len(operations)):
         op = operations[i]
         is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
             op.targets) >= slice_qubit_count)
