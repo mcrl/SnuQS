@@ -402,6 +402,7 @@ class StateVectorSimulation(Simulation):
                                         DeviceType.CUDA,
                                         OffloadType.CPU
                                         )
+
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
             applying_local = len(targets) == 0 or min(

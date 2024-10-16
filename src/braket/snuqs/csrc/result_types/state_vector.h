@@ -5,9 +5,9 @@
 #include <memory>
 #include <vector>
 
+#include "buffer/buffer_cpu.h"
+#include "buffer/buffer_cuda.h"
 #include "device_type.h"
-#include "memory.h"
-#include "memory_cuda.h"
 #include "result_types/result_types.h"
 
 class StateVector : public ResultType {
@@ -44,9 +44,8 @@ class StateVector : public ResultType {
   size_t num_qubits_ = 0;
   size_t num_effective_qubits_ = 0;
   size_t slice_index_ = 0;
-  std::shared_ptr<Memory> ptr_ = nullptr;
-  std::shared_ptr<MemoryCUDA> ptr_cuda_ = nullptr;
-  std::vector<size_t> slice_perm_;
+  std::shared_ptr<BufferCPU> ptr_ = nullptr;
+  std::shared_ptr<BufferCUDA> ptr_cuda_ = nullptr;
   DeviceType device_ = DeviceType::UNKNOWN;
   bool initialized_ = false;
 };

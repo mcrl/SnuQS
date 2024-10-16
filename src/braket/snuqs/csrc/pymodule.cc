@@ -4,6 +4,11 @@
 
 #include <complex>
 
+#include "buffer/buffer.h"
+#include "buffer/buffer_cpu.h"
+#include "buffer/buffer_cuda.h"
+#include "buffer/buffer_pinned.h"
+#include "buffer/buffer_storage.h"
 #include "core/cuda/runtime.h"
 #include "core/runtime.h"
 #include "functionals/functionals.h"
@@ -159,4 +164,16 @@ PYBIND11_MODULE(_C, m) {
       .def("device_count", &cu::device_count)
       .def("get_device", &cu::get_device)
       .def("set_device", &cu::set_device);
+
+  // Buffer
+  py::class_<Buffer>(m, "Buffer")
+      .def("buffer", &Buffer::buffer)
+      .def("count", &Buffer::count)
+      .def("itemsize", &Buffer::itemsize)
+      .def("__repr__", &Buffer::formatted_string);
+  py::class_<BufferCPU, Buffer>(m, "BufferCPU").def(py::init<size_t>());
+  py::class_<BufferCUDA, Buffer>(m, "BufferCUDA").def(py::init<size_t>());
+  py::class_<BufferPinned, Buffer>(m, "BufferPinned").def(py::init<size_t>());
+  py::class_<BufferStorage, Buffer>(m, "BufferStorage")
+      .def(py::init<size_t, size_t, const std::vector<std::string> &>());
 }

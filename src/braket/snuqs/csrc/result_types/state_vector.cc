@@ -4,23 +4,14 @@
 #include <spdlog/spdlog.h>
 
 #include <cmath>
-#include <sstream>
 
 #include "utils_cuda.h"
 
 StateVector::StateVector(size_t num_qubits)
-    : num_qubits_(num_qubits), num_effective_qubits_(num_qubits) {
-  for (size_t i = 0; i < (num_qubits_ - num_effective_qubits_); ++i) {
-    slice_perm_[i] = i;
-  }
-}
+    : num_qubits_(num_qubits), num_effective_qubits_(num_qubits) {}
 
 StateVector::StateVector(size_t num_qubits, size_t num_effective_qubits)
-    : num_qubits_(num_qubits), num_effective_qubits_(num_effective_qubits) {
-  for (size_t i = 0; i < (num_qubits_ - num_effective_qubits_); ++i) {
-    slice_perm_[i] = i;
-  }
-}
+    : num_qubits_(num_qubits), num_effective_qubits_(num_effective_qubits) {}
 
 StateVector::~StateVector() {}
 
@@ -28,14 +19,14 @@ void *StateVector::data() { return ptr(); }
 
 void *StateVector::ptr() {
   if (ptr_ == nullptr) {
-    ptr_ = std::move(std::make_shared<Memory>(1ul << num_effective_qubits_));
+    ptr_ = std::move(std::make_shared<BufferCPU>(1ul << num_effective_qubits_));
   }
   return &ptr_->buffer()[slice_index_ * (1ul << num_effective_qubits_)];
 }
 
 void *StateVector::ptr_cuda() {
   if (ptr_cuda_ == nullptr) {
-    ptr_cuda_ = std::make_shared<MemoryCUDA>(1ul << num_effective_qubits_);
+    ptr_cuda_ = std::make_shared<BufferCUDA>(1ul << num_effective_qubits_);
   }
   return &ptr_cuda_->buffer()[slice_index_ * (1ul << num_effective_qubits_)];
 }
@@ -109,10 +100,6 @@ bool StateVector::allocated() const {
 void StateVector::cut(size_t num_effective_qubits) {
   assert(allocated());
   num_effective_qubits_ = num_effective_qubits;
-
-  for (size_t i = 0; i < (num_qubits_ - num_effective_qubits_); ++i) {
-    slice_perm_[i] = i;
-  }
 }
 
 void StateVector::glue() {
