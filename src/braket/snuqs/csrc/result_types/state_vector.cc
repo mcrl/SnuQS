@@ -62,10 +62,9 @@ std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
 }
 
 void StateVector::cut(size_t num_effective_qubits) {}
+void StateVector::glue() {}
 
-void StateVector::glue() { CUDA_CHECK(cudaDeviceSynchronize()); }
-
-void *StateVector::data() { return ptr(); }
+void *StateVector::data() { return buffer_->buffer(); }
 size_t StateVector::dim() const { return 1; }
 size_t StateVector::num_elems() const { return (1ul << num_qubits_); }
 std::vector<size_t> StateVector::shape() const { return {num_elems()}; }

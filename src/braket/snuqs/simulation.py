@@ -8,6 +8,7 @@ from braket.snuqs._C.operation import GateOperation
 from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_zero
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs._C.core import mem_info
+from braket.snuqs._C import DeviceType
 from braket.snuqs.types import AcceleratorType, OffloadType
 from braket.snuqs.transpile import transpile
 
@@ -80,7 +81,7 @@ class Simulation(ABC):
 
 class StateVectorSimulation(Simulation):
     def __init__(self, qubit_count: int, shots: int,
-                 AcceleratorType: AcceleratorType,
+                 accelerator: AcceleratorType,
                  offload: OffloadType,
                  path: Optional[List[str]] = None):
         r"""
@@ -100,7 +101,7 @@ class StateVectorSimulation(Simulation):
         print(
             f"max_qubit_count: {self._max_qubit_count}, max_qubit_count_cuda: {self._max_qubit_count_cuda}")
         self._initialize_memory_objects(
-            qubit_count, shots, AcceleratorType, offload, path)
+            qubit_count, shots, accelerator, offload, path)
 
     def _compute_max_qubit_count(self):
         free, _ = mem_info()
@@ -113,34 +114,34 @@ class StateVectorSimulation(Simulation):
             self.qubit_count, int(math.log(free / 16, 2)))
 
     def _initialize_memory_objects(self, qubit_count: int, shots: int,
-                                   AcceleratorType: AcceleratorType,
+                                   accelerator: AcceleratorType,
                                    offload: OffloadType,
                                    path: Optional[List[str]] = None):
         match offload:
             case OffloadType.NONE:
                 self._initialize_memory_objects_no_offload(
-                    qubit_count, shots, AcceleratorType)
+                    qubit_count, shots, accelerator)
             case OffloadType.CPU:
                 self._initialize_memory_objects_cpu_offload(
-                    qubit_count, shots, AcceleratorType)
+                    qubit_count, shots, accelerator)
             case OffloadType.STORAGE:
                 self._initialize_memory_objects_storage_offload(
-                    qubit_count, shots, AcceleratorType, path)
+                    qubit_count, shots, accelerator, path)
             case _:
                 raise NotImplementedError("Not Implemented")
 
     def _initialize_memory_objects_no_offload(self, qubit_count: int, shots: int,
-                                              AcceleratorType: AcceleratorType):
-        match AcceleratorType:
+                                              accelerator: AcceleratorType):
+        match accelerator:
             case AcceleratorType.CPU:
                 self._state_vector = StateVector(qubit_count)
-                self._state_vector.cpu()
                 initialize_basis_z(self._state_vector)
 
             case AcceleratorType.CUDA:
-                self._state_vector = StateVector(qubit_count)
-                self._state_vector.cuda()
+                print("HERE!")
+                self._state_vector = StateVector(DeviceType.CUDA, qubit_count)
                 initialize_basis_z(self._state_vector)
+                print("THERE!")
 
             case AcceleratorType.HYBRID:
                 self._state_vector_cuda = StateVector(
@@ -157,8 +158,8 @@ class StateVectorSimulation(Simulation):
                 raise NotImplementedError("Not Implemented")
 
     def _initialize_memory_objects_cpu_offload(self, qubit_count: int, shots: int,
-                                               AcceleratorType: AcceleratorType):
-        match AcceleratorType:
+                                               accelerator: AcceleratorType):
+        match accelerator:
             case AcceleratorType.CPU:
                 self._state_vector = StateVector(qubit_count)
                 self._state_vector.cpu()
@@ -190,8 +191,8 @@ class StateVectorSimulation(Simulation):
                 raise NotImplementedError("Not Implemented")
 
     def _initialize_memory_objects_storage_offload(self, qubit_count: int, shots: int,
-                                                   AcceleratorType: AcceleratorType, path: List[str]):
-        match AcceleratorType:
+                                                   accelerator: AcceleratorType, path: List[str]):
+        match accelerator:
             case AcceleratorType.CPU:
                 assert (qubit_count >= self._max_qubit_count)
                 self._state_vector = StateVector(
@@ -236,7 +237,7 @@ class StateVectorSimulation(Simulation):
         Note:
             Mutating this array will mutate the state of the simulation.
         """
-        return np.array(self._state_vector, copy=False)
+        return np.array(self._state_vector.cpu(), copy=False)
 
     @ property
     def probabilities(self) -> np.ndarray:
@@ -331,19 +332,19 @@ class StateVectorSimulation(Simulation):
     def _evolve_no_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
 
-        operations = transpile(operations,
-                               self._qubit_count,
-                               self._max_qubit_count,
-                               self._max_qubit_count_cuda,
-                               AcceleratorType.CPU,
-                               OffloadType.NONE
-                               )
-        state_vector.cuda()
+#        operations = transpile(operations,
+#                               self._qubit_count,
+#                               self._max_qubit_count,
+#                               self._max_qubit_count_cuda,
+#                               AcceleratorType.CUDA,
+#                               OffloadType.NONE
+#                               )
+        print("!!")
         for operation in operations:
+            print(operation)
             targets = operation.targets
             apply(state_vector, operation, self._qubit_count, targets)
-
-        state_vector.cpu()
+        print("##")
 
     def _evolve_no_offload_hybrid(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
