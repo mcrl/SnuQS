@@ -1,7 +1,6 @@
 from braket.snuqs._C.operation import GateOperation
 import numpy as np
-from braket.snuqs.device import DeviceType
-from braket.snuqs.offload import OffloadType
+from braket.snuqs.types import SimulationType, OffloadType
 from typing import Optional
 from braket.snuqs._C.operation.gate_operations import (
     Swap,
@@ -297,17 +296,17 @@ def transpile_no_offload(operations: list[GateOperation],
                          qubit_count: int,
                          max_qubit_count: int,
                          local_qubit_count: int,
-                         device: DeviceType):
-    match device:
-        case DeviceType.CPU:
+                         _type: SimulationType):
+    match _type:
+        case SimulationType.CPU:
             return transpile_no_offload_cpu(operations,
                                             qubit_count,
                                             local_qubit_count)
-        case DeviceType.CUDA:
+        case SimulationType.CUDA:
             return transpile_no_offload_cuda(operations,
                                              qubit_count,
                                              local_qubit_count)
-        case DeviceType.HYBRID:
+        case SimulationType.HYBRID:
             return transpile_no_offload_hybrid(operations,
                                                qubit_count,
                                                local_qubit_count)
@@ -318,17 +317,17 @@ def transpile_cpu_offload(operations: list[GateOperation],
                           qubit_count: int,
                           max_qubit_count: int,
                           local_qubit_count: int,
-                          device: DeviceType):
-    match device:
-        case DeviceType.CPU:
+                          _type: SimulationType):
+    match _type:
+        case SimulationType.CPU:
             return transpile_cpu_offload_cpu(operations,
                                              qubit_count,
                                              local_qubit_count)
-        case DeviceType.CUDA:
+        case SimulationType.CUDA:
             return transpile_cpu_offload_cuda(operations,
                                               qubit_count,
                                               local_qubit_count)
-        case DeviceType.HYBRID:
+        case SimulationType.HYBRID:
             return transpile_cpu_offload_hybrid(operations,
                                                 qubit_count,
                                                 local_qubit_count)
@@ -430,20 +429,20 @@ def transpile_storage_offload(operations: list[GateOperation],
                               qubit_count: int,
                               max_qubit_count: int,
                               local_qubit_count: int,
-                              device: DeviceType,
+                              _type: SimulationType,
                               path: Optional[list[str]] = None):
-    match device:
-        case DeviceType.CPU:
+    match _type:
+        case SimulationType.CPU:
             return transpile_storage_offload_cpu(operations,
                                                  qubit_count,
                                                  max_qubit_count,
                                                  local_qubit_count)
-        case DeviceType.CUDA:
+        case SimulationType.CUDA:
             return transpile_storage_offload_cuda(operations,
                                                   qubit_count,
                                                   max_qubit_count,
                                                   local_qubit_count)
-        case DeviceType.HYBRID:
+        case SimulationType.HYBRID:
             return transpile_storage_offload_hybrid(operations,
                                                     qubit_count,
                                                     max_qubit_count,
@@ -455,7 +454,7 @@ def transpile(operations: list[GateOperation],
               qubit_count: int,
               max_qubit_count: int,
               local_qubit_count: int,
-              device: DeviceType,
+              _type: SimulationType,
               offload: OffloadType,
               path: Optional[list[str]] = None):
     match offload:
@@ -464,19 +463,19 @@ def transpile(operations: list[GateOperation],
                                         qubit_count,
                                         max_qubit_count,
                                         local_qubit_count,
-                                        device)
+                                        _type)
         case OffloadType.CPU:
             return transpile_cpu_offload(operations,
                                          qubit_count,
                                          max_qubit_count,
                                          local_qubit_count,
-                                         device)
+                                         _type)
         case OffloadType.STORAGE:
             return transpile_storage_offload(operations,
                                              qubit_count,
                                              max_qubit_count,
                                              local_qubit_count,
-                                             device,
+                                             _type,
                                              path)
         case _:
             raise NotImplementedError("Not Implemented")

@@ -5,49 +5,39 @@
 #include <memory>
 #include <vector>
 
-#include "buffer/buffer_cpu.h"
-#include "buffer/buffer_cuda.h"
-#include "device_type.h"
+#include "buffer/buffer.h"
+#include "device_types.h"
 #include "result_types/result_types.h"
 
-class StateVector : public ResultType {
+class StateVector {
  public:
   StateVector(size_t num_qubits);
-  StateVector(size_t num_qubits, size_t num_effective_qubits);
+  StateVector(DeviceType device, size_t num_qubits);
+  StateVector(DeviceType device, size_t num_qubits,
+              std::shared_ptr<Buffer> buffer);
   virtual ~StateVector();
-  virtual void *data() override;
-  virtual size_t dim() const override;
-  virtual std::vector<size_t> shape() const override;
 
   void *ptr();
-  void *ptr_cuda();
-
-  void cpu();
-  void cuda();
-  void copy(StateVector &from);
-  void upload();
-  void download();
-  bool allocated() const;
-  size_t num_elems() const;
-  size_t num_qubits() const;
-  size_t num_effective_qubits() const;
-  DeviceType device() const;
-  std::string formatted_string() const;
-  void set_initialized();
-  bool initialized() const;
-
+  std::shared_ptr<StateVector> cpu();
+  std::shared_ptr<StateVector> cuda();
+  std::shared_ptr<StateVector> slice(size_t num_sliced_qubits, size_t index);
+  void set_offset(size_t count);
   void cut(size_t num_effective_qubits);
   void glue();
-  void slice(size_t idx);
+
+  DeviceType device() const;
+  size_t num_qubits() const;
+  std::shared_ptr<Buffer> buffer() const;
+  void *data();
+  size_t dim() const;
+  std::vector<size_t> shape() const;
+  size_t num_elems() const;
+  std::string formatted_string() const;
 
  private:
-  size_t num_qubits_ = 0;
-  size_t num_effective_qubits_ = 0;
-  size_t slice_index_ = 0;
-  std::shared_ptr<BufferCPU> ptr_ = nullptr;
-  std::shared_ptr<BufferCUDA> ptr_cuda_ = nullptr;
   DeviceType device_ = DeviceType::UNKNOWN;
-  bool initialized_ = false;
+  size_t num_qubits_ = 0;
+  std::shared_ptr<Buffer> buffer_ = nullptr;
 };
 
 #endif  //_STATE_VECTOR_H_

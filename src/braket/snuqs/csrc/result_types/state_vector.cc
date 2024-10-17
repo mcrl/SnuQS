@@ -4,131 +4,79 @@
 #include <spdlog/spdlog.h>
 
 #include <cmath>
+#include <complex>
 
+#include "buffer/buffer_cpu.h"
+#include "buffer/buffer_cuda.h"
+#include "buffer/buffer_storage.h"
 #include "utils_cuda.h"
 
 StateVector::StateVector(size_t num_qubits)
-    : num_qubits_(num_qubits), num_effective_qubits_(num_qubits) {}
+    : device_(DeviceType::CPU),
+      num_qubits_(num_qubits),
+      buffer_(std::make_shared<BufferCPU>(sizeof(std::complex<double>) *
+                                          (1ul << num_qubits))) {}
 
-StateVector::StateVector(size_t num_qubits, size_t num_effective_qubits)
-    : num_qubits_(num_qubits), num_effective_qubits_(num_effective_qubits) {}
+StateVector::StateVector(DeviceType device, size_t num_qubits)
+    : device_(device), num_qubits_(num_qubits) {
+  switch (device) {
+    case DeviceType::CPU:
+      buffer_ = std::make_shared<BufferCPU>(sizeof(std::complex<double>) *
+                                            (1ul << num_qubits));
+      break;
+    case DeviceType::CUDA:
+      buffer_ = std::make_shared<BufferCUDA>(sizeof(std::complex<double>) *
+                                             (1ul << num_qubits));
+      break;
+    case DeviceType::STORAGE:
+      buffer_ = std::make_shared<BufferStorage>(sizeof(std::complex<double>) *
+                                                (1ul << num_qubits));
+      break;
+    default:
+      assert(false);
+  }
+}
+
+StateVector::StateVector(DeviceType device, size_t num_qubits,
+                         std::shared_ptr<Buffer> buffer)
+    : device_(device), num_qubits_(num_qubits), buffer_(buffer) {}
 
 StateVector::~StateVector() {}
 
+void *StateVector::ptr() { return buffer_->buffer(); }
+
+std::shared_ptr<StateVector> StateVector::cpu() {
+  return std::make_shared<StateVector>(DeviceType::CPU, num_qubits_,
+                                       buffer_->cpu());
+}
+
+std::shared_ptr<StateVector> StateVector::cuda() {
+  return std::make_shared<StateVector>(DeviceType::CUDA, num_qubits_,
+                                       buffer_->cuda());
+}
+
+std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
+                                                size_t index) {
+  auto sv = std::make_shared<StateVector>(device_, num_sliced_qubits, buffer_);
+  return sv;
+}
+
+void StateVector::cut(size_t num_effective_qubits) {}
+
+void StateVector::glue() { CUDA_CHECK(cudaDeviceSynchronize()); }
+
 void *StateVector::data() { return ptr(); }
-
-void *StateVector::ptr() {
-  if (ptr_ == nullptr) {
-    ptr_ = std::move(std::make_shared<BufferCPU>(1ul << num_effective_qubits_));
-  }
-  return &ptr_->buffer()[slice_index_ * (1ul << num_effective_qubits_)];
-}
-
-void *StateVector::ptr_cuda() {
-  if (ptr_cuda_ == nullptr) {
-    ptr_cuda_ = std::make_shared<BufferCUDA>(1ul << num_effective_qubits_);
-  }
-  return &ptr_cuda_->buffer()[slice_index_ * (1ul << num_effective_qubits_)];
-}
-
-void StateVector::cpu() {
-  if (device_ == DeviceType::CUDA) {
-    assert(ptr_cuda_ != nullptr);
-    CUDA_CHECK(cudaMemcpy(ptr(), ptr_cuda(), num_elems() * ptr_->itemsize(),
-                          cudaMemcpyDeviceToHost));
-  } else {
-    ptr();
-  }
-  device_ = DeviceType::CPU;
-}
-
-void StateVector::cuda() {
-  if (device_ == DeviceType::CPU) {
-    assert(ptr_ != nullptr);
-    CUDA_CHECK(cudaMemcpy(ptr_cuda(), ptr(), num_elems() * ptr_->itemsize(),
-                          cudaMemcpyHostToDevice));
-  } else {
-    ptr_cuda();
-  }
-  device_ = DeviceType::CUDA;
-}
-
-void StateVector::copy(StateVector &from) {
-  assert(allocated());
-  assert(from.allocated());
-
-  auto from_device = from.device();
-  if (device_ == DeviceType::CPU && from_device == DeviceType::CPU) {
-    memcpy(ptr(), from.ptr(), num_elems() * ptr_->itemsize());
-  } else if (device_ == DeviceType::CPU && from_device == DeviceType::CUDA) {
-    CUDA_CHECK(cudaMemcpy(ptr(), from.ptr_cuda(),
-                          num_elems() * ptr_->itemsize(),
-                          cudaMemcpyDeviceToHost));
-  } else if (device_ == DeviceType::CUDA && from_device == DeviceType::CPU) {
-    CUDA_CHECK(cudaMemcpy(ptr_cuda(), from.ptr(),
-                          num_elems() * ptr_->itemsize(),
-                          cudaMemcpyHostToDevice));
-  } else if (device_ == DeviceType::CUDA && from_device == DeviceType::CUDA) {
-    CUDA_CHECK(cudaMemcpy(ptr_cuda(), from.ptr_cuda(),
-                          num_elems() * ptr_->itemsize(),
-                          cudaMemcpyDeviceToDevice));
-  } else {
-    assert(false);
-  }
-}
-
-void StateVector::upload() {
-  size_t num_elems = slice_index_ * (1ul << num_effective_qubits_);
-}
-
-void StateVector::download() {
-  size_t num_elems = slice_index_ * (1ul << num_effective_qubits_);
-}
-
-bool StateVector::allocated() const {
-  switch (device_) {
-    case DeviceType::UNKNOWN:
-      return false;
-    case DeviceType::CPU:
-      return (ptr_ != nullptr);
-    case DeviceType::CUDA:
-      return (ptr_cuda_ != nullptr);
-  }
-  return false;
-}
-
-void StateVector::cut(size_t num_effective_qubits) {
-  assert(allocated());
-  num_effective_qubits_ = num_effective_qubits;
-}
-
-void StateVector::glue() {
-  CUDA_CHECK(cudaDeviceSynchronize());
-  num_effective_qubits_ = num_qubits_;
-  slice_index_ = 0;
-}
-
-void StateVector::slice(size_t idx) {
-  assert(idx >= 0 && idx < (num_qubits_ - num_effective_qubits_));
-  slice_index_ = idx;
-}
-
-void StateVector::set_initialized() { initialized_ = true; }
-bool StateVector::initialized() const { return initialized_; }
-DeviceType StateVector::device() const { return device_; }
 size_t StateVector::dim() const { return 1; }
-size_t StateVector::num_elems() const { return (1ul << num_effective_qubits_); }
-size_t StateVector::num_qubits() const { return num_qubits_; }
-size_t StateVector::num_effective_qubits() const {
-  return num_effective_qubits_;
-}
+size_t StateVector::num_elems() const { return (1ul << num_qubits_); }
 std::vector<size_t> StateVector::shape() const { return {num_elems()}; }
+DeviceType StateVector::device() const { return device_; }
+size_t StateVector::num_qubits() const { return num_qubits_; }
+std::shared_ptr<Buffer> StateVector::buffer() const { return buffer_; }
+
 std::string StateVector::formatted_string() const {
   std::stringstream ss;
 
-  ss << "StateVector:\n"
-     << "\tnum_qubits: " << num_qubits() << "\n"
-     << "\tnum_effective_qubits: " << num_effective_qubits() << "\n"
-     << "\tdevice: " << static_cast<int>(device());
+  ss << "StateVector<" << num_qubits_
+     << " qubits, device: " << device_to_string(device_) << ">";
   return ss.str();
 }

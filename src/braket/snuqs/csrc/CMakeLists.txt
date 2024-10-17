@@ -21,11 +21,12 @@ add_library(
   operation/gate_operations_impl_cuda.cu
   operation/initialization_impl_cpu.cc
   operation/initialization_impl_cuda.cu
+  buffer/pbuffer.cc
   buffer/buffer_cpu.cc
   buffer/buffer_pinned.cc
   buffer/buffer_cuda.cc
   buffer/buffer_storage.cc
-  buffer/hier_buffer.cc
+  fs/fs.cc
   result_types/state_vector.cc)
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")

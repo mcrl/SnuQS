@@ -8,13 +8,14 @@ class BufferCPU : public Buffer {
   BufferCPU(size_t count);
   ~BufferCPU();
 
-  virtual std::complex<double>* buffer() override;
+  virtual void* buffer() override;
   virtual size_t count() const override;
-  virtual size_t itemsize() const override;
   virtual std::string formatted_string() const override;
+  virtual std::shared_ptr<Buffer> cpu() override;
+  virtual std::shared_ptr<Buffer> cuda() override;
 
  private:
   size_t count_;
-  std::complex<double>* buffer_ = nullptr;
+  void* buffer_ = nullptr;
 };
 #endif  //_BUFFER_CPU_H_
