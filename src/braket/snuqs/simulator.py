@@ -21,7 +21,7 @@ from braket.snuqs.simulation import Simulation, StateVectorSimulation
 from braket.snuqs.openqasm.circuit import Circuit as OpenQASMCircuit
 from braket.snuqs.openqasm.interpreter import Interpreter
 from braket.snuqs.openqasm.program_context import AbstractProgramContext, ProgramContext
-from braket.snuqs.types import SimulationType, OffloadType
+from braket.snuqs.types import AcceleratorType, OffloadType
 from braket.ir.jaqcd import Program as JaqcdProgram
 from braket.ir.jaqcd.shared_models import MultiTarget, OptionalMultiTarget
 from braket.ir.jaqcd.program_v1 import Results
@@ -35,19 +35,19 @@ from braket.snuqs.result_types import (
 
 class BaseSimulator(ABC):
     @staticmethod
-    def _validate_simulation_type(_type: str):
+    def _validate_simulation_type(accelerator: str):
         supported_devices = {
-            'cpu': SimulationType.CPU,
-            'cuda': SimulationType.CUDA,
-            'hybrid': SimulationType.HYBRID,
+            'cpu': AcceleratorType.CPU,
+            'cuda': AcceleratorType.CUDA,
+            'hybrid': AcceleratorType.HYBRID,
         }
-        if _type is None:
-            return SimulationType.CPU
+        if accelerator is None:
+            return AcceleratorType.CPU
 
-        if _type not in supported_devices:
-            raise TypeError(f"Device {_type} is not supported")
+        if accelerator not in supported_devices:
+            raise TypeError(f"Device {accelerator} is not supported")
 
-        return supported_devices[_type]
+        return supported_devices[accelerator]
 
     @staticmethod
     def _validate_offload_type(offload: Optional[str], path: Optional[List[str]]):
@@ -322,10 +322,10 @@ class BaseSimulator(ABC):
                      qubit_count: Any = None,
                      shots: int = 0,
                      *,
-                     _type: Optional[str] = None,
+                     accelerator: Optional[str] = None,
                      offload: Optional[str] = None,
                      path: Optional[List[str]] = None) -> GateModelTaskResult:
-        _type = BaseSimulator._validate_simulation_type(_type)
+        accelerator = BaseSimulator._validate_simulation_type(accelerator)
         offload = BaseSimulator._validate_offload_type(offload, path)
 
         circuit = self.parse_program(ir).circuit
@@ -341,12 +341,12 @@ class BaseSimulator(ABC):
         simulation = self.initialize_simulation(
             qubit_count=qubit_count,
             shots=shots,
-            _type=_type,
+            accelerator=accelerator,
             offload=offload,
             path=path)
 
         simulation.evolve(operations,
-                          _type=_type,
+                          accelerator=accelerator,
                           offload=offload,
                           path=path)
 
@@ -360,7 +360,7 @@ class BaseSimulator(ABC):
             )
         else:
             simulation.evolve(
-                circuit.basis_rotation_instructions, _type=_type,
+                circuit.basis_rotation_instructions, accelerator=accelerator,
                 offload=offload,
                 path=path)
 
@@ -372,10 +372,10 @@ class BaseSimulator(ABC):
                   qubit_count: Any = None,
                   shots: int = 0,
                   *,
-                  _type: Optional[str] = None,
+                  accelerator: Optional[str] = None,
                   offload: Optional[str] = None,
                   path: Optional[List[str]] = None) -> GateModelTaskResult:
-        _type = BaseSimulator._validate_simulation_type(_type)
+        accelerator = BaseSimulator._validate_simulation_type(accelerator)
         offload = BaseSimulator._validate_offload_type(offload, path)
 
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(ir)
@@ -390,7 +390,7 @@ class BaseSimulator(ABC):
 
         simulation = self.initialize_simulation(
             qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations, _type=_type,
+        simulation.evolve(operations, accelerator=accelerator,
                           offload=offload,
                           path=path)
 
@@ -594,14 +594,14 @@ class StateVectorSimulator(BaseSimulator):
     def initialize_simulation(self,
                               qubit_count: Optional[int] = None,
                               shots: Optional[int] = None,
-                              _type: Optional[str] = None,
+                              accelerator: Optional[str] = None,
                               offload: Optional[str] = None,
                               path: Optional[List[str]] = None) -> StateVectorSimulation:
         """Initializes simulation with keyword arguments"""
-        if _type is None:
-            _type = SimulationType.CPU
+        if accelerator is None:
+            accelerator = AcceleratorType.CPU
         if offload is None:
             offload = OffloadType.NONE
         return StateVectorSimulation(qubit_count, shots,
-                                     _type, offload, path=path
+                                     accelerator, offload, path=path
                                      )

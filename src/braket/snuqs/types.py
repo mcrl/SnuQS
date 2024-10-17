@@ -1,6 +1,6 @@
 from enum import Enum
 
-class SimulationType(Enum):
+class AcceleratorType(Enum):
     CPU = 0
     CUDA = 1
     HYBRID = 2
