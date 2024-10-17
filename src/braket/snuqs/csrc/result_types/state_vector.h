@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "buffer/buffer.h"
+#include "buffer/pbuffer.h"
 #include "device_types.h"
 #include "result_types/result_types.h"
 
@@ -14,7 +14,7 @@ class StateVector {
   StateVector(size_t num_qubits);
   StateVector(DeviceType device, size_t num_qubits);
   StateVector(DeviceType device, size_t num_qubits,
-              std::shared_ptr<Buffer> buffer);
+              std::shared_ptr<PBuffer> buffer);
   virtual ~StateVector();
 
   void *ptr();
@@ -27,7 +27,7 @@ class StateVector {
 
   DeviceType device() const;
   size_t num_qubits() const;
-  std::shared_ptr<Buffer> buffer() const;
+  std::shared_ptr<PBuffer> buffer() const;
   void *data();
   size_t dim() const;
   std::vector<size_t> shape() const;
@@ -37,7 +37,7 @@ class StateVector {
  private:
   DeviceType device_ = DeviceType::UNKNOWN;
   size_t num_qubits_ = 0;
-  std::shared_ptr<Buffer> buffer_ = nullptr;
+  std::shared_ptr<PBuffer> buffer_ = nullptr;
 };
 
 #endif  //_STATE_VECTOR_H_

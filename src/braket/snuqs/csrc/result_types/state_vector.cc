@@ -6,39 +6,20 @@
 #include <cmath>
 #include <complex>
 
-#include "buffer/buffer_cpu.h"
-#include "buffer/buffer_cuda.h"
-#include "buffer/buffer_storage.h"
-#include "utils_cuda.h"
-
 StateVector::StateVector(size_t num_qubits)
     : device_(DeviceType::CPU),
       num_qubits_(num_qubits),
-      buffer_(std::make_shared<BufferCPU>(sizeof(std::complex<double>) *
-                                          (1ul << num_qubits))) {}
+      buffer_(std::make_shared<PBuffer>(sizeof(std::complex<double>) *
+                                        (1ul << num_qubits))) {}
 
 StateVector::StateVector(DeviceType device, size_t num_qubits)
-    : device_(device), num_qubits_(num_qubits) {
-  switch (device) {
-    case DeviceType::CPU:
-      buffer_ = std::make_shared<BufferCPU>(sizeof(std::complex<double>) *
-                                            (1ul << num_qubits));
-      break;
-    case DeviceType::CUDA:
-      buffer_ = std::make_shared<BufferCUDA>(sizeof(std::complex<double>) *
-                                             (1ul << num_qubits));
-      break;
-    case DeviceType::STORAGE:
-      buffer_ = std::make_shared<BufferStorage>(sizeof(std::complex<double>) *
-                                                (1ul << num_qubits));
-      break;
-    default:
-      assert(false);
-  }
-}
+    : device_(device),
+      num_qubits_(num_qubits),
+      buffer_(std::make_shared<PBuffer>(
+          device, sizeof(std::complex<double>) * (1ul << num_qubits))) {}
 
 StateVector::StateVector(DeviceType device, size_t num_qubits,
-                         std::shared_ptr<Buffer> buffer)
+                         std::shared_ptr<PBuffer> buffer)
     : device_(device), num_qubits_(num_qubits), buffer_(buffer) {}
 
 StateVector::~StateVector() {}
@@ -70,7 +51,7 @@ size_t StateVector::num_elems() const { return (1ul << num_qubits_); }
 std::vector<size_t> StateVector::shape() const { return {num_elems()}; }
 DeviceType StateVector::device() const { return device_; }
 size_t StateVector::num_qubits() const { return num_qubits_; }
-std::shared_ptr<Buffer> StateVector::buffer() const { return buffer_; }
+std::shared_ptr<PBuffer> StateVector::buffer() const { return buffer_; }
 
 std::string StateVector::formatted_string() const {
   std::stringstream ss;
