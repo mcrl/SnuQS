@@ -81,7 +81,7 @@ PYBIND11_MODULE(_C, m) {
 
   // GateOperation
   py::class_<GateOperation, Operation>(m_operation, "GateOperation")
-      .def(py::init<const std::string &, const std::vector<size_t> &,
+      .def(py::init<GateOperationType, const std::vector<size_t> &,
                     const std::vector<double> &, const std::vector<size_t> &,
                     size_t>())
       .def("sliceable", &GateOperation::sliceable)
@@ -179,15 +179,16 @@ PYBIND11_MODULE(_C, m) {
       .def("free", &FS::free)
       .def("dump", &FS::dump);
 
-//  // Buffer
-//  auto m_buffer = m.def_submodule("buffer");
-//  py::class_<Buffer>(m_buffer, "Buffer")
-//      .def("ptr", &Buffer::ptr)
-//      .def("count", &Buffer::count)
-//      .def("__repr__", &Buffer::formatted_string);
-//  py::class_<BufferCPU, Buffer>(m_buffer, "BufferCPU").def(py::init<size_t>());
-//  py::class_<BufferCUDA, Buffer>(m_buffer, "BufferCUDA")
-//      .def(py::init<size_t>());
-//  py::class_<BufferStorage, Buffer>(m_buffer, "BufferStorage")
-//      .def(py::init<size_t>());
+  //  // Buffer
+  //  auto m_buffer = m.def_submodule("buffer");
+  //  py::class_<Buffer>(m_buffer, "Buffer")
+  //      .def("ptr", &Buffer::ptr)
+  //      .def("count", &Buffer::count)
+  //      .def("__repr__", &Buffer::formatted_string);
+  //  py::class_<BufferCPU, Buffer>(m_buffer,
+  //  "BufferCPU").def(py::init<size_t>()); py::class_<BufferCUDA,
+  //  Buffer>(m_buffer, "BufferCUDA")
+  //      .def(py::init<size_t>());
+  //  py::class_<BufferStorage, Buffer>(m_buffer, "BufferStorage")
+  //      .def(py::init<size_t>());
 }

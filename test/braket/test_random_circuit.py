@@ -9,8 +9,6 @@ from braket.circuits.instruction import Instruction
 MIN_QUBIT = 35
 MAX_QUBIT = 35
 MAX_GATE = 1
-NUM_ITER = 1000
-
 
 class RandomInstruction:
     def __init__(self, nqubits):
@@ -115,9 +113,7 @@ def repeat(times):
 
 
 class BraketTest(unittest.TestCase):
-    def random_circuit(self):
-        nqubits = np.random.randint(MIN_QUBIT, MAX_QUBIT+1)
-        ngates = np.random.randint(1, MAX_GATE+1)
+    def random_circuit(self, nqubits, ngates):
         circ = Circuit([Instruction(Gate.H(), [q]) for q in range(nqubits)])
         for _ in range(ngates):
             circ.add_instruction(RandomInstruction(nqubits).get())
@@ -128,51 +124,62 @@ class BraketTest(unittest.TestCase):
         task = sim.run(circ)
         return task
 
-    def run_snuqs(self, circ):
-        option = {
-            'accelerator': 'cpu',
-            'offload': 'storage',
-            'path': ['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1', '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
-            'count': 2**38,
-            'block_count': 2**34,
-        }
+    def run_snuqs(self, circ, **option):
         sim = LocalSimulator(backend="snuqs")
         task = sim.run(circ, **option)
         return task
 
-    def run_snuqs2(self, circ):
-        option = {
-            'accelerator': 'cpu',
-            # 'offload': 'cpu',
-            # 'path': ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1', ],
-        }
-        sim = LocalSimulator(backend="snuqs")
-        task = sim.run(circ, **option)
-        return task
+    def run_benchmark(self, nqubits, ngates, **option):
+        circ = self.random_circuit(nqubits, ngates)
+        circ.state_vector()
 
-    def test_braket_snuqs(self):
-        for i in range(NUM_ITER):
-            circ = self.random_circuit()
-            circ.state_vector()
+        print("\tRunning braket")
+        task_braket = self.run_braket(circ)
+        result_braket = task_braket.result().values
+        print("\t\t=> Done")
 
-            print(f"Running random circuit test #{i}... ")
+        print("\tRunning snuqs")
+        task_snuqs = self.run_snuqs(circ, **option)
+        result_snuqs = task_snuqs.result().values
+        print("\t\t=> Done")
 
-            print("\tRunning braket")
-            task_braket = self.run_snuqs(circ)
-            result_braket = task_braket.result().values
-            print("\t\t=> Done")
+        self.assertTrue(np.allclose(
+            result_braket,
+            result_snuqs,
+        ))
 
-            print("\tRunning snuqs")
-            task_snuqs = self.run_snuqs2(circ)
-            result_snuqs = task_snuqs.result().values
-            print("\t\t=> Done")
+    def test_braket_snuqs_cpu(self):
+        print("Testing Braket-SnuQS CPU")
+        self.run_benchmark(15, 500, accelerator='cpu')
 
-            print(result_braket)
-            print(result_snuqs)
-            self.assertTrue(np.allclose(
-                result_braket,
-                result_snuqs,
-            ))
+    def test_braket_snuqs_cuda(self):
+        print("Testing Braket-SnuQS CUDA")
+        self.run_benchmark(15, 500, accelerator='cuda')
+
+    def test_braket_snuqs_hybrid(self):
+        print("Testing Braket-SnuQS Hybrid")
+        self.run_benchmark(31, 20, accelerator='hybrid')
+
+    def test_braket_snuqs_cpu_offload_cpu(self):
+        print("Testing Braket-SnuQS CPU-Offload CPU")
+        self.run_benchmark(31, 20, accelerator='cpu', offload='cpu')
+
+    def test_braket_snuqs_cpu_offload_cuda(self):
+        print("Testing Braket-SnuQS CPU-Offload CUDA")
+        self.run_benchmark(31, 20, accelerator='cuda', offload='cpu')
+
+    def test_braket_snuqs_cpu_offload_hybrid(self):
+        print("Testing Braket-SnuQS CPU-Offload Hybrid")
+        self.run_benchmark(31, 20, accelerator='hybrid', offload='cpu')
+
+    def test_braket_snuqs_storage_offload_cpu(self):
+        print("Testing Braket-SnuQS Stroage-Offload Hybrid")
+        self.run_benchmark(35, 5, accelerator='cpu', offload='cpu',
+                           path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
+                                 '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
+                           count=2**38,
+                           block_count=2**34
+                           )
 
 
 if __name__ == '__main__':

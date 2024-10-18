@@ -18,40 +18,74 @@ void Operation::set_targets(const std::vector<size_t> &targets) {
 
 static std::string gate_operation_type_to_string(GateOperationType type) {
   switch (type) {
-    case GateOperationType::Identity: return "Identity";
-    case GateOperationType::Hadamard: return "Hadamard";
-    case GateOperationType::PauliX: return "PauliX";
-    case GateOperationType::PauliY: return "PauliY";
-    case GateOperationType::PauliZ: return "PauliZ";
-    case GateOperationType::CX: return "CX";
-    case GateOperationType::CY: return "CY";
-    case GateOperationType::CZ: return "CZ";
-    case GateOperationType::S: return "S";
-    case GateOperationType::Si: return "Si";
-    case GateOperationType::T: return "T";
-    case GateOperationType::Ti: return "Ti";
-    case GateOperationType::V: return "V";
-    case GateOperationType::Vi: return "Vi";
-    case GateOperationType::PhaseShift: return "PhaseShift";
-    case GateOperationType::CPhaseShift: return "CPhaseShift";
-    case GateOperationType::CPhaseShift00: return "CPhaseShift00";
-    case GateOperationType::CPhaseShift01: return "CPhaseShift01";
-    case GateOperationType::CPhaseShift10: return "CPhaseShift10";
-    case GateOperationType::RotX: return "RotX";
-    case GateOperationType::RotY: return "RotY";
-    case GateOperationType::RotZ: return "RotZ";
-    case GateOperationType::Swap: return "Swap";
-    case GateOperationType::ISwap: return "ISwap";
-    case GateOperationType::PSwap: return "PSwap";
-    case GateOperationType::XY: return "XY";
-    case GateOperationType::XX: return "XX";
-    case GateOperationType::YY: return "YY";
-    case GateOperationType::ZZ: return "ZZ";
-    case GateOperationType::CCNot: return "CCNot";
-    case GateOperationType::CSwap: return "CSwap";
-    case GateOperationType::U: return "U";
-    case GateOperationType::GPhase: return "GPhase";
-    case GateOperationType::SwapA2A: return "SwapA2A";
+    case GateOperationType::Identity:
+      return "Identity";
+    case GateOperationType::Hadamard:
+      return "Hadamard";
+    case GateOperationType::PauliX:
+      return "PauliX";
+    case GateOperationType::PauliY:
+      return "PauliY";
+    case GateOperationType::PauliZ:
+      return "PauliZ";
+    case GateOperationType::CX:
+      return "CX";
+    case GateOperationType::CY:
+      return "CY";
+    case GateOperationType::CZ:
+      return "CZ";
+    case GateOperationType::S:
+      return "S";
+    case GateOperationType::Si:
+      return "Si";
+    case GateOperationType::T:
+      return "T";
+    case GateOperationType::Ti:
+      return "Ti";
+    case GateOperationType::V:
+      return "V";
+    case GateOperationType::Vi:
+      return "Vi";
+    case GateOperationType::PhaseShift:
+      return "PhaseShift";
+    case GateOperationType::CPhaseShift:
+      return "CPhaseShift";
+    case GateOperationType::CPhaseShift00:
+      return "CPhaseShift00";
+    case GateOperationType::CPhaseShift01:
+      return "CPhaseShift01";
+    case GateOperationType::CPhaseShift10:
+      return "CPhaseShift10";
+    case GateOperationType::RotX:
+      return "RotX";
+    case GateOperationType::RotY:
+      return "RotY";
+    case GateOperationType::RotZ:
+      return "RotZ";
+    case GateOperationType::Swap:
+      return "Swap";
+    case GateOperationType::ISwap:
+      return "ISwap";
+    case GateOperationType::PSwap:
+      return "PSwap";
+    case GateOperationType::XY:
+      return "XY";
+    case GateOperationType::XX:
+      return "XX";
+    case GateOperationType::YY:
+      return "YY";
+    case GateOperationType::ZZ:
+      return "ZZ";
+    case GateOperationType::CCNot:
+      return "CCNot";
+    case GateOperationType::CSwap:
+      return "CSwap";
+    case GateOperationType::U:
+      return "U";
+    case GateOperationType::GPhase:
+      return "GPhase";
+    case GateOperationType::SwapA2A:
+      return "SwapA2A";
   }
 }
 
@@ -134,13 +168,18 @@ bool GateOperation::anti_diagonal() const {
   return true;
 }
 bool GateOperation::sliceable() const { return diagonal(); }
-
 std::string GateOperation::name() const {
+  return gate_operation_type_to_string(type_);
+}
+
+std::string GateOperation::formatted_string() const {
+  std::stringstream ss;
+  ss << "<";
   if (angles_.size() == 0) {
-    return gate_operation_type_to_string(type_);
+    return name();
   } else {
     std::stringstream ss;
-    ss << gate_operation_type_to_string(type_) << "(";
+    ss << name() << "(";
     for (size_t i = 0; i < angles_.size(); ++i) {
       ss << angles_[i];
       if (i < angles_.size() - 1) ss << ", ";
@@ -148,11 +187,6 @@ std::string GateOperation::name() const {
     ss << ")";
     return ss.str();
   }
-}
-std::string GateOperation::formatted_string() const {
-  std::stringstream ss;
-  ss << "<";
-  ss << name() << ": ";
   ss << "targets: {";
   for (auto t : targets_) {
     ss << t << ", ";
@@ -161,12 +195,3 @@ std::string GateOperation::formatted_string() const {
   ss << ">";
   return ss.str();
 }
-
-// GateOperationSliced
-GateOperationSliced::GateOperationSliced(
-    const std::string &name, const std::vector<size_t> &targets,
-    const std::vector<double> &angles,
-    const std::vector<size_t> &ctrl_modifiers, size_t power)
-    : GateOperation(name, targets, angles, ctrl_modifiers, power) {}
-bool GateOperationSliced::sliceable() const { return false; }
-GateOperationSliced::~GateOperationSliced() {}

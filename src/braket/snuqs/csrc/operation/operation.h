@@ -85,14 +85,5 @@ class GateOperation : public Operation {
   bool copied_to_cuda = false;
 };
 
-class GateOperationSliced : public GateOperation {
- public:
-  GateOperationSliced(const std::string &name,
-                      const std::vector<size_t> &targets,
-                      const std::vector<double> &angles,
-                      const std::vector<size_t> &ctrl_modifiers, size_t power);
-  virtual ~GateOperationSliced();
-  virtual bool sliceable() const override;
-};
 
 #endif  //_OPERATION_H_
