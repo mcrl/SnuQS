@@ -16,6 +16,7 @@ class PBuffer : public std::enable_shared_from_this<PBuffer> {
   DeviceType device() const;
   size_t count() const;
   void* ptr();
+  std::shared_ptr<Buffer> buffer();
   size_t offset() const;
 
   std::shared_ptr<PBuffer> slice(size_t count, size_t offset);

@@ -1,6 +1,7 @@
 #include "fs.h"
 
 #include <fcntl.h>
+#include <limits.h>
 #include <spdlog/spdlog.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -138,4 +139,52 @@ void FS::dump() const {
     spdlog::info("addr {}: {}-{}", i, addr.start, addr.end);
     ++i;
   }
+}
+
+void FS::read(fs_addr_t addr, void* buf, size_t count) {
+  size_t nbytes = count;
+  size_t nbytes_read = 0;
+
+  char* buffer = reinterpret_cast<char*>(buf);
+  while (nbytes_read < nbytes) {
+    auto off_info = get_offset(nbytes_read);
+    int fd = off_info.first;
+    size_t offset = off_info.second;
+    size_t bytes_to_read =
+        std::min((size_t)SSIZE_MAX,
+                 std::min((size_t)(blk_count_ - (offset % blk_count_)),
+                          (size_t)(nbytes - nbytes_read)));
+    ssize_t ret = pread(fd, buf, bytes_to_read, offset);
+    assert(ret != -1);
+    nbytes_read += ret;
+    buffer += ret;
+  }
+}
+
+void FS::write(fs_addr_t addr, void* buf, size_t count) {
+  size_t nbytes = count;
+  size_t nbytes_written = 0;
+
+  char* buffer = reinterpret_cast<char*>(buf);
+  while (nbytes_written < nbytes) {
+    auto off_info = get_offset(nbytes_written);
+    int fd = off_info.first;
+    size_t offset = off_info.second;
+    size_t bytes_to_write =
+        std::min((size_t)SSIZE_MAX,
+                 std::min((size_t)(blk_count_ - (offset % blk_count_)),
+                          (size_t)(nbytes - nbytes_written)));
+    ssize_t ret = pwrite(fd, buf, bytes_to_write, offset);
+    assert(ret != -1);
+    nbytes_written += ret;
+    buffer += ret;
+  }
+}
+
+std::pair<int, size_t> FS::get_offset(size_t pos) const {
+  size_t num_devices = fds_.size();
+  size_t row_size = blk_count_ * num_devices;
+  size_t device = (pos / blk_count_) % num_devices;
+  size_t offset = (pos / row_size) * blk_count_;
+  return {device, offset};
 }

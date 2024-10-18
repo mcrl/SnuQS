@@ -17,7 +17,10 @@ class FS {
   ~FS();
   fs_addr_t alloc(size_t count);
   void free(fs_addr_t addr);
+  void read(fs_addr_t addr, void* buf, size_t count);
+  void write(fs_addr_t addr, void* buf, size_t count);
   void dump() const;
+  std::pair<int, size_t> get_offset(size_t pos) const;
 
  private:
   size_t count_;
