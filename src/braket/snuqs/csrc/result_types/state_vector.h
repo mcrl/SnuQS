@@ -34,7 +34,7 @@ class StateVector : public std::enable_shared_from_this<StateVector> {
   std::string formatted_string() const;
 
  private:
-  DeviceType device_ = DeviceType::UNKNOWN;
+  DeviceType device_;
   size_t num_qubits_ = 0;
   std::shared_ptr<PBuffer> buffer_ = nullptr;
 };

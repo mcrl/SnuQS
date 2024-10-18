@@ -408,7 +408,12 @@ def transpile_storage_offload_cpu(operations: list[GateOperation],
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
 
+    for subcircuit in subcircuits:
+        for op in subcircuit:
+            pass
+
     print(subcircuits)
+
     slice_count = 2**(qubit_count - max_qubit_count)
     return [[subcircuit] * slice_count for subcircuit in subcircuits]
 

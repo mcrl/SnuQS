@@ -39,7 +39,7 @@ class HierBuffer {
   size_t l1_blk_count_ = 0;
   size_t l2_count_ = 0;
 
-  DeviceType device_ = DeviceType::UNKNOWN;
+  DeviceType device_;
   std::shared_ptr<Buffer> ptr_ = nullptr;
   std::shared_ptr<Buffer> ptr_cuda_ = nullptr;
   std::shared_ptr<Buffer> ptr_storage_ = nullptr;

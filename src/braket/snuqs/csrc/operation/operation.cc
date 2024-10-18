@@ -16,17 +16,56 @@ void Operation::set_targets(const std::vector<size_t> &targets) {
   targets_ = targets;
 }
 
+static std::string gate_operation_type_to_string(GateOperationType type) {
+  switch (type) {
+    case GateOperationType::Identity: return "Identity";
+    case GateOperationType::Hadamard: return "Hadamard";
+    case GateOperationType::PauliX: return "PauliX";
+    case GateOperationType::PauliY: return "PauliY";
+    case GateOperationType::PauliZ: return "PauliZ";
+    case GateOperationType::CX: return "CX";
+    case GateOperationType::CY: return "CY";
+    case GateOperationType::CZ: return "CZ";
+    case GateOperationType::S: return "S";
+    case GateOperationType::Si: return "Si";
+    case GateOperationType::T: return "T";
+    case GateOperationType::Ti: return "Ti";
+    case GateOperationType::V: return "V";
+    case GateOperationType::Vi: return "Vi";
+    case GateOperationType::PhaseShift: return "PhaseShift";
+    case GateOperationType::CPhaseShift: return "CPhaseShift";
+    case GateOperationType::CPhaseShift00: return "CPhaseShift00";
+    case GateOperationType::CPhaseShift01: return "CPhaseShift01";
+    case GateOperationType::CPhaseShift10: return "CPhaseShift10";
+    case GateOperationType::RotX: return "RotX";
+    case GateOperationType::RotY: return "RotY";
+    case GateOperationType::RotZ: return "RotZ";
+    case GateOperationType::Swap: return "Swap";
+    case GateOperationType::ISwap: return "ISwap";
+    case GateOperationType::PSwap: return "PSwap";
+    case GateOperationType::XY: return "XY";
+    case GateOperationType::XX: return "XX";
+    case GateOperationType::YY: return "YY";
+    case GateOperationType::ZZ: return "ZZ";
+    case GateOperationType::CCNot: return "CCNot";
+    case GateOperationType::CSwap: return "CSwap";
+    case GateOperationType::U: return "U";
+    case GateOperationType::GPhase: return "GPhase";
+    case GateOperationType::SwapA2A: return "SwapA2A";
+  }
+}
+
 // GateOperation
-GateOperation::GateOperation(const std::string &name,
+GateOperation::GateOperation(GateOperationType type,
                              const std::vector<size_t> &targets,
                              const std::vector<double> &angles,
                              const std::vector<size_t> &ctrl_modifiers,
                              size_t power)
     : Operation(targets),
+      type_(type),
       angles_(angles),
       ctrl_modifiers_(ctrl_modifiers),
-      power_(power),
-      name_(name) {
+      power_(power) {
   size_t ncols = (1ul << targets_.size());
   ptr_ = new std::complex<double>[ncols * ncols];
   CUDA_CHECK(
@@ -66,7 +105,7 @@ std::vector<size_t> GateOperation::stride() const {
 }
 
 std::shared_ptr<GateOperation> GateOperation::slice(size_t idx) const {
-  auto g = std::make_shared<GateOperation>(name_, targets_, angles_,
+  auto g = std::make_shared<GateOperation>(type_, targets_, angles_,
                                            ctrl_modifiers_, power_);
   return g;
 }
@@ -98,10 +137,10 @@ bool GateOperation::sliceable() const { return diagonal(); }
 
 std::string GateOperation::name() const {
   if (angles_.size() == 0) {
-    return name_;
+    return gate_operation_type_to_string(type_);
   } else {
     std::stringstream ss;
-    ss << name_ << "(";
+    ss << gate_operation_type_to_string(type_) << "(";
     for (size_t i = 0; i < angles_.size(); ++i) {
       ss << angles_[i];
       if (i < angles_.size() - 1) ss << ", ";

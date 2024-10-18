@@ -132,7 +132,7 @@ class StateVectorSimulation(Simulation):
                 self._initialize_memory_objects_storage_offload(
                     qubit_count, shots, accelerator)
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     def _initialize_memory_objects_no_offload(self, qubit_count: int, shots: int,
                                               accelerator: AcceleratorType):
@@ -154,7 +154,7 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(state_vector_slice)
 
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     def _initialize_memory_objects_cpu_offload(self, qubit_count: int, shots: int,
                                                accelerator: AcceleratorType):
@@ -182,7 +182,7 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(state_vector_slice)
 
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     def _initialize_memory_objects_storage_offload(self, qubit_count: int, shots: int,
                                                    accelerator: AcceleratorType):
@@ -217,7 +217,7 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(state_vector_slice)
 
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     @property
     def state_vector(self) -> np.ndarray:
@@ -258,7 +258,7 @@ class StateVectorSimulation(Simulation):
             case OffloadType.STORAGE:
                 self._evolve_storage_offload(operations, accelerator)
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     def _evolve_no_offload(self,
                            operations: list[GateOperation],
@@ -271,7 +271,7 @@ class StateVectorSimulation(Simulation):
             case AcceleratorType.HYBRID:
                 self._evolve_no_offload_hybrid(operations)
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     def _evolve_cpu_offload(self,
                             operations: list[GateOperation],
@@ -284,7 +284,7 @@ class StateVectorSimulation(Simulation):
             case AcceleratorType.HYBRID:
                 self._evolve_cpu_offload_hybrid(operations)
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     def _evolve_storage_offload(self,
                                 operations: list[GateOperation],
@@ -297,7 +297,7 @@ class StateVectorSimulation(Simulation):
             case AcceleratorType.HYBRID:
                 self._evolve_storage_offload_hybrid(operations)
             case _:
-                raise NotImplementedError("Not Implemented")
+                raise TypeError(f"Unknown type {offload}")
 
     #
     # No offload
@@ -450,12 +450,11 @@ class StateVectorSimulation(Simulation):
                     state_vector_slice.copy(state_vector_cpu)
             else:
                 subcircuit = subcircuit_slices[0]
+                assert all(max(op.targets) < slice_qubit_count for op in subcircuit)
                 for operation in subcircuit:
                     targets = operation.targets
                     print("Trying to apply", operation)
-                    # apply(state_vector, operation, self._qubit_count, targets)
-
-        raise NotImplementedError("Not Implemented")
+                    apply(state_vector, operation, self._qubit_count, targets)
 
     def _evolve_storage_offload_cuda(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector

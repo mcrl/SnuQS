@@ -6,7 +6,8 @@ using namespace std::complex_literals;
 
 Identity::Identity(std::vector<size_t> targets,
                    std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("Identity", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::Identity, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
@@ -16,7 +17,8 @@ Identity::~Identity() {}
 
 Hadamard::Hadamard(std::vector<size_t> targets,
                    std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("Hadamard", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::Hadamard, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 2 + 0] = M_SQRT1_2;
   ptr_[0 * 2 + 1] = M_SQRT1_2;
   ptr_[1 * 2 + 0] = M_SQRT1_2;
@@ -26,7 +28,8 @@ Hadamard::~Hadamard() {}
 
 PauliX::PauliX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
-    : GateOperation("PauliX", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::PauliX, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 2 + 0] = 0;
   ptr_[0 * 2 + 1] = 1;
   ptr_[1 * 2 + 0] = 1;
@@ -36,7 +39,8 @@ PauliX::~PauliX() {}
 
 PauliY::PauliY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
-    : GateOperation("PauliY", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::PauliY, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 2 + 0] = 0;
   ptr_[0 * 2 + 1] = -1i;
   ptr_[1 * 2 + 0] = 1i;
@@ -46,7 +50,8 @@ PauliY::~PauliY() {}
 
 PauliZ::PauliZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
                size_t power)
-    : GateOperation("PauliZ", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::PauliZ, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
@@ -56,7 +61,7 @@ PauliZ::~PauliZ() {}
 
 CX::CX(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation("CX", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::CX, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -78,7 +83,7 @@ CX::~CX() {}
 
 CY::CY(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation("CY", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::CY, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -100,7 +105,7 @@ CY::~CY() {}
 
 CZ::CZ(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation("CZ", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::CZ, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -122,7 +127,7 @@ CZ::~CZ() {}
 
 S::S(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
-    : GateOperation("S", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::S, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
@@ -132,7 +137,7 @@ S::~S() {}
 
 Si::Si(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation("Si", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::Si, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
@@ -142,7 +147,7 @@ Si::~Si() {}
 
 T::T(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
-    : GateOperation("T", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::T, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
@@ -152,7 +157,7 @@ T::~T() {}
 
 Ti::Ti(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation("Ti", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::Ti, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
   ptr_[1 * 2 + 0] = 0;
@@ -162,7 +167,7 @@ Ti::~Ti() {}
 
 V::V(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
      size_t power)
-    : GateOperation("V", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::V, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 0.5 + 0.5i;
   ptr_[0 * 2 + 1] = 0.5 - 0.5i;
   ptr_[1 * 2 + 0] = 0.5 - 0.5i;
@@ -172,7 +177,7 @@ V::~V() {}
 
 Vi::Vi(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
        size_t power)
-    : GateOperation("Vi", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::Vi, targets, {}, ctrl_modifiers, power) {
   ptr_[0 * 2 + 0] = 0.5 - 0.5i;
   ptr_[0 * 2 + 1] = 0.5 + 0.5i;
   ptr_[1 * 2 + 0] = 0.5 + 0.5i;
@@ -182,7 +187,8 @@ Vi::~Vi() {}
 
 PhaseShift::PhaseShift(std::vector<size_t> targets, double angle,
                        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("PhaseShift", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::PhaseShift, targets, {angle},
+                    ctrl_modifiers, power),
       angle_(angle) {
   ptr_[0 * 2 + 0] = 1;
   ptr_[0 * 2 + 1] = 0;
@@ -193,7 +199,8 @@ PhaseShift::~PhaseShift() {}
 
 CPhaseShift::CPhaseShift(std::vector<size_t> targets, double angle,
                          std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("CPhaseShift", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::CPhaseShift, targets, {angle},
+                    ctrl_modifiers, power),
       angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
@@ -216,7 +223,8 @@ CPhaseShift::~CPhaseShift() {}
 
 CPhaseShift00::CPhaseShift00(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("CPhaseShift00", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::CPhaseShift00, targets, {angle},
+                    ctrl_modifiers, power),
       angle_(angle) {
   ptr_[0 * 4 + 0] = std::exp(1i * angle);
   ptr_[0 * 4 + 1] = 0;
@@ -239,7 +247,8 @@ CPhaseShift00::~CPhaseShift00() {}
 
 CPhaseShift01::CPhaseShift01(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("CPhaseShift01", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::CPhaseShift01, targets, {angle},
+                    ctrl_modifiers, power),
       angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
@@ -262,7 +271,8 @@ CPhaseShift01::~CPhaseShift01() {}
 
 CPhaseShift10::CPhaseShift10(std::vector<size_t> targets, double angle,
                              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("CPhaseShift10", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::CPhaseShift10, targets, {angle},
+                    ctrl_modifiers, power),
       angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
@@ -285,7 +295,8 @@ CPhaseShift10::~CPhaseShift10() {}
 
 RotX::RotX(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("RotX", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::RotX, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   double cos_half_angle = cos(angle_ / 2);
   std::complex<double> i_sin_hanlf_angle = 1i * sin(angle_ / 2);
@@ -298,7 +309,8 @@ RotX::~RotX() {}
 
 RotY::RotY(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("RotY", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::RotY, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   double cos_half_angle = cos(angle_ / 2);
   std::complex<double> sin_hanlf_angle = sin(angle_ / 2);
@@ -311,7 +323,8 @@ RotY::~RotY() {}
 
 RotZ::RotZ(std::vector<size_t> targets, double angle,
            std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("RotZ", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::RotZ, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   std::complex<double> positive_phase = std::exp(1i * angle_ / 2.);
   std::complex<double> negative_phase = std::exp(-1i * angle_ / 2.);
@@ -324,7 +337,8 @@ RotZ::~RotZ() {}
 
 Swap::Swap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
            size_t power)
-    : GateOperation("Swap", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::Swap, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -346,7 +360,8 @@ Swap::~Swap() {}
 
 ISwap::ISwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
-    : GateOperation("ISwap", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::ISwap, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;
@@ -368,7 +383,8 @@ ISwap::~ISwap() {}
 
 PSwap::PSwap(std::vector<size_t> targets, double angle,
              std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("PSwap", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::PSwap, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
@@ -391,7 +407,8 @@ PSwap::~PSwap() {}
 
 XY::XY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("XY", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::XY, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
@@ -416,7 +433,8 @@ XY::~XY() {}
 
 XX::XX(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("XX", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::XX, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
@@ -441,7 +459,8 @@ XX::~XX() {}
 
 YY::YY(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("YY", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::YY, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   double cos_angle = cos(angle / 2);
   std::complex<double> i_sin_angle = 1i * sin(angle / 2);
@@ -466,7 +485,8 @@ YY::~YY() {}
 
 ZZ::ZZ(std::vector<size_t> targets, double angle,
        std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("ZZ", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::ZZ, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   std::complex<double> positive_phase = std::exp(1i * angle_ / 2.);
   std::complex<double> negative_phase = std::exp(-1i * angle_ / 2.);
@@ -491,7 +511,8 @@ ZZ::~ZZ() {}
 
 CCNot::CCNot(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
-    : GateOperation("CCNot", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::CCNot, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 8 + 0] = 1;
   ptr_[0 * 8 + 1] = 0;
   ptr_[0 * 8 + 2] = 0;
@@ -561,7 +582,8 @@ CCNot::~CCNot() {}
 
 CSwap::CSwap(std::vector<size_t> targets, std::vector<size_t> ctrl_modifiers,
              size_t power)
-    : GateOperation("CSwap", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::CSwap, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 8 + 0] = 1;
   ptr_[0 * 8 + 1] = 0;
   ptr_[0 * 8 + 2] = 0;
@@ -631,7 +653,8 @@ CSwap::~CSwap() {}
 
 U::U(std::vector<size_t> targets, double theta, double phi, double lambda,
      std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("U", targets, {theta, phi, lambda}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::U, targets, {theta, phi, lambda},
+                    ctrl_modifiers, power),
       theta_(theta),
       phi_(phi),
       lambda_(lambda) {
@@ -644,7 +667,8 @@ U::~U() {}
 
 GPhase::GPhase(std::vector<size_t> targets, double angle,
                std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("GPhase", targets, {angle}, ctrl_modifiers, power),
+    : GateOperation(GateOperationType::GPhase, targets, {angle}, ctrl_modifiers,
+                    power),
       angle_(angle) {
   ptr_[0] = std::exp(1i * angle);
 }
@@ -652,7 +676,8 @@ GPhase::~GPhase() {}
 
 SwapA2A::SwapA2A(std::vector<size_t> targets,
                  std::vector<size_t> ctrl_modifiers, size_t power)
-    : GateOperation("SwapA2A", targets, {}, ctrl_modifiers, power) {
+    : GateOperation(GateOperationType::SwapA2A, targets, {}, ctrl_modifiers,
+                    power) {
   ptr_[0 * 4 + 0] = 1;
   ptr_[0 * 4 + 1] = 0;
   ptr_[0 * 4 + 2] = 0;

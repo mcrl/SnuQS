@@ -164,7 +164,6 @@ PYBIND11_MODULE(_C, m) {
 
   // Device
   py::enum_<DeviceType>(m, "DeviceType")
-      .value("UNKNOWN", DeviceType::UNKNOWN)
       .value("CPU", DeviceType::CPU)
       .value("CUDA", DeviceType::CUDA)
       .value("STORAGE", DeviceType::STORAGE)

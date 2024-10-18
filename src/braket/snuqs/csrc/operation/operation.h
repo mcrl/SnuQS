@@ -15,9 +15,46 @@ class Operation {
   std::vector<size_t> targets_;
 };
 
+enum class GateOperationType {
+  Identity,
+  Hadamard,
+  PauliX,
+  PauliY,
+  PauliZ,
+  CX,
+  CY,
+  CZ,
+  S,
+  Si,
+  T,
+  Ti,
+  V,
+  Vi,
+  PhaseShift,
+  CPhaseShift,
+  CPhaseShift00,
+  CPhaseShift01,
+  CPhaseShift10,
+  RotX,
+  RotY,
+  RotZ,
+  Swap,
+  ISwap,
+  PSwap,
+  XY,
+  XX,
+  YY,
+  ZZ,
+  CCNot,
+  CSwap,
+  U,
+  GPhase,
+  SwapA2A,
+};
+
 class GateOperation : public Operation {
  public:
-  GateOperation(const std::string &name, const std::vector<size_t> &targets,
+  GateOperation(GateOperationType type, const std::vector<size_t> &targets,
                 const std::vector<double> &angles,
                 const std::vector<size_t> &ctrl_modifiers, size_t power);
   virtual ~GateOperation();
@@ -42,7 +79,7 @@ class GateOperation : public Operation {
   virtual std::shared_ptr<GateOperation> slice(size_t idx) const;
 
   std::vector<double> angles_;
-  std::string name_ = "Unknown";
+  GateOperationType type_;
   std::complex<double> *ptr_ = nullptr;
   std::complex<double> *ptr_cuda_ = nullptr;
   bool copied_to_cuda = false;
