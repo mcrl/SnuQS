@@ -435,7 +435,7 @@ class StateVectorSimulation(Simulation):
             if applying_local:
                 for i, subcircuit in enumerate(subcircuit_slices):
                     state_vector_slice = state_vector.slice(
-                        self._max_qubit_cuda, i)
+                        self._max_qubit_count, i)
                     if s != 0 or i == 0:
                         state_vector_cpu.copy(state_vector_slice)
                     else:
