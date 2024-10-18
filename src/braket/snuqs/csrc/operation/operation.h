@@ -85,5 +85,4 @@ class GateOperation : public Operation {
   bool copied_to_cuda = false;
 };
 
-
 #endif  //_OPERATION_H_

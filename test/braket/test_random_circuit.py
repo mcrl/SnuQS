@@ -148,31 +148,31 @@ class BraketTest(unittest.TestCase):
             result_snuqs,
         ))
 
-    def test_braket_snuqs_cpu(self):
+    def test_1_braket_snuqs_cpu(self):
         print("Testing Braket-SnuQS CPU")
-        self.run_benchmark(15, 500, accelerator='cpu')
+        self.run_benchmark(15, 1000, accelerator='cpu')
 
-    def test_braket_snuqs_cuda(self):
+    def test_2_braket_snuqs_cuda(self):
         print("Testing Braket-SnuQS CUDA")
-        self.run_benchmark(15, 500, accelerator='cuda')
+        self.run_benchmark(15, 1000, accelerator='cuda')
 
-    def test_braket_snuqs_hybrid(self):
+    def test_3_braket_snuqs_hybrid(self):
         print("Testing Braket-SnuQS Hybrid")
-        self.run_benchmark(31, 20, accelerator='hybrid')
+        self.run_benchmark(31, 100, accelerator='hybrid')
 
-    def test_braket_snuqs_cpu_offload_cpu(self):
+    def test_4_braket_snuqs_cpu_offload_cpu(self):
         print("Testing Braket-SnuQS CPU-Offload CPU")
-        self.run_benchmark(31, 20, accelerator='cpu', offload='cpu')
+        self.run_benchmark(31, 100, accelerator='cpu', offload='cpu')
 
-    def test_braket_snuqs_cpu_offload_cuda(self):
+    def test_5_braket_snuqs_cpu_offload_cuda(self):
         print("Testing Braket-SnuQS CPU-Offload CUDA")
-        self.run_benchmark(31, 20, accelerator='cuda', offload='cpu')
+        self.run_benchmark(31, 100, accelerator='cuda', offload='cpu')
 
-    def test_braket_snuqs_cpu_offload_hybrid(self):
+    def test_6_braket_snuqs_cpu_offload_hybrid(self):
         print("Testing Braket-SnuQS CPU-Offload Hybrid")
-        self.run_benchmark(31, 20, accelerator='hybrid', offload='cpu')
+        self.run_benchmark(31, 100, accelerator='hybrid', offload='cpu')
 
-    def test_braket_snuqs_storage_offload_cpu(self):
+    def test_7_braket_snuqs_storage_offload_cpu(self):
         print("Testing Braket-SnuQS Stroage-Offload Hybrid")
         self.run_benchmark(35, 5, accelerator='cpu', offload='cpu',
                            path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
