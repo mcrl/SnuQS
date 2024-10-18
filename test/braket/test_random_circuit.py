@@ -132,7 +132,7 @@ class BraketTest(unittest.TestCase):
         option = {
             'accelerator': 'cpu',
             'offload': 'storage',
-            'path': ['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1', '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1']
+            'path': ['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1', '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
             'count': 2**38,
             'block_count': 2**34,
         }
