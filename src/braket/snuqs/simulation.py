@@ -195,17 +195,23 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(self._state_vector_cpu)
 
             case AcceleratorType.CUDA:
-                self._state_vector = StateVector(DeviceType.STORAGE, qubit_count)
-                self._state_vector_cpu = StateVector(self._max_qubit_count_cuda)
-                self._state_vector_cuda = StateVector(DeviceType.CUDA, self._max_qubit_count_cuda)
+                self._state_vector = StateVector(
+                    DeviceType.STORAGE, qubit_count)
+                self._state_vector_cpu = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, self._max_qubit_count_cuda)
                 state_vector_slice = self._state_vector_cpu.slice(
                     self._max_qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case AcceleratorType.HYBRID:
-                self._state_vector = StateVector(DeviceType.STORAGE, qubit_count)
-                self._state_vector_cpu = StateVector(self._max_qubit_count_cuda)
-                self._state_vector_cuda = StateVector(DeviceType.CUDA, self._max_qubit_count_cuda)
+                self._state_vector = StateVector(
+                    DeviceType.STORAGE, qubit_count)
+                self._state_vector_cpu = StateVector(
+                    self._max_qubit_count_cuda)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, self._max_qubit_count_cuda)
                 state_vector_slice = self._state_vector_cpu.slice(
                     self._max_qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
@@ -412,6 +418,7 @@ class StateVectorSimulation(Simulation):
     #
     def _evolve_storage_offload_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
         slice_qubit_count = self._qubit_count - self._max_qubit_count
         list_of_subcircuits = transpile(operations,
                                         self._qubit_count,
@@ -426,28 +433,28 @@ class StateVectorSimulation(Simulation):
             applying_local = len(targets) == 0 or min(
                 targets) >= slice_qubit_count
             if applying_local:
-                state_vector.cut(self._max_qubit_count_cuda)
                 for i, subcircuit in enumerate(subcircuit_slices):
-                    state_vector.slice(i)
+                    state_vector_slice = state_vector.slice(
+                        self._max_qubit_cuda, i)
                     if s != 0 or i == 0:
-                        state_vector.upload()
+                        state_vector_cpu.copy(state_vector_slice)
                     else:
-                        initialize_zero(state_vector)
+                        initialize_zero(state_vector_cpu)
                     for operation in subcircuit:
                         targets = operation.targets
                         print(operation)
                         assert len(targets) == 0 or (
                             min(targets) >= slice_qubit_count)
-                        apply(state_vector, operation,
+                        apply(state_vector_cpu, operation,
                               self._qubit_count, targets)
-                    state_vector.download()
-                state_vector.glue()
+                    state_vector_slice.copy(state_vector_cpu)
             else:
                 subcircuit = subcircuit_slices[0]
                 for operation in subcircuit:
                     targets = operation.targets
                     print("Trying to apply", operation)
                     # apply(state_vector, operation, self._qubit_count, targets)
+
         raise NotImplementedError("Not Implemented")
 
     def _evolve_storage_offload_cuda(self, operations: list[GateOperation]) -> None:
