@@ -8,7 +8,7 @@
 PBuffer::PBuffer(size_t count)
     : device_(DeviceType::CPU),
       count_(count),
-      buffer_(std::make_shared<BufferCPU>(count, pinned)),
+      buffer_(std::make_shared<BufferCPU>(count)),
       offset_(0) {}
 
 PBuffer::PBuffer(size_t count, bool pinned)
