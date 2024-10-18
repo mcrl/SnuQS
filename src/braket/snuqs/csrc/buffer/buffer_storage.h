@@ -25,6 +25,5 @@ class BufferStorage : public Buffer {
   size_t count_;
   std::shared_ptr<FS> fs_;
   fs_addr_t fs_addr_;
-  void* ptr_ = nullptr;
 };
 #endif  //_BUFFER_STORAGE_H_

@@ -7,6 +7,7 @@ class BufferCPU : public Buffer {
  public:
   BufferCPU(size_t count);
   BufferCPU(size_t count, bool pinned);
+  BufferCPU(size_t count, void *ptr);
   ~BufferCPU();
 
   virtual void* ptr() override;

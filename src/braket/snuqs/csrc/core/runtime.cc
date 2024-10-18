@@ -18,11 +18,16 @@ static std::shared_ptr<FS> fs_ = nullptr;
 void attach_fs(size_t count, size_t blk_count,
                const std::vector<std::string> &path) {
   assert(fs_ == nullptr);
+  spdlog::info("Attaching FS, count: {}, blk_count: {}", count, blk_count);
+  for (auto &p : path) {
+    spdlog::info("\t{}", p);
+  }
   fs_ = std::make_shared<FS>(count, blk_count, path);
 }
 bool is_attached_fs() { return fs_ != nullptr; }
 void detach_fs() {
   assert(fs_ != nullptr);
+  spdlog::info("Detaching FS");
   fs_ = nullptr;
 }
 std::shared_ptr<FS> get_fs() { return fs_; }

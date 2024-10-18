@@ -7,7 +7,7 @@ from braket.snuqs._C.result_types import StateVector
 from braket.snuqs._C.operation import GateOperation
 from braket.snuqs._C.functionals import apply, initialize_basis_z, initialize_zero
 from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
-from braket.snuqs._C.core import mem_info
+from braket.snuqs._C.core import mem_info, attach_fs
 from braket.snuqs._C import DeviceType
 from braket.snuqs.types import AcceleratorType, OffloadType
 from braket.snuqs.transpile import transpile
@@ -83,7 +83,10 @@ class StateVectorSimulation(Simulation):
     def __init__(self, qubit_count: int, shots: int,
                  accelerator: AcceleratorType,
                  offload: OffloadType,
-                 path: Optional[List[str]] = None):
+                 path: Optional[List[str]] = None,
+                 count: Optional[int] = None,
+                 block_count: Optional[int] = None,
+                 ):
         r"""
         Args:
             qubit_count (int): The number of qubits being simulated.
@@ -98,10 +101,12 @@ class StateVectorSimulation(Simulation):
         self._max_qubit_count = self._compute_max_qubit_count()
         self._max_qubit_count_cuda = self._compute_max_qubit_count_cuda()
 
-        print(
-            f"max_qubit_count: {self._max_qubit_count}, max_qubit_count_cuda: {self._max_qubit_count_cuda}")
+        if offload == OffloadType.STORAGE:
+            attach_fs(count, block_count, path)
+
+        # print(f"max_qubit_count: {self._max_qubit_count}, max_qubit_count_cuda: {self._max_qubit_count_cuda}")
         self._initialize_memory_objects(
-            qubit_count, shots, accelerator, offload, path)
+            qubit_count, shots, accelerator, offload)
 
     def _compute_max_qubit_count(self):
         free, _ = mem_info()
@@ -115,8 +120,7 @@ class StateVectorSimulation(Simulation):
 
     def _initialize_memory_objects(self, qubit_count: int, shots: int,
                                    accelerator: AcceleratorType,
-                                   offload: OffloadType,
-                                   path: Optional[List[str]] = None):
+                                   offload: OffloadType):
         match offload:
             case OffloadType.NONE:
                 self._initialize_memory_objects_no_offload(
@@ -126,7 +130,7 @@ class StateVectorSimulation(Simulation):
                     qubit_count, shots, accelerator)
             case OffloadType.STORAGE:
                 self._initialize_memory_objects_storage_offload(
-                    qubit_count, shots, accelerator, path)
+                    qubit_count, shots, accelerator)
             case _:
                 raise NotImplementedError("Not Implemented")
 
@@ -181,7 +185,7 @@ class StateVectorSimulation(Simulation):
                 raise NotImplementedError("Not Implemented")
 
     def _initialize_memory_objects_storage_offload(self, qubit_count: int, shots: int,
-                                                   accelerator: AcceleratorType, path: List[str]):
+                                                   accelerator: AcceleratorType):
         match accelerator:
             case AcceleratorType.CPU:
                 assert (qubit_count >= self._max_qubit_count)
@@ -191,23 +195,17 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(self._state_vector_cpu)
 
             case AcceleratorType.CUDA:
-                self._state_vector = StateVector(
-                    DeviceType.STORAGE, qubit_count)
-                self._state_vector_cpu = StateVector(
-                    self._max_qubit_count_cuda)
-                self._state_vector_cuda = StateVector(
-                    self._max_qubit_count_cuda)
+                self._state_vector = StateVector(DeviceType.STORAGE, qubit_count)
+                self._state_vector_cpu = StateVector(self._max_qubit_count_cuda)
+                self._state_vector_cuda = StateVector(DeviceType.CUDA, self._max_qubit_count_cuda)
                 state_vector_slice = self._state_vector_cpu.slice(
                     self._max_qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case AcceleratorType.HYBRID:
-                self._state_vector = StateVector(
-                    DeviceType.STORAGE, qubit_count)
-                self._state_vector_cpu = StateVector(
-                    self._max_qubit_count_cpu)
-                self._state_vector_cuda = StateVector(
-                    self._max_qubit_count_cuda)
+                self._state_vector = StateVector(DeviceType.STORAGE, qubit_count)
+                self._state_vector_cpu = StateVector(self._max_qubit_count_cuda)
+                self._state_vector_cuda = StateVector(DeviceType.CUDA, self._max_qubit_count_cuda)
                 state_vector_slice = self._state_vector_cpu.slice(
                     self._max_qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
@@ -240,8 +238,7 @@ class StateVectorSimulation(Simulation):
                operations: list[GateOperation],
                *,
                accelerator: Optional[AcceleratorType] = None,
-               offload: Optional[OffloadType] = None,
-               path: Optional[List[str]] = None) -> None:
+               offload: Optional[OffloadType] = None) -> None:
         if accelerator is None:
             accelerator = AcceleratorType.CPU
         if offload is None:
@@ -253,7 +250,7 @@ class StateVectorSimulation(Simulation):
             case OffloadType.CPU:
                 self._evolve_cpu_offload(operations, accelerator)
             case OffloadType.STORAGE:
-                self._evolve_storage_offload(operations, accelerator, path)
+                self._evolve_storage_offload(operations, accelerator)
             case _:
                 raise NotImplementedError("Not Implemented")
 
@@ -285,15 +282,14 @@ class StateVectorSimulation(Simulation):
 
     def _evolve_storage_offload(self,
                                 operations: list[GateOperation],
-                                accelerator: AcceleratorType,
-                                path: List[str]) -> None:
+                                accelerator: AcceleratorType) -> None:
         match accelerator:
             case AcceleratorType.CPU:
-                self._evolve_storage_offload_cpu(operations, path)
+                self._evolve_storage_offload_cpu(operations)
             case AcceleratorType.CUDA:
-                self._evolve_storage_offload_cuda(operations, path)
+                self._evolve_storage_offload_cuda(operations)
             case AcceleratorType.HYBRID:
-                self._evolve_storage_offload_hybrid(operations, path)
+                self._evolve_storage_offload_hybrid(operations)
             case _:
                 raise NotImplementedError("Not Implemented")
 
@@ -414,8 +410,7 @@ class StateVectorSimulation(Simulation):
     #
     # Storage offload
     #
-    def _evolve_storage_offload_cpu(self, operations: list[GateOperation],
-                                    path: List[str] = None) -> None:
+    def _evolve_storage_offload_cpu(self, operations: list[GateOperation]) -> None:
         state_vector = self._state_vector
         slice_qubit_count = self._qubit_count - self._max_qubit_count
         list_of_subcircuits = transpile(operations,
@@ -425,6 +420,7 @@ class StateVectorSimulation(Simulation):
                                         AcceleratorType.CPU,
                                         OffloadType.STORAGE
                                         )
+
         for s, subcircuit_slices in enumerate(list_of_subcircuits):
             targets = subcircuit_slices[0][0].targets
             applying_local = len(targets) == 0 or min(
@@ -454,12 +450,8 @@ class StateVectorSimulation(Simulation):
                     # apply(state_vector, operation, self._qubit_count, targets)
         raise NotImplementedError("Not Implemented")
 
-    def _evolve_storage_offload_cuda(self,
-                                     operations: list[GateOperation],
-                                     path: List[str] = None) -> None:
+    def _evolve_storage_offload_cuda(self, operations: list[GateOperation]) -> None:
         raise NotImplementedError("Not Implemented")
 
-    def _evolve_storage_offload_hybrid(self,
-                                       operations: list[GateOperation],
-                                       path: List[str] = None) -> None:
+    def _evolve_storage_offload_hybrid(self, operations: list[GateOperation]) -> None:
         raise NotImplementedError("Not Implemented")

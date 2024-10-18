@@ -50,7 +50,11 @@ class BaseSimulator(ABC):
         return supported_devices[accelerator]
 
     @staticmethod
-    def _validate_offload_type(offload: Optional[str], path: Optional[List[str]]):
+    def _validate_offload_type(offload: Optional[str],
+                               path: Optional[List[str]],
+                               count: Optional[int],
+                               block_count: Optional[int],
+                               ):
         supported_offloads = {
             'none': OffloadType.NONE,
             'cpu': OffloadType.CPU,
@@ -61,7 +65,17 @@ class BaseSimulator(ABC):
 
         if offload not in supported_offloads:
             raise TypeError(f"Offload {offload} is not supported")
-        return supported_offloads[offload]
+
+        offload_type = supported_offloads[offload]
+        if offload_type == OffloadType.STORAGE:
+            if path is None:
+                raise ValueError("path must be given for storage offloading")
+
+            if block_count > count:
+                raise ValueError(
+                    f"block_count is larger than count: {block_count} > {count}")
+
+        return offload_type
 
     def create_program_context(self) -> AbstractProgramContext:
         return ProgramContext()
@@ -324,9 +338,13 @@ class BaseSimulator(ABC):
                      *,
                      accelerator: Optional[str] = None,
                      offload: Optional[str] = None,
-                     path: Optional[List[str]] = None) -> GateModelTaskResult:
+                     path: Optional[List[str]] = None,
+                     count: Optional[int] = None,
+                     block_count: Optional[int] = None,
+                     ) -> GateModelTaskResult:
         accelerator = BaseSimulator._validate_simulation_type(accelerator)
-        offload = BaseSimulator._validate_offload_type(offload, path)
+        offload = BaseSimulator._validate_offload_type(
+            offload, path, count, block_count)
 
         circuit = self.parse_program(ir).circuit
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(circuit)
@@ -343,12 +361,14 @@ class BaseSimulator(ABC):
             shots=shots,
             accelerator=accelerator,
             offload=offload,
-            path=path)
+            path=path,
+            count=count,
+            block_count=block_count,
+        )
 
         simulation.evolve(operations,
                           accelerator=accelerator,
-                          offload=offload,
-                          path=path)
+                          offload=offload)
 
         results = circuit.results
         if not shots:
@@ -361,8 +381,7 @@ class BaseSimulator(ABC):
         else:
             simulation.evolve(
                 circuit.basis_rotation_instructions, accelerator=accelerator,
-                offload=offload,
-                path=path)
+                offload=offload)
 
         return self._create_results_obj(
             results, ir, simulation, measured_qubits, mapped_measured_qubits
@@ -374,9 +393,13 @@ class BaseSimulator(ABC):
                   *,
                   accelerator: Optional[str] = None,
                   offload: Optional[str] = None,
-                  path: Optional[List[str]] = None) -> GateModelTaskResult:
+                  path: Optional[List[str]] = None,
+                  count: Optional[int] = None,
+                  block_count: Optional[int] = None,
+                  ) -> GateModelTaskResult:
         accelerator = BaseSimulator._validate_simulation_type(accelerator)
-        offload = BaseSimulator._validate_offload_type(offload, path)
+        offload = BaseSimulator._validate_offload_type(
+            offload, path, count, block_count)
 
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(ir)
         qubit_count = len(qubit_map)
@@ -384,15 +407,23 @@ class BaseSimulator(ABC):
         operations = [
             from_braket_instruction(instr) for instr in ir.instructions
         ]
+
         if shots > 0 and ir.basis_rotation_instructions:
             for instruction in ir.basis_rotation_instructions:
                 operations.append(from_braket_instruction(instruction))
 
         simulation = self.initialize_simulation(
-            qubit_count=qubit_count, shots=shots)
+            qubit_count=qubit_count,
+            shots=shots,
+            accelerator=accelerator,
+            offload=offload,
+            path=path,
+            count=count,
+            block_count=block_count,
+        )
+
         simulation.evolve(operations, accelerator=accelerator,
-                          offload=offload,
-                          path=path)
+                          offload=offload)
 
         results = []
         if not shots and ir.results:
@@ -421,8 +452,8 @@ class BaseSimulator(ABC):
 class StateVectorSimulator(BaseSimulator):
     DEVICE_ID = "snuqs"
 
-    def __init__(self, *args, **kwargs):
-        self.max_qubits = 40
+    def __init__(self):
+        self.max_qubits = 42
 
     def _service(self):
         return {
@@ -596,12 +627,18 @@ class StateVectorSimulator(BaseSimulator):
                               shots: Optional[int] = None,
                               accelerator: Optional[str] = None,
                               offload: Optional[str] = None,
-                              path: Optional[List[str]] = None) -> StateVectorSimulation:
+                              path: Optional[List[str]] = None,
+                              count: Optional[int] = None,
+                              block_count: Optional[int] = None,
+                              ) -> StateVectorSimulation:
         """Initializes simulation with keyword arguments"""
         if accelerator is None:
             accelerator = AcceleratorType.CPU
         if offload is None:
             offload = OffloadType.NONE
         return StateVectorSimulation(qubit_count, shots,
-                                     accelerator, offload, path=path
+                                     accelerator, offload,
+                                     path=path,
+                                     count=count,
+                                     block_count=block_count,
                                      )

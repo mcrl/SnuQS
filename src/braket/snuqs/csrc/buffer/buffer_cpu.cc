@@ -14,6 +14,7 @@ BufferCPU::BufferCPU(size_t count) : count_(count), pinned_(false) {
   ptr_ = aligned_alloc(1ul << 12, count);
   assert(ptr_ != nullptr);
 }
+
 BufferCPU::BufferCPU(size_t count, bool pinned)
     : count_(count), pinned_(pinned) {
   spdlog::info("BufferCPU({}, {})", count, pinned);
@@ -24,6 +25,7 @@ BufferCPU::BufferCPU(size_t count, bool pinned)
   }
   assert(ptr_ != nullptr);
 }
+
 BufferCPU::~BufferCPU() {
   if (pinned_) {
     CUDA_CHECK(cudaFreeHost(ptr_));

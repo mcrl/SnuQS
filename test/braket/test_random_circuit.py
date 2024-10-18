@@ -6,8 +6,8 @@ from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
 
-MIN_QUBIT = 31
-MAX_QUBIT = 31
+MIN_QUBIT = 34
+MAX_QUBIT = 34
 MAX_GATE = 100
 NUM_ITER = 1000
 
@@ -130,9 +130,11 @@ class BraketTest(unittest.TestCase):
 
     def run_snuqs(self, circ):
         option = {
-            'accelerator': 'cuda',
-            'offload': 'cpu',
-            # 'path': ['/dev/nvme0n1', '/dev/nvme1n1', '/dev/nvme2n1', '/dev/nvme3n1', '/dev/nvme4n1', '/dev/nvme5n1', '/dev/nvme6n1', '/dev/nvme7n1', ],
+            'accelerator': 'cpu',
+            'offload': 'storage',
+            'path': ['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1', '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1']
+            'count': 2**38,
+            'block_count': 2**34,
         }
         sim = LocalSimulator(backend="snuqs")
         task = sim.run(circ, **option)
