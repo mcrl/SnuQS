@@ -339,7 +339,6 @@ def transpile_storage_offload_cpu(operations: list[GateOperation],
                                   max_qubit_count: int,
                                   local_qubit_count: int):
     assert max_qubit_count <= qubit_count
-    assert local_qubit_count <= qubit_count
     assert local_qubit_count <= max_qubit_count
 
     slice_qubit_count = qubit_count - max_qubit_count

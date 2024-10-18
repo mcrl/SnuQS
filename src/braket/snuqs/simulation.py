@@ -458,7 +458,79 @@ class StateVectorSimulation(Simulation):
         raise NotImplementedError("Not Implemented")
 
     def _evolve_storage_offload_cuda(self, operations: list[GateOperation]) -> None:
-        raise NotImplementedError("Not Implemented")
+        state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
+        slice_qubit_count = self._qubit_count - self._max_qubit_count
+        list_of_subcircuits = transpile(operations,
+                                        self._qubit_count,
+                                        self._max_qubit_count,
+                                        self._max_qubit_count_cuda,
+                                        AcceleratorType.CPU,
+                                        OffloadType.STORAGE
+                                        )
+
+        for s, subcircuit_slices in enumerate(list_of_subcircuits):
+            targets = subcircuit_slices[0][0].targets
+            applying_local = len(targets) == 0 or min(
+                targets) >= slice_qubit_count
+            if applying_local:
+                for i, subcircuit in enumerate(subcircuit_slices):
+                    state_vector_slice = state_vector.slice(
+                        self._max_qubit_count, i)
+                    if s != 0 or i == 0:
+                        state_vector_cpu.copy(state_vector_slice)
+                    else:
+                        initialize_zero(state_vector_cpu)
+                    for operation in subcircuit:
+                        targets = operation.targets
+                        print(operation)
+                        assert len(targets) == 0 or (
+                            min(targets) >= slice_qubit_count)
+                        apply(state_vector_cpu, operation,
+                              self._qubit_count, targets)
+                    state_vector_slice.copy(state_vector_cpu)
+            else:
+                subcircuit = subcircuit_slices[0]
+                for operation in subcircuit:
+                    targets = operation.targets
+                    print("Trying to apply", operation)
+                    # apply(state_vector, operation, self._qubit_count, targets)
 
     def _evolve_storage_offload_hybrid(self, operations: list[GateOperation]) -> None:
-        raise NotImplementedError("Not Implemented")
+        state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
+        slice_qubit_count = self._qubit_count - self._max_qubit_count
+        list_of_subcircuits = transpile(operations,
+                                        self._qubit_count,
+                                        self._max_qubit_count,
+                                        self._max_qubit_count_cuda,
+                                        AcceleratorType.CPU,
+                                        OffloadType.STORAGE
+                                        )
+
+        for s, subcircuit_slices in enumerate(list_of_subcircuits):
+            targets = subcircuit_slices[0][0].targets
+            applying_local = len(targets) == 0 or min(
+                targets) >= slice_qubit_count
+            if applying_local:
+                for i, subcircuit in enumerate(subcircuit_slices):
+                    state_vector_slice = state_vector.slice(
+                        self._max_qubit_count, i)
+                    if s != 0 or i == 0:
+                        state_vector_cpu.copy(state_vector_slice)
+                    else:
+                        initialize_zero(state_vector_cpu)
+                    for operation in subcircuit:
+                        targets = operation.targets
+                        print(operation)
+                        assert len(targets) == 0 or (
+                            min(targets) >= slice_qubit_count)
+                        apply(state_vector_cpu, operation,
+                              self._qubit_count, targets)
+                    state_vector_slice.copy(state_vector_cpu)
+            else:
+                subcircuit = subcircuit_slices[0]
+                for operation in subcircuit:
+                    targets = operation.targets
+                    print("Trying to apply", operation)
+                    # apply(state_vector, operation, self._qubit_count, targets)
