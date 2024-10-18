@@ -1,5 +1,7 @@
 #include "buffer/buffer_cuda.h"
 
+#include <spdlog/spdlog.h>
+
 #include <cassert>
 #include <cstdlib>
 
@@ -8,11 +10,12 @@
 #include "utils_cuda.h"
 
 BufferCUDA::BufferCUDA(size_t count) : count_(count) {
-  CUDA_CHECK(cudaMalloc(&buffer_, count));
-  assert(buffer_ != nullptr);
+  spdlog::info("BufferCUDA({})", count);
+  CUDA_CHECK(cudaMalloc(&ptr_, count));
+  assert(ptr_ != nullptr);
 }
-BufferCUDA::~BufferCUDA() { CUDA_CHECK(cudaFree(buffer_)); }
-void* BufferCUDA::buffer() { return buffer_; }
+BufferCUDA::~BufferCUDA() { CUDA_CHECK(cudaFree(ptr_)); }
+void* BufferCUDA::ptr() { return ptr_; }
 size_t BufferCUDA::count() const { return count_; }
 std::string BufferCUDA::formatted_string() const {
   return "BufferCUDA<" + std::to_string(count_) + ">";
@@ -20,12 +23,15 @@ std::string BufferCUDA::formatted_string() const {
 
 std::shared_ptr<Buffer> BufferCUDA::cpu() {
   auto buf = std::make_shared<BufferCPU>(count_);
-  memcpyD2H(buf->buffer(), buffer_, count_);
+  memcpyD2H(buf->ptr(), ptr_, count_);
   return buf;
 }
 
 std::shared_ptr<Buffer> BufferCUDA::cuda() {
-  auto buf = std::make_shared<BufferCUDA>(count_);
-  memcpyD2D(buf->buffer(), buffer_, count_);
-  return buf;
+  return shared_from_this();
+}
+
+std::shared_ptr<Buffer> BufferCUDA::storage() {
+  assert(false);
+  return nullptr;
 }

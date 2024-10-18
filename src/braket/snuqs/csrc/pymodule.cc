@@ -145,8 +145,8 @@ PYBIND11_MODULE(_C, m) {
       .def(py::init<DeviceType, size_t>())
       .def("cpu", &StateVector::cpu)
       .def("cuda", &StateVector::cuda)
-      .def("cut", &StateVector::cut)
-      .def("glue", &StateVector::glue)
+      .def("slice", &StateVector::slice)
+      .def("copy", &StateVector::copy)
       .def("__repr__", &StateVector::formatted_string);
 
   auto m_core = m.def_submodule("core");
@@ -180,18 +180,15 @@ PYBIND11_MODULE(_C, m) {
       .def("free", &FS::free)
       .def("dump", &FS::dump);
 
-  // Buffer
-  auto m_buffer = m.def_submodule("buffer");
-  py::class_<Buffer>(m_buffer, "Buffer")
-      .def("buffer", &Buffer::buffer)
-      .def("count", &Buffer::count)
-      .def("__repr__", &Buffer::formatted_string);
-  py::class_<BufferCPU, Buffer>(m_buffer, "BufferCPU").def(py::init<size_t>());
-  py::class_<BufferCUDA, Buffer>(m_buffer, "BufferCUDA")
-      .def(py::init<size_t>());
-  py::class_<BufferPinned, Buffer>(m_buffer, "BufferPinned")
-      .def(py::init<size_t>());
-  py::class_<BufferStorage, Buffer>(m_buffer, "BufferStorage")
-      .def(py::init<size_t>());
-
+//  // Buffer
+//  auto m_buffer = m.def_submodule("buffer");
+//  py::class_<Buffer>(m_buffer, "Buffer")
+//      .def("ptr", &Buffer::ptr)
+//      .def("count", &Buffer::count)
+//      .def("__repr__", &Buffer::formatted_string);
+//  py::class_<BufferCPU, Buffer>(m_buffer, "BufferCPU").def(py::init<size_t>());
+//  py::class_<BufferCUDA, Buffer>(m_buffer, "BufferCUDA")
+//      .def(py::init<size_t>());
+//  py::class_<BufferStorage, Buffer>(m_buffer, "BufferStorage")
+//      .def(py::init<size_t>());
 }

@@ -23,7 +23,6 @@ add_library(
   operation/initialization_impl_cuda.cu
   buffer/pbuffer.cc
   buffer/buffer_cpu.cc
-  buffer/buffer_pinned.cc
   buffer/buffer_cuda.cc
   buffer/buffer_storage.cc
   fs/fs.cc

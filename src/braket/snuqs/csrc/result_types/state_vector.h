@@ -7,11 +7,11 @@
 
 #include "buffer/pbuffer.h"
 #include "device_types.h"
-#include "result_types/result_types.h"
 
-class StateVector {
+class StateVector : public std::enable_shared_from_this<StateVector> {
  public:
   StateVector(size_t num_qubits);
+  StateVector(size_t num_qubits, bool pinned);
   StateVector(DeviceType device, size_t num_qubits);
   StateVector(DeviceType device, size_t num_qubits,
               std::shared_ptr<PBuffer> buffer);
@@ -20,18 +20,17 @@ class StateVector {
   void *ptr();
   std::shared_ptr<StateVector> cpu();
   std::shared_ptr<StateVector> cuda();
+  std::shared_ptr<StateVector> storage();
   std::shared_ptr<StateVector> slice(size_t num_sliced_qubits, size_t index);
-  void set_offset(size_t count);
-  void cut(size_t num_effective_qubits);
-  void glue();
+  void copy(StateVector &other);
 
+  void *data();
+  size_t dim() const;
+  size_t num_elems() const;
+  std::vector<size_t> shape() const;
   DeviceType device() const;
   size_t num_qubits() const;
   std::shared_ptr<PBuffer> buffer() const;
-  void *data();
-  size_t dim() const;
-  std::vector<size_t> shape() const;
-  size_t num_elems() const;
   std::string formatted_string() const;
 
  private:

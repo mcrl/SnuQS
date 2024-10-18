@@ -12,6 +12,12 @@ StateVector::StateVector(size_t num_qubits)
       buffer_(std::make_shared<PBuffer>(sizeof(std::complex<double>) *
                                         (1ul << num_qubits))) {}
 
+StateVector::StateVector(size_t num_qubits, bool pinned)
+    : device_(DeviceType::CPU),
+      num_qubits_(num_qubits),
+      buffer_(std::make_shared<PBuffer>(
+          sizeof(std::complex<double>) * (1ul << num_qubits), pinned)) {}
+
 StateVector::StateVector(DeviceType device, size_t num_qubits)
     : device_(device),
       num_qubits_(num_qubits),
@@ -24,28 +30,37 @@ StateVector::StateVector(DeviceType device, size_t num_qubits,
 
 StateVector::~StateVector() {}
 
-void *StateVector::ptr() { return buffer_->buffer(); }
+void *StateVector::ptr() { return buffer_->ptr(); }
 
 std::shared_ptr<StateVector> StateVector::cpu() {
+  if (device_ == DeviceType::CPU) return shared_from_this();
   return std::make_shared<StateVector>(DeviceType::CPU, num_qubits_,
                                        buffer_->cpu());
 }
 
 std::shared_ptr<StateVector> StateVector::cuda() {
+  if (device_ == DeviceType::CUDA) return shared_from_this();
   return std::make_shared<StateVector>(DeviceType::CUDA, num_qubits_,
                                        buffer_->cuda());
 }
 
-std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
-                                                size_t index) {
-  auto sv = std::make_shared<StateVector>(device_, num_sliced_qubits, buffer_);
-  return sv;
+std::shared_ptr<StateVector> StateVector::storage() {
+  if (device_ == DeviceType::STORAGE) return shared_from_this();
+  return std::make_shared<StateVector>(DeviceType::STORAGE, num_qubits_,
+                                       buffer_->storage());
 }
 
-void StateVector::cut(size_t num_effective_qubits) {}
-void StateVector::glue() {}
+std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
+                                                size_t index) {
+  auto buffer = buffer_->slice(
+      (1ul << num_sliced_qubits) * sizeof(std::complex<double>),
+      (1ul << num_sliced_qubits) * sizeof(std::complex<double>) * index);
+  return std::make_shared<StateVector>(device_, num_sliced_qubits, buffer);
+}
 
-void *StateVector::data() { return buffer_->buffer(); }
+void StateVector::copy(StateVector &other) { buffer_->copy(other.buffer()); }
+
+void *StateVector::data() { return buffer_->ptr(); }
 size_t StateVector::dim() const { return 1; }
 size_t StateVector::num_elems() const { return (1ul << num_qubits_); }
 std::vector<size_t> StateVector::shape() const { return {num_elems()}; }

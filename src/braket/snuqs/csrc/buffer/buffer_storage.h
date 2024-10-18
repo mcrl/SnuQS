@@ -12,11 +12,12 @@ class BufferStorage : public Buffer {
  public:
   BufferStorage(size_t count);
   virtual ~BufferStorage();
-  virtual void* buffer() override;
+  virtual void* ptr() override;
   virtual size_t count() const override;
   virtual std::string formatted_string() const override;
   virtual std::shared_ptr<Buffer> cpu() override;
   virtual std::shared_ptr<Buffer> cuda() override;
+  virtual std::shared_ptr<Buffer> storage() override;
 
  private:
   std::pair<int, size_t> get_offset(size_t pos) const;
@@ -24,6 +25,6 @@ class BufferStorage : public Buffer {
   size_t count_;
   std::shared_ptr<FS> fs_;
   fs_addr_t fs_addr_;
-  void* buffer_ = nullptr;
+  void* ptr_ = nullptr;
 };
 #endif  //_BUFFER_STORAGE_H_

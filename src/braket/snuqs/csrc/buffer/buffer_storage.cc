@@ -25,7 +25,7 @@ BufferStorage::BufferStorage(size_t count) : count_(count) {
 }
 BufferStorage::~BufferStorage() { fs_->free(fs_addr_); }
 
-void* BufferStorage::buffer() { return buffer_; }
+void* BufferStorage::ptr() { return ptr_; }
 size_t BufferStorage::count() const { return count_; }
 
 std::string BufferStorage::formatted_string() const {
@@ -69,6 +69,8 @@ std::shared_ptr<Buffer> BufferStorage::cuda() {
 
   return cpu()->cuda();
 }
+
+std::shared_ptr<Buffer> BufferStorage::storage() { return shared_from_this(); }
 
 std::pair<int, size_t> BufferStorage::get_offset(size_t pos) const {
   //  size_t num_devices = fds_.size();

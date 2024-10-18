@@ -6,19 +6,27 @@
 #include "buffer/buffer.h"
 #include "device_types.h"
 
-class PBuffer {
+class PBuffer : public std::enable_shared_from_this<PBuffer> {
  public:
   PBuffer(size_t count);
+  PBuffer(size_t count, bool pinned);
   PBuffer(DeviceType device, size_t count);
   PBuffer(DeviceType device, size_t count, std::shared_ptr<Buffer> buffer,
           size_t offset);
   DeviceType device() const;
   size_t count() const;
-  void* buffer();
+  void* ptr();
   size_t offset() const;
+
+  std::shared_ptr<PBuffer> slice(size_t count, size_t offset);
+  void copy(std::shared_ptr<PBuffer> other);
+  void copy_from_cpu(std::shared_ptr<PBuffer> other);
+  void copy_from_cuda(std::shared_ptr<PBuffer> other);
+  void copy_from_storage(std::shared_ptr<PBuffer> other);
 
   std::shared_ptr<PBuffer> cpu();
   std::shared_ptr<PBuffer> cuda();
+  std::shared_ptr<PBuffer> storage();
 
  private:
   DeviceType device_;
