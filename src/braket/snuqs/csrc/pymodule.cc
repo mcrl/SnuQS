@@ -123,17 +123,18 @@ PYBIND11_MODULE(_C, m) {
   GATEOP3(U);
   GATEOP1(GPhase);
 
+  // Stream
+  auto m_stream = m.def_submodule("stream");
+  py::class_<Stream, std::shared_ptr<Stream>>(m_stream, "Stream")
+      .def(py::init<void *>())
+      .def("get", &Stream::get);
+
   // Functionals
   auto m_functionals = m.def_submodule("functionals");
-  m_functionals.def(
-      "apply",
-      [](StateVector &state_vector, GateOperation &op, size_t num_qubits,
-         std::vector<size_t> targets, Stream &stream) {
-        return functionals::apply(state_vector, op, num_qubits, targets,
-                                  stream);
-      },
-      py::arg("state_vector"), py::arg("op"), py::arg("num_qubits"),
-      py::arg("targets"), py::arg("stream") = Stream::null());
+  m_functionals.def("apply", &functionals::apply, py::arg("state_vector"),
+                    py::arg("op"), py::arg("num_qubits"), py::arg("targets"),
+                    py::kw_only(), py::arg("stream") = Stream::null());
+
   m_functionals.def("initialize_zero", &functionals::initialize_zero);
   m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z);
 

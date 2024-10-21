@@ -2,13 +2,14 @@
 
 #include "utils_cuda.h"
 
-Stream::Stream(cudaStream_t stream) : stream_(stream) {}
+Stream::Stream(void* stream) : stream_(stream) {}
 
 Stream::~Stream() {
-  if (stream_ != nullptr) CUDA_CHECK(cudaStreamDestroy(stream_));
+  if (stream_ != nullptr)
+    CUDA_CHECK(cudaStreamDestroy(reinterpret_cast<cudaStream_t>(stream_)));
 }
 
-cudaStream_t Stream::get() { return stream_; }
+void* Stream::get() { return stream_; }
 
-static Stream* null_stream = new Stream(nullptr);
-Stream& Stream::null() { return *null_stream; }
+static std::shared_ptr<Stream> null_stream = std::make_shared<Stream>(nullptr);
+std::shared_ptr<Stream> Stream::null() { return null_stream; }

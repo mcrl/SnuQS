@@ -1,16 +1,18 @@
 #ifndef _STREAM_H_
 #define _STREAM_H_
-#include <cuda_runtime.h>
+
+#include <memory>
 
 class Stream {
  public:
-  Stream(cudaStream_t stream);
+  Stream(void* stream);
   ~Stream();
-  cudaStream_t get();
-  static Stream& null();
+  void* get();
+
+  static std::shared_ptr<Stream> null();
 
  private:
-  cudaStream_t stream_;
+  void* stream_;
 };
 
 #endif  //_STREAM_H_
