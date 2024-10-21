@@ -88,6 +88,8 @@ static std::string gate_operation_type_to_string(GateOperationType type) {
     case GateOperationType::SwapA2A:
       return "SwapA2A";
   }
+  assert(false);
+  return "";
 }
 
 // GateOperation

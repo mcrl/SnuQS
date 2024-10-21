@@ -13,7 +13,7 @@
 
 namespace functionals {
 void apply(StateVector &state_vector, GateOperation &op, size_t num_qubits,
-           std::vector<size_t> targets) {
+           std::vector<size_t> targets, Stream &stream) {
   assert(state_vector.allocated());
 
   if (state_vector.device() == DeviceType::CPU) {

@@ -17,6 +17,8 @@ static std::string device_to_string(DeviceType device) {
     case DeviceType::STORAGE:
       return "STORAGE";
   }
+  assert(false);
+  return "";
 }
 
 #endif  //_DEVICE_H_

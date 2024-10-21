@@ -17,6 +17,7 @@
 #include "operation/gate_operations.h"
 #include "operation/operation.h"
 #include "result_types/state_vector.h"
+#include "stream/stream.h"
 
 namespace py = pybind11;
 
@@ -124,7 +125,15 @@ PYBIND11_MODULE(_C, m) {
 
   // Functionals
   auto m_functionals = m.def_submodule("functionals");
-  m_functionals.def("apply", &functionals::apply);
+  m_functionals.def(
+      "apply",
+      [](StateVector &state_vector, GateOperation &op, size_t num_qubits,
+         std::vector<size_t> targets, Stream &stream) {
+        return functionals::apply(state_vector, op, num_qubits, targets,
+                                  stream);
+      },
+      py::arg("state_vector"), py::arg("op"), py::arg("num_qubits"),
+      py::arg("targets"), py::arg("stream") = Stream::null());
   m_functionals.def("initialize_zero", &functionals::initialize_zero);
   m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z);
 

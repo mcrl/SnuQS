@@ -144,27 +144,27 @@ class BraketTest(unittest.TestCase):
             result_snuqs,
         ))
 
-#    def test_1_braket_snuqs_cpu(self):
-#        print("Testing Braket-SnuQS CPU")
-#        self.run_benchmark(15, 1000, accelerator='cpu')
-#
-#    def test_2_braket_snuqs_cuda(self):
-#        print("Testing Braket-SnuQS CUDA")
-#        self.run_benchmark(15, 1000, accelerator='cuda')
-#
+    def test_1_braket_snuqs_cpu(self):
+        print("Testing Braket-SnuQS CPU")
+        self.run_benchmark(15, 1000, accelerator='cpu')
+
+    def test_2_braket_snuqs_cuda(self):
+        print("Testing Braket-SnuQS CUDA")
+        self.run_benchmark(15, 1000, accelerator='cuda')
+
     def test_3_braket_snuqs_hybrid(self):
         print("Testing Braket-SnuQS Hybrid")
-        self.run_benchmark(31, 1000, accelerator='hybrid')
+        self.run_benchmark(31, 200, accelerator='hybrid')
 
-#    def test_4_braket_snuqs_cpu_offload_cpu(self):
-#        print("Testing Braket-SnuQS CPU-Offload CPU")
-#        self.run_benchmark(31, 50, accelerator='cpu', offload='cpu')
-#
-#    def test_5_braket_snuqs_cpu_offload_cuda(self):
-#        print("Testing Braket-SnuQS CPU-Offload CUDA")
-#        self.run_benchmark(31, 50, accelerator='cuda',
-#                           prefetch='cuda', offload='cpu')
-#
+    def test_4_braket_snuqs_cpu_offload_cpu(self):
+        print("Testing Braket-SnuQS CPU-Offload CPU")
+        self.run_benchmark(31, 200, accelerator='cpu', offload='cpu')
+
+    def test_5_braket_snuqs_cpu_offload_cuda(self):
+        print("Testing Braket-SnuQS CPU-Offload CUDA")
+        self.run_benchmark(31, 200, accelerator='cuda',
+                           prefetch='cuda', offload='cpu')
+
 #    def test_6_braket_snuqs_cpu_offload_hybrid(self):
 #        print("Testing Braket-SnuQS CPU-Offload Hybrid")
 #        self.run_benchmark(31, 50, accelerator='hybrid', offload='cpu')
