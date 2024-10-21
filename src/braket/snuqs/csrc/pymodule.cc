@@ -21,8 +21,8 @@
 namespace py = pybind11;
 
 #define GATEOP(name)                                                          \
-  py::class_<name, GateOperation>(m_gate_operations, #name,                   \
-                                  py::buffer_protocol())                      \
+  py::class_<name, GateOperation, std::shared_ptr<name>>(                     \
+      m_gate_operations, #name, py::buffer_protocol())                        \
       .def_buffer([](name &g) -> py::buffer_info {                            \
         return py::buffer_info(                                               \
             g.data(), sizeof(std::complex<double>),                           \
@@ -33,12 +33,11 @@ namespace py = pybind11;
                     size_t>(),                                                \
            py::arg("targets"), py::kw_only(),                                 \
            py::arg("ctrl_modifiers") = std::vector<size_t>(),                 \
-           py::arg("power") = 1)                                              \
-      .def("__repr__", &GateOperation::formatted_string);
+           py::arg("power") = 1)
 
 #define GATEOP1(name)                                                       \
-  py::class_<name, GateOperation>(m_gate_operations, #name,                 \
-                                  py::buffer_protocol())                    \
+  py::class_<name, GateOperation, std::shared_ptr<name>>(                   \
+      m_gate_operations, #name, py::buffer_protocol())                      \
       .def_buffer([](name &g) -> py::buffer_info {                          \
         return py::buffer_info(                                             \
             g.data(), sizeof(std::complex<double>),                         \
@@ -49,12 +48,11 @@ namespace py = pybind11;
                     const std::vector<size_t> &, size_t>(),                 \
            py::arg("targets"), py::arg("angle"), py::kw_only(),             \
            py::arg("ctrl_modifiers") = std::vector<size_t>(),               \
-           py::arg("power") = 1)                                            \
-      .def("__repr__", &GateOperation::formatted_string);
+           py::arg("power") = 1)
 
 #define GATEOP3(name)                                                       \
-  py::class_<name, GateOperation>(m_gate_operations, #name,                 \
-                                  py::buffer_protocol())                    \
+  py::class_<name, GateOperation, std::shared_ptr<name>>(                   \
+      m_gate_operations, #name, py::buffer_protocol())                      \
       .def_buffer([](name &g) -> py::buffer_info {                          \
         return py::buffer_info(                                             \
             g.data(), sizeof(std::complex<double>),                         \
@@ -66,26 +64,27 @@ namespace py = pybind11;
            py::arg("targets"), py::arg("angle_1"), py::arg("angle_2"),      \
            py::arg("angle_3"), py::kw_only(),                               \
            py::arg("ctrl_modifiers") = std::vector<size_t>(),               \
-           py::arg("power") = 1)                                            \
-      .def("__repr__", &GateOperation::formatted_string);
+           py::arg("power") = 1)
 
 PYBIND11_MODULE(_C, m) {
   m.doc() = "SnuQS Pybind11 module.";
 
   // Operation
   auto m_operation = m.def_submodule("operation");
-  py::class_<Operation>(m_operation, "Operation")
+  py::class_<Operation, std::shared_ptr<Operation>>(m_operation, "Operation")
       .def(py::init<const std::vector<size_t> &>())
       .def_property("targets", &Operation::get_targets,
                     &Operation::set_targets);
 
   // GateOperation
-  py::class_<GateOperation, Operation>(m_operation, "GateOperation")
+  py::class_<GateOperation, Operation, std::shared_ptr<GateOperation>>(
+      m_operation, "GateOperation")
       .def(py::init<GateOperationType, const std::vector<size_t> &,
                     const std::vector<double> &, const std::vector<size_t> &,
                     size_t>())
       .def("sliceable", &GateOperation::sliceable)
-      .def("slice", &GateOperation::slice);
+      .def("slice", &GateOperation::slice)
+      .def("__repr__", &GateOperation::formatted_string);
 
   auto m_gate_operations = m_operation.def_submodule("gate_operations");
   GATEOP(Identity);
@@ -154,13 +153,15 @@ PYBIND11_MODULE(_C, m) {
       .def("mem_info", &mem_info)
       .def("attach_fs", &attach_fs)
       .def("detach_fs", &detach_fs)
+      .def("is_attached_fs", &is_attached_fs)
       .def("get_fs", &get_fs);
 
   auto m_core_cuda = m_core.def_submodule("cuda");
   m_core_cuda.def("mem_info", &cu::mem_info)
       .def("device_count", &cu::device_count)
       .def("get_device", &cu::get_device)
-      .def("set_device", &cu::set_device);
+      .def("set_device", &cu::set_device)
+      .def("device_synchronize", &cu::device_synchronize);
 
   // Device
   py::enum_<DeviceType>(m, "DeviceType")

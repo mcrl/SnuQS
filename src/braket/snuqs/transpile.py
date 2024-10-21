@@ -1,11 +1,12 @@
 from braket.snuqs._C.operation import GateOperation
-import numpy as np
-from braket.snuqs.types import AcceleratorType, OffloadType
-from typing import Optional
+from braket.snuqs.types import AcceleratorType, PrefetchType, OffloadType
 from braket.snuqs._C.operation.gate_operations import (
     Swap,
 )
-from braket.snuqs.dag import GateDAG
+from braket.snuqs._C.core import mem_info
+from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
+from braket.snuqs.subcircuit import Subcircuit
+import math
 
 
 def pseudo_lt(oppos1, oppos2):
@@ -183,8 +184,8 @@ def transpile_no_offload_hybrid(operations: list[GateOperation],
     operations = pseudo_sort_operations_descending(operations)
     for i in range(len(operations)):
         op = operations[i]
-        is_local_gate = (op.sliceable() or len(op.targets) == 0
-                         or min(op.targets) >= slice_qubit_count)
+        is_local_gate = (len(op.targets) == 0 or min(
+            op.targets) >= slice_qubit_count)
         if accumulating_local == is_local_gate:
             current_operations.append(op)
         else:
@@ -222,6 +223,7 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
     cleanup_operations = []
     operations = pseudo_sort_operations_descending(operations)
 
+    print("AA", operations)
     for i in range(len(operations)):
         op = operations[i]
         is_local_gate = (op.sliceable() or len(op.targets) == 0 or min(
@@ -282,6 +284,7 @@ def transpile_cpu_offload_cuda(operations: list[GateOperation],
     if len(current_operations) != 0:
         subcircuits.append(current_operations)
 
+    print(subcircuits)
     slice_count = 2**(qubit_count - local_qubit_count)
     return [[subcircuit] * slice_count for subcircuit in subcircuits]
 
@@ -433,8 +436,7 @@ def transpile_storage_offload(operations: list[GateOperation],
                               qubit_count: int,
                               max_qubit_count: int,
                               local_qubit_count: int,
-                              accelerator: AcceleratorType,
-                              path: Optional[list[str]] = None):
+                              accelerator: AcceleratorType):
     match accelerator:
         case AcceleratorType.CPU:
             return transpile_storage_offload_cpu(operations,
@@ -454,32 +456,52 @@ def transpile_storage_offload(operations: list[GateOperation],
         case _:
             raise NotImplementedError("Not Implemented")
 
-def transpile(operations: list[GateOperation],
-              qubit_count: int,
-              max_qubit_count: int,
-              local_qubit_count: int,
-              accelerator: AcceleratorType,
-              offload: OffloadType,
-              path: Optional[list[str]] = None):
+def compute_max_qubit_count(qubit_count):
+    free, _ = mem_info()
+    return min(
+        qubit_count, int(math.log(free / 16, 2)))
+
+def compute_max_qubit_count_cuda(qubit_count):
+    free, _ = mem_info_cuda()
+    return min(
+        qubit_count, int(math.log(free / 16, 2)))
+
+
+def transpile(
+        qubit_count: int,
+        operations: list[GateOperation],
+        accelerator: AcceleratorType,
+        prefetch: PrefetchType,
+        offload: OffloadType) -> Subcircuit:
+    max_qubit_count = compute_max_qubit_count(qubit_count, prefetch)
+    max_qubit_count_cuda = compute_max_qubit_count_cuda(qubit_count, prefetch)
+
     match offload:
         case OffloadType.NONE:
-            return transpile_no_offload(operations,
-                                        qubit_count,
-                                        max_qubit_count,
-                                        local_qubit_count,
-                                        accelerator)
+            operations = transpile_no_offload(operations,
+                                              qubit_count,
+                                              max_qubit_count,
+                                              max_qubit_count_cuda,
+                                              accelerator)
         case OffloadType.CPU:
-            return transpile_cpu_offload(operations,
-                                         qubit_count,
-                                         max_qubit_count,
-                                         local_qubit_count,
-                                         accelerator)
+            operations = transpile_cpu_offload(operations,
+                                               qubit_count,
+                                               max_qubit_count,
+                                               max_qubit_count_cuda,
+                                               accelerator)
         case OffloadType.STORAGE:
-            return transpile_storage_offload(operations,
-                                             qubit_count,
-                                             max_qubit_count,
-                                             local_qubit_count,
-                                             accelerator,
-                                             path)
+            operations = transpile_storage_offload(operations,
+                                                   qubit_count,
+                                                   max_qubit_count,
+                                                   max_qubit_count_cuda,
+                                                   accelerator)
         case _:
             raise NotImplementedError("Not Implemented")
+
+    return Subcircuit(
+        qubit_count=qubit_count,
+        max_qubit_count=max_qubit_count,
+        max_qubit_count_cuda=max_qubit_count_cuda,
+        accelerator=accelerator,
+        offload=offload,
+        operations=operations)

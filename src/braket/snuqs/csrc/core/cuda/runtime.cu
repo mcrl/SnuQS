@@ -19,4 +19,8 @@ int get_device() {
   CUDA_CHECK(cudaGetDevice(&device));
   return device;
 }
+
+void device_synchronize() {
+    CUDA_CHECK(cudaDeviceSynchronize());
+}
 };  // namespace cu

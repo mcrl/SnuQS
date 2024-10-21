@@ -14,7 +14,10 @@ BufferCUDA::BufferCUDA(size_t count) : count_(count) {
   CUDA_CHECK(cudaMalloc(&ptr_, count));
   assert(ptr_ != nullptr);
 }
-BufferCUDA::~BufferCUDA() { CUDA_CHECK(cudaFree(ptr_)); }
+BufferCUDA::~BufferCUDA() {
+  spdlog::info("~BufferCUDA({})", count_);
+  CUDA_CHECK(cudaFree(ptr_));
+}
 void* BufferCUDA::ptr() { return ptr_; }
 size_t BufferCUDA::count() const { return count_; }
 std::string BufferCUDA::formatted_string() const {
@@ -27,9 +30,7 @@ std::shared_ptr<Buffer> BufferCUDA::cpu() {
   return buf;
 }
 
-std::shared_ptr<Buffer> BufferCUDA::cuda() {
-  return shared_from_this();
-}
+std::shared_ptr<Buffer> BufferCUDA::cuda() { return shared_from_this(); }
 
 std::shared_ptr<Buffer> BufferCUDA::storage() {
   assert(false);

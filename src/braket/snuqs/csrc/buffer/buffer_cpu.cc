@@ -27,6 +27,7 @@ BufferCPU::BufferCPU(size_t count, bool pinned)
 }
 
 BufferCPU::~BufferCPU() {
+  spdlog::info("~BufferCPU({}, {})", count_, pinned_);
   if (pinned_) {
     CUDA_CHECK(cudaFreeHost(ptr_));
   } else {

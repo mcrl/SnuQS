@@ -3,9 +3,10 @@
 #include <cuda_runtime.h>
 #include <spdlog/spdlog.h>
 
+#include <complex>
+#include <cstdlib>
 #include <sstream>
 
-#include "operation/gate_operations.h"
 #include "utils_cuda.h"
 
 // Operation
@@ -100,15 +101,15 @@ GateOperation::GateOperation(GateOperationType type,
       angles_(angles),
       ctrl_modifiers_(ctrl_modifiers),
       power_(power) {
-  size_t ncols = (1ul << targets_.size());
-  ptr_ = new std::complex<double>[ncols * ncols];
+  size_t ncols = (1ul << targets.size());
+  ptr_ = aligned_alloc(4096, sizeof(std::complex<double>) * ncols * ncols);
   CUDA_CHECK(
       cudaMalloc(&ptr_cuda_, sizeof(std::complex<double>) * ncols * ncols));
 }
 
 GateOperation::~GateOperation() {
   CUDA_CHECK(cudaFree(ptr_cuda_));
-  delete[] ptr_;
+  free(ptr_);
 }
 
 void *GateOperation::data() { return ptr_; }
@@ -145,10 +146,11 @@ std::shared_ptr<GateOperation> GateOperation::slice(size_t idx) const {
 }
 
 bool GateOperation::diagonal() const {
+  std::complex<double> *ptr = reinterpret_cast<std::complex<double> *>(ptr_);
   size_t ncols = (1ul << targets_.size());
   for (size_t i = 0; i < ncols; ++i) {
     for (size_t j = 0; j < ncols; ++j) {
-      if ((i != j) && (ptr_[i] == ptr_[j])) {
+      if ((i != j) && (ptr[i] == ptr[j])) {
         return false;
       }
     }
@@ -157,10 +159,11 @@ bool GateOperation::diagonal() const {
 }
 
 bool GateOperation::anti_diagonal() const {
+  std::complex<double> *ptr = reinterpret_cast<std::complex<double> *>(ptr_);
   size_t ncols = (1ul << targets_.size());
   for (size_t i = 0; i < ncols; ++i) {
     for (size_t j = 0; j < ncols; ++j) {
-      if ((i != (ncols - 1 - j)) && (ptr_[i] == ptr_[j])) {
+      if ((i != (ncols - 1 - j)) && (ptr[i] == ptr[j])) {
         return false;
       }
     }
@@ -174,24 +177,18 @@ std::string GateOperation::name() const {
 
 std::string GateOperation::formatted_string() const {
   std::stringstream ss;
-  ss << "<";
-  if (angles_.size() == 0) {
-    return name();
-  } else {
-    std::stringstream ss;
-    ss << name() << "(";
-    for (size_t i = 0; i < angles_.size(); ++i) {
-      ss << angles_[i];
-      if (i < angles_.size() - 1) ss << ", ";
-    }
-    ss << ")";
-    return ss.str();
+  ss << name() << "(";
+  for (size_t i = 0; i < angles_.size(); ++i) {
+    ss << angles_[i];
+    if (i < angles_.size() - 1) ss << ", ";
   }
-  ss << "targets: {";
-  for (auto t : targets_) {
-    ss << t << ", ";
+  ss << ")";
+
+  ss << " {";
+  for (size_t i = 0; i < targets_.size(); ++i) {
+    ss << targets_[i];
+    if (i < targets_.size() - 1) ss << ", ";
   }
   ss << "}";
-  ss << ">";
   return ss.str();
 }

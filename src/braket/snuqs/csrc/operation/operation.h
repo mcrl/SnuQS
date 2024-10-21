@@ -1,7 +1,6 @@
 #ifndef _OPERATION_H_
 #define _OPERATION_H_
 
-#include <complex>
 #include <memory>
 #include <string>
 #include <vector>
@@ -62,16 +61,16 @@ class GateOperation : public Operation {
   virtual void *data();
   void *ptr();
   void *ptr_cuda();
-  virtual size_t num_elems() const;
+  size_t num_elems() const;
   std::vector<size_t> ctrl_modifiers_;
   size_t power_;
 
-  virtual size_t dim() const;
-  virtual std::vector<size_t> shape() const;
-  virtual std::vector<size_t> stride() const;
+  size_t dim() const;
+  std::vector<size_t> shape() const;
+  std::vector<size_t> stride() const;
 
   std::string name() const;
-  virtual std::string formatted_string() const;
+  std::string formatted_string() const;
 
   virtual bool diagonal() const;
   virtual bool anti_diagonal() const;
@@ -80,8 +79,8 @@ class GateOperation : public Operation {
 
   std::vector<double> angles_;
   GateOperationType type_;
-  std::complex<double> *ptr_ = nullptr;
-  std::complex<double> *ptr_cuda_ = nullptr;
+  void *ptr_ = nullptr;
+  void *ptr_cuda_ = nullptr;
   bool copied_to_cuda = false;
 };
 

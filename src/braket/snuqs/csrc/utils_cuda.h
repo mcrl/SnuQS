@@ -2,7 +2,7 @@
 #define _UTILS_H_
 
 #include <cuda_runtime.h>
-
+#include <cstdlib>
 #include <cstdio>
 
 #define CUDA_CHECK(e)                                                   \
@@ -11,6 +11,7 @@
     if (r != cudaSuccess) {                                             \
       fprintf(stderr, "CUDA Error: %s %s %s:%d\n", cudaGetErrorName(r), \
               cudaGetErrorString(r), __FILE__, __LINE__);               \
+      std::exit(EXIT_FAILURE);                                          \
     }                                                                   \
   } while (0)
 

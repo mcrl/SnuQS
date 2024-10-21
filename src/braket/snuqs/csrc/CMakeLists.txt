@@ -26,7 +26,8 @@ add_library(
   buffer/buffer_cuda.cc
   buffer/buffer_storage.cc
   fs/fs.cc
-  result_types/state_vector.cc)
+  result_types/state_vector.cc
+  stream/stream.cc)
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")
 set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
