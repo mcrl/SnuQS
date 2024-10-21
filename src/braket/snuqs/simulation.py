@@ -260,47 +260,36 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
 
         operations = subcircuit.operations
-        for operation in operations:
-            targets = operation.targets
-            apply(state_vector, operation, subcircuit.qubit_count, targets)
+        for op in operations:
+            apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     def _evolve_no_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
 
         operations = subcircuit.operations
-        for operation in operations:
-            targets = operation.targets
-            apply(state_vector, operation, subcircuit.qubit_count, targets)
+        for op in operations:
+            apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     def _evolve_no_offload_hybrid(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
-        slice_qubit_count = subcircuit.qubit_count - subcircuit.max_qubit_count_cuda
 
-        list_of_subcircuits = subcircuit.operations
-        for s, subcircuit_slices in enumerate(list_of_subcircuits):
-            targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(
-                targets) >= slice_qubit_count
-            if applying_local:
-                for i, subcircuit_slice in enumerate(subcircuit_slices):
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
                         subcircuit.max_qubit_count_cuda, i)
                     if s != 0 or i == 0:
                         state_vector_cuda.copy(state_vector_slice)
-                        for operation in subcircuit_slice:
-                            targets = operation.targets
-                            apply(state_vector_cuda, operation,
-                                  subcircuit.qubit_count, targets)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cuda, op,
+                                  subcircuit.qubit_count, op.targets)
                         state_vector_slice.copy(state_vector_cuda)
                     else:
                         initialize_zero(state_vector_slice)
             else:
-                subcircuit_slice = subcircuit_slices[0]
-                for operation in subcircuit_slice:
-                    targets = operation.targets
-                    apply(state_vector, operation,
-                          subcircuit.qubit_count, targets)
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     #
     # CPU offload
@@ -312,32 +301,23 @@ class StateVectorSimulation(Simulation):
     def _evolve_cpu_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
-        slice_qubit_count = subcircuit.qubit_count - subcircuit.max_qubit_count_cuda
 
-        list_of_subcircuits = subcircuit.operations
-        for s, subcircuit_slices in enumerate(list_of_subcircuits):
-            targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(
-                targets) >= slice_qubit_count
-            if applying_local:
-                for i, subcircuit_slice in enumerate(subcircuit_slices):
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
                         subcircuit.max_qubit_count_cuda, i)
                     if s != 0 or i == 0:
                         state_vector_cuda.copy(state_vector_slice)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cuda, op.targets,
+                                  subcircuit.qubit_count)
+                        state_vector_slice.copy(state_vector_cuda)
                     else:
-                        initialize_zero(state_vector_cuda)
-                    for operation in subcircuit_slice:
-                        targets = operation.targets
-                        apply(state_vector_cuda, operation,
-                              subcircuit.qubit_count, targets)
-                    state_vector_slice.copy(state_vector_cuda)
+                        initialize_zero(state_vector_slice)
             else:
-                subcircuit_slice = subcircuit_slices[0]
-                for operation in subcircuit_slice:
-                    targets = operation.targets
-                    apply(state_vector, operation,
-                          subcircuit.qubit_count, targets)
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     def _evolve_cpu_offload_hybrid(self, subcircuit: Subcircuit) -> None:
         """CPU offload with Hybrid simulation is equivalent to Hybrid simulation"""
@@ -349,36 +329,23 @@ class StateVectorSimulation(Simulation):
     def _evolve_storage_offload_cpu(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
-        slice_qubit_count = subcircuit.qubit_count - subcircuit.max_qubit_count
 
-        list_of_subcircuits = subcircuit.operations
-        for s, subcircuit_slices in enumerate(list_of_subcircuits):
-            targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(
-                targets) >= slice_qubit_count
-            if applying_local:
-                for i, subcircuit in enumerate(subcircuit_slices):
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
                         subcircuit.max_qubit_count, i)
                     if s != 0 or i == 0:
                         state_vector_cpu.copy(state_vector_slice)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cpu, op.targets,
+                                  subcircuit.qubit_count)
+                        state_vector_slice.copy(state_vector_cpu)
                     else:
-                        initialize_zero(state_vector_cpu)
-                    for operation in subcircuit:
-                        targets = operation.targets
-                        assert len(targets) == 0 or (
-                            min(targets) >= slice_qubit_count)
-                        apply(state_vector_cpu, operation,
-                              subcircuit.qubit_count, targets)
-                    state_vector_slice.copy(state_vector_cpu)
+                        initialize_zero(state_vector_slice)
             else:
-                subcircuit = subcircuit_slices[0]
-                assert all(max(op.targets) <
-                           slice_qubit_count for op in subcircuit)
-                for operation in subcircuit:
-                    targets = operation.targets
-                    apply(state_vector, operation,
-                          subcircuit.qubit_count, targets)
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     def _evolve_storage_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector

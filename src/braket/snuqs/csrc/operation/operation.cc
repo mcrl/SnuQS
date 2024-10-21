@@ -177,12 +177,15 @@ std::string GateOperation::name() const {
 
 std::string GateOperation::formatted_string() const {
   std::stringstream ss;
-  ss << name() << "(";
-  for (size_t i = 0; i < angles_.size(); ++i) {
-    ss << angles_[i];
-    if (i < angles_.size() - 1) ss << ", ";
+  ss << name();
+  if (angles_.size() > 0) {
+    ss << "(";
+    for (size_t i = 0; i < angles_.size(); ++i) {
+      ss << angles_[i];
+      if (i < angles_.size() - 1) ss << ", ";
+    }
+    ss << ")";
   }
-  ss << ")";
 
   ss << " {";
   for (size_t i = 0; i < targets_.size(); ++i) {
@@ -191,4 +194,33 @@ std::string GateOperation::formatted_string() const {
   }
   ss << "}";
   return ss.str();
+}
+
+GateOperationType GateOperation::type() const { return type_; }
+std::vector<double> GateOperation::angles() const { return angles_; }
+std::vector<size_t> GateOperation::ctrl_modifiers() const {
+  return ctrl_modifiers_;
+}
+size_t GateOperation::power() const { return power_; }
+
+bool GateOperation::operator==(const GateOperation &other) const {
+  auto other_type = other.type();
+  auto other_targets = other.get_targets();
+  auto other_angles = other.angles();
+  auto other_ctrl_modifiers = other.ctrl_modifiers();
+  auto other_power = other.power();
+
+  if (targets_.size() != other_targets.size()) return false;
+  for (int i = 0; i < targets_.size(); ++i) {
+    if (targets_[i] != other_targets[i]) return false;
+  }
+  if (angles_.size() != other_angles.size()) return false;
+  for (int i = 0; i < angles_.size(); ++i) {
+    if (angles_[i] != other_angles[i]) return false;
+  }
+  if (ctrl_modifiers_.size() != other_ctrl_modifiers.size()) return false;
+  for (int i = 0; i < ctrl_modifiers_.size(); ++i) {
+    if (ctrl_modifiers_[i] != other_ctrl_modifiers[i]) return false;
+  }
+  return (type_ == other_type) && (power_ == other_power);
 }

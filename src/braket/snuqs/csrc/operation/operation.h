@@ -71,6 +71,11 @@ class GateOperation : public Operation {
 
   std::string name() const;
   std::string formatted_string() const;
+  GateOperationType type() const;
+  std::vector<double> angles() const;
+  std::vector<size_t> ctrl_modifiers() const;
+  size_t power() const;
+  bool operator==(const GateOperation &other) const;
 
   virtual bool diagonal() const;
   virtual bool anti_diagonal() const;

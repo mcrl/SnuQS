@@ -84,7 +84,8 @@ PYBIND11_MODULE(_C, m) {
                     size_t>())
       .def("sliceable", &GateOperation::sliceable)
       .def("slice", &GateOperation::slice)
-      .def("__repr__", &GateOperation::formatted_string);
+      .def("__repr__", &GateOperation::formatted_string)
+      .def("__eq__", &GateOperation::operator==);
 
   auto m_gate_operations = m_operation.def_submodule("gate_operations");
   GATEOP(Identity);

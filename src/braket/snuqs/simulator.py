@@ -60,7 +60,7 @@ class BaseSimulator(ABC):
             'storage': PrefetchType.STORAGE,
         }
         if prefetch is None:
-            return PrefetchType.CPU
+            return PrefetchType.NONE
 
         if prefetch not in supported_prefetches:
             raise TypeError(f"Prefetch {prefetch} is not supported")
