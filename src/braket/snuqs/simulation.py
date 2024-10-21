@@ -258,14 +258,12 @@ class StateVectorSimulation(Simulation):
     #
     def _evolve_no_offload_cpu(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
-
         operations = subcircuit.operations
         for op in operations:
             apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     def _evolve_no_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
-
         operations = subcircuit.operations
         for op in operations:
             apply(state_vector, op, subcircuit.qubit_count, op.targets)
@@ -350,67 +348,55 @@ class StateVectorSimulation(Simulation):
     def _evolve_storage_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
-        slice_qubit_count = subcircuit.qubit_count - subcircuit.max_qubit_count
+        state_vector_cuda = self._state_vector_cuda
 
-        list_of_subcircuits = subcircuit.operations
-        for s, subcircuit_slices in enumerate(list_of_subcircuits):
-            targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(
-                targets) >= slice_qubit_count
-            if applying_local:
-                for i, subcircuit in enumerate(subcircuit_slices):
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
                         subcircuit.max_qubit_count, i)
                     if s != 0 or i == 0:
                         state_vector_cpu.copy(state_vector_slice)
+                        state_vector_cuda.copy(state_vector_cpu)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cuda, op.targets,
+                                  subcircuit.qubit_count)
+                        state_vector_cpu.copy(state_vector_cuda)
                     else:
                         initialize_zero(state_vector_cpu)
-                    for operation in subcircuit:
-                        targets = operation.targets
-                        assert len(targets) == 0 or (
-                            min(targets) >= slice_qubit_count)
-                        apply(state_vector_cpu, operation,
-                              subcircuit.qubit_count, targets)
+
                     state_vector_slice.copy(state_vector_cpu)
             else:
-                subcircuit = subcircuit_slices[0]
-                assert all(max(op.targets) <
-                           slice_qubit_count for op in subcircuit)
-                for operation in subcircuit:
-                    targets = operation.targets
-                    apply(state_vector, operation,
-                          subcircuit.qubit_count, targets)
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
     def _evolve_storage_offload_hybrid(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
-        slice_qubit_count = subcircuit.qubit_count - subcircuit.max_qubit_count
+        state_vector_cuda = self._state_vector_cuda
 
-        list_of_subcircuits = subcircuit.operations
-        for s, subcircuit_slices in enumerate(list_of_subcircuits):
-            targets = subcircuit_slices[0][0].targets
-            applying_local = len(targets) == 0 or min(
-                targets) >= slice_qubit_count
-            if applying_local:
-                for i, subcircuit in enumerate(subcircuit_slices):
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
                         subcircuit.max_qubit_count, i)
                     if s != 0 or i == 0:
                         state_vector_cpu.copy(state_vector_slice)
+                        if isinstance(sliced_subcircuit[0], list):
+                            for j, re_sliced_subcircuit in enumerate(sliced_subcircuit):
+                                state_vector_cpu_slice = state_vector_cpu.slice(
+                                    subcircuit.max_qubit_count_cuda, j)
+                                state_vector_cuda.copy(state_vector_cpu_slice)
+                                for op in re_sliced_subcircuit:
+                                    apply(state_vector_cuda, op.targets,
+                                          subcircuit.qubit_count)
+                                state_vector_cpu_slice.copy(state_vector_cuda)
+                        else:
+                            for op in sliced_subcircuit:
+                                apply(state_vector_cpu, op.targets,
+                                      subcircuit.qubit_count)
                     else:
                         initialize_zero(state_vector_cpu)
-                    for operation in subcircuit:
-                        targets = operation.targets
-                        assert len(targets) == 0 or (
-                            min(targets) >= slice_qubit_count)
-                        apply(state_vector_cpu, operation,
-                              subcircuit.qubit_count, targets)
-                    state_vector_slice.copy(state_vector_cpu)
             else:
-                subcircuit = subcircuit_slices[0]
-                assert all(max(op.targets) <
-                           slice_qubit_count for op in subcircuit)
-                for operation in subcircuit:
-                    targets = operation.targets
-                    apply(state_vector, operation,
-                          subcircuit.qubit_count, targets)
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)

@@ -369,6 +369,23 @@ def transpile_storage_offload_hybrid(subcircuit: Subcircuit):
     subcircuit.operations = partition_operations(subcircuit.operations,
                                                  subcircuit.qubit_count,
                                                  subcircuit.max_qubit_count)
+
+    for s in range(len(subcircuit.operations)):
+        partitioned_subcircuit = subcircuit.operations[s]
+        if isinstance(partitioned_subcircuit[0], list):
+            for i in range(len(partitioned_subcircuit)):
+                sliced_subcircuit = partitioned_subcircuit[i]
+                sliced_subcircuit = pseudo_sort_operations_descending(
+                    sliced_subcircuit)
+                sliced_subcircuit = optimize_operations(sliced_subcircuit)
+                sliced_subcircuit = partition_operations(subcircuit.operations,
+                                                         subcircuit.qubit_count,
+                                                         subcircuit.max_qubit_count_cuda)
+                partitioned_subcircuit[i] = sliced_subcircuit
+
+            subcircuit.operations[s] = partitioned_subcircuit
+
+    print(subcircuit)
     return subcircuit
 
 def compute_max_qubit_count(qubit_count: int, prefetch: PrefetchType):
