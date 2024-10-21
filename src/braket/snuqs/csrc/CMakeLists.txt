@@ -12,17 +12,28 @@ include_directories("${PYBIND_INCLUDE_DIRS}")
 add_library(
   _C SHARED
   pymodule.cc
-  runtime.cc
-  state_vector.cc
-  functionals.cc
-  operation.cc
-  gate_operations.cc
-  gate_operations_impl_cpu.cc
-  gate_operations_impl_cuda.cu
-  cuda/runtime.cu)
+  core/runtime.cc
+  core/cuda/runtime.cu
+  functionals/functionals.cc
+  operation/operation.cc
+  operation/gate_operations.cc
+  operation/gate_operations_impl_cpu.cc
+  operation/gate_operations_impl_cuda.cu
+  operation/initialization_impl_cpu.cc
+  operation/initialization_impl_cuda.cu
+  buffer/pbuffer.cc
+  buffer/buffer_cpu.cc
+  buffer/buffer_cuda.cc
+  buffer/buffer_storage.cc
+  fs/fs.cc
+  result_types/state_vector.cc
+  stream/stream.cc)
 set_target_properties(_C PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(_C PROPERTIES PREFIX "")
 set_target_properties(_C PROPERTIES SUFFIX "${LIBRARY_SUFFIX}")
+
+target_compile_options(_C PUBLIC -fopenmp)
+# add_link_options(_C PUBLIC -fopenmp)
 
 target_include_directories(_C PUBLIC "." "${CMAKE_CURRENT_SOURCE_DIR}/include")
 

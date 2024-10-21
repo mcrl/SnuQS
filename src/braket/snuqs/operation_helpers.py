@@ -1,7 +1,7 @@
 from functools import lru_cache, singledispatch
 
 import numpy as np
-from braket.snuqs.operation import GateOperation
+from braket.snuqs._C.operation import GateOperation
 
 
 def from_braket_instruction(instruction) -> GateOperation:
