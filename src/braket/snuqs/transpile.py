@@ -456,15 +456,19 @@ def transpile_storage_offload(operations: list[GateOperation],
         case _:
             raise NotImplementedError("Not Implemented")
 
-def compute_max_qubit_count(qubit_count):
+def compute_max_qubit_count(qubit_count: int, prefetch: PrefetchType):
     free, _ = mem_info()
-    return min(
-        qubit_count, int(math.log(free / 16, 2)))
+    max_count = int(math.log(free / 16, 2))
+    if prefetch != PrefetchType.NONE:
+        max_count /= 2
+    return min(qubit_count, max_count)
 
-def compute_max_qubit_count_cuda(qubit_count):
+def compute_max_qubit_count_cuda(qubit_count: int, prefetch: PrefetchType):
     free, _ = mem_info_cuda()
-    return min(
-        qubit_count, int(math.log(free / 16, 2)))
+    max_count = int(math.log(free / 16, 2))
+    if prefetch != PrefetchType.NONE:
+        max_count /= 2
+    return min(qubit_count, max_count)
 
 
 def transpile(
