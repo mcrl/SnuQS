@@ -146,18 +146,29 @@ void FS::read(fs_addr_t addr, void* buf, size_t count) {
   size_t nbytes_read = 0;
 
   char* buffer = reinterpret_cast<char*>(buf);
-  while (nbytes_read < nbytes) {
-    auto off_info = get_offset(nbytes_read);
-    int fd = off_info.first;
-    size_t offset = off_info.second;
-    size_t bytes_to_read =
-        std::min((size_t)SSIZE_MAX,
-                 std::min((size_t)(blk_count_ - (offset % blk_count_)),
-                          (size_t)(nbytes - nbytes_read)));
-    ssize_t ret = pread(fd, buf, bytes_to_read, offset);
-    assert(ret != -1);
-    nbytes_read += ret;
-    buffer += ret;
+#pragma omp parallel num_threads(fds_.size())
+#pragma omp single
+  {
+    while (nbytes_read < nbytes) {
+      auto off_info = get_offset(nbytes_read);
+      int fd = off_info.first;
+      size_t offset = off_info.second;
+      size_t bytes_to_read =
+          std::min((size_t)SSIZE_MAX,
+                   std::min((size_t)(blk_count_ - (offset % blk_count_)),
+                            (size_t)(nbytes - nbytes_read)));
+#pragma omp task
+      {
+        size_t current = 0;
+        while (current < bytes_to_read) {
+          ssize_t ret = pread(fd, buf, bytes_to_read, offset);
+          assert(ret != -1);
+          current += ret;
+        }
+      }
+      nbytes_read += bytes_to_read;
+      buffer += bytes_to_read;
+    }
   }
 }
 
@@ -166,18 +177,29 @@ void FS::write(fs_addr_t addr, void* buf, size_t count) {
   size_t nbytes_written = 0;
 
   char* buffer = reinterpret_cast<char*>(buf);
-  while (nbytes_written < nbytes) {
-    auto off_info = get_offset(nbytes_written);
-    int fd = off_info.first;
-    size_t offset = off_info.second;
-    size_t bytes_to_write =
-        std::min((size_t)SSIZE_MAX,
-                 std::min((size_t)(blk_count_ - (offset % blk_count_)),
-                          (size_t)(nbytes - nbytes_written)));
-    ssize_t ret = pwrite(fd, buf, bytes_to_write, offset);
-    assert(ret != -1);
-    nbytes_written += ret;
-    buffer += ret;
+#pragma omp parallel num_threads(fds_.size())
+#pragma omp single
+  {
+    while (nbytes_written < nbytes) {
+      auto off_info = get_offset(nbytes_written);
+      int fd = off_info.first;
+      size_t offset = off_info.second;
+      size_t bytes_to_write =
+          std::min((size_t)SSIZE_MAX,
+                   std::min((size_t)(blk_count_ - (offset % blk_count_)),
+                            (size_t)(nbytes - nbytes_written)));
+#pragma omp task
+      {
+        size_t current = 0;
+        while (current < bytes_to_write) {
+          ssize_t ret = pwrite(fd, buf, bytes_to_write, offset);
+          assert(ret != -1);
+          current += ret;
+        }
+      }
+      nbytes_written += bytes_to_write;
+      buffer += bytes_to_write;
+    }
   }
 }
 
