@@ -6,6 +6,7 @@
 #include <cstdlib>
 
 #include "buffer/buffer_cuda.h"
+#include "buffer/buffer_storage.h"
 #include "core/runtime.h"
 #include "utils_cuda.h"
 
@@ -44,15 +45,18 @@ std::string BufferCPU::formatted_string() const {
 
 bool BufferCPU::pinned() const { return pinned_; }
 
-std::shared_ptr<Buffer> BufferCPU::cpu() { return shared_from_this(); }
+std::shared_ptr<Buffer> BufferCPU::cpu(std::shared_ptr<Stream> stream) {
+  return shared_from_this();
+}
 
-std::shared_ptr<Buffer> BufferCPU::cuda() {
+std::shared_ptr<Buffer> BufferCPU::cuda(std::shared_ptr<Stream> stream) {
   auto buf = std::make_shared<BufferCUDA>(count_);
-  memcpyH2D(buf->ptr(), ptr_, count_);
+  memcpyH2D(buf->ptr(), ptr_, count_, stream);
   return buf;
 }
 
-std::shared_ptr<Buffer> BufferCPU::storage() {
-  assert(false);
-  return nullptr;
+std::shared_ptr<Buffer> BufferCPU::storage(std::shared_ptr<Stream> stream) {
+  auto buf = std::make_shared<BufferStorage>(count_);
+  memcpyH2S(buf->addr(), ptr_, count_, stream);
+  return buf;
 }

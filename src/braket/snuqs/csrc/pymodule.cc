@@ -7,7 +7,6 @@
 #include "buffer/buffer.h"
 #include "buffer/buffer_cpu.h"
 #include "buffer/buffer_cuda.h"
-#include "buffer/buffer_pinned.h"
 #include "buffer/buffer_storage.h"
 #include "core/cuda/runtime.h"
 #include "core/runtime.h"
@@ -127,16 +126,20 @@ PYBIND11_MODULE(_C, m) {
   auto m_stream = m.def_submodule("stream");
   py::class_<Stream, std::shared_ptr<Stream>>(m_stream, "Stream")
       .def(py::init<void *>())
-      .def("get", &Stream::get);
+      .def("get", &Stream::get)
+      .def("create", &Stream::create);
 
   // Functionals
   auto m_functionals = m.def_submodule("functionals");
   m_functionals.def("apply", &functionals::apply, py::arg("state_vector"),
                     py::arg("op"), py::arg("num_qubits"), py::arg("targets"),
-                    py::kw_only(), py::arg("stream") = Stream::null());
-
-  m_functionals.def("initialize_zero", &functionals::initialize_zero);
-  m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z);
+                    py::kw_only(), py::arg("stream") = nullptr);
+  m_functionals.def("initialize_zero", &functionals::initialize_zero,
+                    py::arg("state_vector"), py::kw_only(),
+                    py::arg("stream") = nullptr);
+  m_functionals.def("initialize_basis_z", &functionals::initialize_basis_z,
+                    py::arg("state_vector"), py::kw_only(),
+                    py::arg("stream") = nullptr);
 
   // StateVector
   auto m_result_types = m.def_submodule("result_types");
@@ -153,26 +156,13 @@ PYBIND11_MODULE(_C, m) {
       })
       .def(py::init<size_t>())
       .def(py::init<DeviceType, size_t>())
-      .def("cpu", &StateVector::cpu)
-      .def("cuda", &StateVector::cuda)
+      .def("cpu", &StateVector::cpu, py::kw_only(), py::arg("stream") = nullptr)
+      .def("cuda", &StateVector::cuda, py::kw_only(),
+           py::arg("stream") = nullptr)
+      .def("copy", &StateVector::copy, py::arg("other"), py::kw_only(),
+           py::arg("stream") = nullptr)
       .def("slice", &StateVector::slice)
-      .def("copy", &StateVector::copy)
       .def("__repr__", &StateVector::formatted_string);
-
-  auto m_core = m.def_submodule("core");
-  m_core.def("mem_info", &mem_info)
-      .def("mem_info", &mem_info)
-      .def("attach_fs", &attach_fs)
-      .def("detach_fs", &detach_fs)
-      .def("is_attached_fs", &is_attached_fs)
-      .def("get_fs", &get_fs);
-
-  auto m_core_cuda = m_core.def_submodule("cuda");
-  m_core_cuda.def("mem_info", &cu::mem_info)
-      .def("device_count", &cu::device_count)
-      .def("get_device", &cu::get_device)
-      .def("set_device", &cu::set_device)
-      .def("device_synchronize", &cu::device_synchronize);
 
   // Device
   py::enum_<DeviceType>(m, "DeviceType")
@@ -191,16 +181,19 @@ PYBIND11_MODULE(_C, m) {
       .def("free", &FS::free)
       .def("dump", &FS::dump);
 
-  //  // Buffer
-  //  auto m_buffer = m.def_submodule("buffer");
-  //  py::class_<Buffer>(m_buffer, "Buffer")
-  //      .def("ptr", &Buffer::ptr)
-  //      .def("count", &Buffer::count)
-  //      .def("__repr__", &Buffer::formatted_string);
-  //  py::class_<BufferCPU, Buffer>(m_buffer,
-  //  "BufferCPU").def(py::init<size_t>()); py::class_<BufferCUDA,
-  //  Buffer>(m_buffer, "BufferCUDA")
-  //      .def(py::init<size_t>());
-  //  py::class_<BufferStorage, Buffer>(m_buffer, "BufferStorage")
-  //      .def(py::init<size_t>());
+  // Core
+  auto m_core = m.def_submodule("core");
+  m_core.def("mem_info", &mem_info)
+      .def("mem_info", &mem_info)
+      .def("attach_fs", &attach_fs)
+      .def("detach_fs", &detach_fs)
+      .def("is_attached_fs", &is_attached_fs)
+      .def("get_fs", &get_fs);
+
+  auto m_core_cuda = m_core.def_submodule("cuda");
+  m_core_cuda.def("mem_info", &cu::mem_info)
+      .def("device_count", &cu::device_count)
+      .def("get_device", &cu::get_device)
+      .def("set_device", &cu::set_device)
+      .def("device_synchronize", &cu::device_synchronize);
 }

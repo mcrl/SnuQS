@@ -11,5 +11,8 @@ Stream::~Stream() {
 
 void* Stream::get() { return stream_; }
 
-static std::shared_ptr<Stream> null_stream = std::make_shared<Stream>(nullptr);
-std::shared_ptr<Stream> Stream::null() { return null_stream; }
+std::shared_ptr<Stream> Stream::create() {
+  cudaStream_t stream;
+  CUDA_CHECK(cudaStreamCreate(&stream));
+  return std::make_shared<Stream>(reinterpret_cast<void*>(stream));
+}

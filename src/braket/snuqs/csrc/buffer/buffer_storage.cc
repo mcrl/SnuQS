@@ -11,6 +11,7 @@
 #include <cstdlib>
 
 #include "buffer/buffer_cpu.h"
+#include "buffer/buffer_cuda.h"
 #include "core/cuda/runtime.h"
 #include "core/runtime.h"
 #define SECTOR_SIZE (512)
@@ -32,8 +33,16 @@ std::string BufferStorage::formatted_string() const {
 }
 fs_addr_t BufferStorage::addr() { return fs_addr_; }
 
-std::shared_ptr<Buffer> BufferStorage::cpu() { return nullptr; }
-
-std::shared_ptr<Buffer> BufferStorage::cuda() { return nullptr; }
-
-std::shared_ptr<Buffer> BufferStorage::storage() { return shared_from_this(); }
+std::shared_ptr<Buffer> BufferStorage::cpu(std::shared_ptr<Stream> stream) {
+  auto buf = std::make_shared<BufferCPU>(count_);
+  memcpyS2H(buf->ptr(), fs_addr_, count_, stream);
+  return buf;
+}
+std::shared_ptr<Buffer> BufferStorage::cuda(std::shared_ptr<Stream> stream) {
+  auto buf_cuda = std::make_shared<BufferCUDA>(count_);
+  memcpyS2D(buf_cuda->ptr(), fs_addr_, count_, stream);
+  return buf_cuda;
+}
+std::shared_ptr<Buffer> BufferStorage::storage(std::shared_ptr<Stream> stream) {
+  return shared_from_this();
+}

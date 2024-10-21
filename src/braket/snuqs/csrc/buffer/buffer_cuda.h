@@ -12,9 +12,9 @@ class BufferCUDA : public Buffer {
   virtual void* ptr() override;
   virtual size_t count() const override;
   virtual std::string formatted_string() const override;
-  virtual std::shared_ptr<Buffer> cpu() override;
-  virtual std::shared_ptr<Buffer> cuda() override;
-  virtual std::shared_ptr<Buffer> storage() override;
+  virtual std::shared_ptr<Buffer> cpu(std::shared_ptr<Stream> stream) override;
+  virtual std::shared_ptr<Buffer> cuda(std::shared_ptr<Stream> stream) override;
+  virtual std::shared_ptr<Buffer> storage(std::shared_ptr<Stream> stream) override;
 
  private:
   size_t count_;

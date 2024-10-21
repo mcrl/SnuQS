@@ -9,7 +9,7 @@ class Stream {
   ~Stream();
   void* get();
 
-  static std::shared_ptr<Stream> null();
+  static std::shared_ptr<Stream> create();
 
  private:
   void* stream_;

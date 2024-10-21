@@ -308,8 +308,8 @@ class StateVectorSimulation(Simulation):
                     if s != 0 or i == 0:
                         state_vector_cuda.copy(state_vector_slice)
                         for op in sliced_subcircuit:
-                            apply(state_vector_cuda, op.targets,
-                                  subcircuit.qubit_count)
+                            apply(state_vector_cuda, op,
+                                  subcircuit.qubit_count, op.targets)
                         state_vector_slice.copy(state_vector_cuda)
                     else:
                         initialize_zero(state_vector_slice)
@@ -336,8 +336,8 @@ class StateVectorSimulation(Simulation):
                     if s != 0 or i == 0:
                         state_vector_cpu.copy(state_vector_slice)
                         for op in sliced_subcircuit:
-                            apply(state_vector_cpu, op.targets,
-                                  subcircuit.qubit_count)
+                            apply(state_vector_cpu, op,
+                                  subcircuit.qubit_count, op.targets)
                         state_vector_slice.copy(state_vector_cpu)
                     else:
                         initialize_zero(state_vector_slice)
@@ -359,8 +359,8 @@ class StateVectorSimulation(Simulation):
                         state_vector_cpu.copy(state_vector_slice)
                         state_vector_cuda.copy(state_vector_cpu)
                         for op in sliced_subcircuit:
-                            apply(state_vector_cuda, op.targets,
-                                  subcircuit.qubit_count)
+                            apply(state_vector_cuda, op,
+                                  subcircuit.qubit_count, op.targets)
                         state_vector_cpu.copy(state_vector_cuda)
                     else:
                         initialize_zero(state_vector_cpu)
@@ -388,13 +388,13 @@ class StateVectorSimulation(Simulation):
                                     subcircuit.max_qubit_count_cuda, j)
                                 state_vector_cuda.copy(state_vector_cpu_slice)
                                 for op in re_sliced_subcircuit:
-                                    apply(state_vector_cuda, op.targets,
-                                          subcircuit.qubit_count)
+                                    apply(state_vector_cuda, op,
+                                          subcircuit.qubit_count, op.targets)
                                 state_vector_cpu_slice.copy(state_vector_cuda)
                         else:
                             for op in sliced_subcircuit:
-                                apply(state_vector_cpu, op.targets,
-                                      subcircuit.qubit_count)
+                                apply(state_vector_cpu, op,
+                                      subcircuit.qubit_count, op.targets)
                     else:
                         initialize_zero(state_vector_cpu)
             else:

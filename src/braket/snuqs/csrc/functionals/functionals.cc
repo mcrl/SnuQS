@@ -13,7 +13,7 @@
 
 namespace functionals {
 void apply(StateVector &state_vector, GateOperation &op, size_t num_qubits,
-           std::vector<size_t> targets, Stream &stream) {
+           std::vector<size_t> targets, std::shared_ptr<Stream> stream) {
   assert(state_vector.allocated());
 
   if (state_vector.device() == DeviceType::CPU) {
@@ -27,7 +27,7 @@ void apply(StateVector &state_vector, GateOperation &op, size_t num_qubits,
   }
 }
 
-void initialize_zero(StateVector &state_vector) {
+void initialize_zero(StateVector &state_vector, std::shared_ptr<Stream> &stream) {
   assert(state_vector.allocated());
   if (state_vector.device() == DeviceType::CPU) {
     cpu::initializeZero(state_vector.ptr(), state_vector.num_elems());
@@ -38,7 +38,7 @@ void initialize_zero(StateVector &state_vector) {
   }
 }
 
-void initialize_basis_z(StateVector &state_vector) {
+void initialize_basis_z(StateVector &state_vector, std::shared_ptr<Stream> &stream) {
   assert(state_vector.allocated());
   if (state_vector.device() == DeviceType::CPU) {
     cpu::initializeBasis_Z(state_vector.ptr(), state_vector.num_elems());

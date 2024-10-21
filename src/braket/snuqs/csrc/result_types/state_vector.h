@@ -7,6 +7,7 @@
 
 #include "buffer/pbuffer.h"
 #include "device_types.h"
+#include "stream/stream.h"
 
 class StateVector : public std::enable_shared_from_this<StateVector> {
  public:
@@ -18,11 +19,11 @@ class StateVector : public std::enable_shared_from_this<StateVector> {
   virtual ~StateVector();
 
   void *ptr();
-  std::shared_ptr<StateVector> cpu();
-  std::shared_ptr<StateVector> cuda();
-  std::shared_ptr<StateVector> storage();
+  std::shared_ptr<StateVector> cpu(std::shared_ptr<Stream> stream);
+  std::shared_ptr<StateVector> cuda(std::shared_ptr<Stream> stream);
+  std::shared_ptr<StateVector> storage(std::shared_ptr<Stream> stream);
+  void copy(StateVector &other, std::shared_ptr<Stream> stream);
   std::shared_ptr<StateVector> slice(size_t num_sliced_qubits, size_t index);
-  void copy(StateVector &other);
 
   void *data();
   size_t dim() const;

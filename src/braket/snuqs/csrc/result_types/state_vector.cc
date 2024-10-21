@@ -32,22 +32,27 @@ StateVector::~StateVector() {}
 
 void *StateVector::ptr() { return buffer_->ptr(); }
 
-std::shared_ptr<StateVector> StateVector::cpu() {
+std::shared_ptr<StateVector> StateVector::cpu(std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::CPU) return shared_from_this();
   return std::make_shared<StateVector>(DeviceType::CPU, num_qubits_,
-                                       buffer_->cpu());
+                                       buffer_->cpu(stream));
 }
 
-std::shared_ptr<StateVector> StateVector::cuda() {
+std::shared_ptr<StateVector> StateVector::cuda(std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::CUDA) return shared_from_this();
   return std::make_shared<StateVector>(DeviceType::CUDA, num_qubits_,
-                                       buffer_->cuda());
+                                       buffer_->cuda(stream));
 }
 
-std::shared_ptr<StateVector> StateVector::storage() {
+std::shared_ptr<StateVector> StateVector::storage(
+    std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::STORAGE) return shared_from_this();
   return std::make_shared<StateVector>(DeviceType::STORAGE, num_qubits_,
-                                       buffer_->storage());
+                                       buffer_->storage(stream));
+}
+
+void StateVector::copy(StateVector &other, std::shared_ptr<Stream> stream) {
+  buffer_->copy(other.buffer(), stream);
 }
 
 std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
@@ -57,8 +62,6 @@ std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
       (1ul << num_sliced_qubits) * sizeof(std::complex<double>) * index);
   return std::make_shared<StateVector>(device_, num_sliced_qubits, buffer);
 }
-
-void StateVector::copy(StateVector &other) { buffer_->copy(other.buffer()); }
 
 void *StateVector::data() { return buffer_->ptr(); }
 size_t StateVector::dim() const { return 1; }

@@ -49,22 +49,22 @@ void* PBuffer::ptr() {
 std::shared_ptr<Buffer> PBuffer::buffer() { return buffer_; }
 size_t PBuffer::offset() const { return offset_; }
 
-std::shared_ptr<PBuffer> PBuffer::cpu() {
+std::shared_ptr<PBuffer> PBuffer::cpu(std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::CPU) return shared_from_this();
-  return std::make_shared<PBuffer>(DeviceType::CPU, count_, buffer_->cpu(),
-                                   offset_);
+  return std::make_shared<PBuffer>(DeviceType::CPU, count_,
+                                   buffer_->cpu(stream), offset_);
 }
 
-std::shared_ptr<PBuffer> PBuffer::cuda() {
+std::shared_ptr<PBuffer> PBuffer::cuda(std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::CUDA) return shared_from_this();
-  return std::make_shared<PBuffer>(DeviceType::CUDA, count_, buffer_->cuda(),
-                                   offset_);
+  return std::make_shared<PBuffer>(DeviceType::CUDA, count_,
+                                   buffer_->cuda(stream), offset_);
 }
 
-std::shared_ptr<PBuffer> PBuffer::storage() {
+std::shared_ptr<PBuffer> PBuffer::storage(std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::STORAGE) return shared_from_this();
   return std::make_shared<PBuffer>(DeviceType::STORAGE, count_,
-                                   buffer_->storage(), offset_);
+                                   buffer_->storage(stream), offset_);
 }
 
 std::shared_ptr<PBuffer> PBuffer::slice(size_t count, size_t offset) {
@@ -72,87 +72,79 @@ std::shared_ptr<PBuffer> PBuffer::slice(size_t count, size_t offset) {
   return std::make_shared<PBuffer>(device_, count, buffer_, offset_ + offset);
 }
 
-void PBuffer::copy(std::shared_ptr<PBuffer> other) {
+void PBuffer::copy(std::shared_ptr<PBuffer> other,
+                   std::shared_ptr<Stream> stream) {
   switch (other->device()) {
     case DeviceType::CPU:
-      copy_from_cpu(other);
+      copy_from_cpu(other, stream);
       break;
     case DeviceType::CUDA:
-      copy_from_cuda(other);
+      copy_from_cuda(other, stream);
       break;
     case DeviceType::STORAGE:
-      copy_from_storage(other);
+      copy_from_storage(other, stream);
       break;
     default:
       assert(false);
   }
 }
 
-void PBuffer::copy_from_cpu(std::shared_ptr<PBuffer> other) {
+void PBuffer::copy_from_cpu(std::shared_ptr<PBuffer> other,
+                            std::shared_ptr<Stream> stream) {
   assert(other->device() == Device::CPU);
   assert(count_ == other->count());
   switch (device_) {
     case DeviceType::CPU:
-      memcpyH2H(ptr(), other->ptr(), count_);
+      memcpyH2H(ptr(), other->ptr(), count_, stream);
       break;
     case DeviceType::CUDA:
-      memcpyH2D(ptr(), other->ptr(), count_);
+      memcpyH2D(ptr(), other->ptr(), count_, stream);
       break;
     case DeviceType::STORAGE: {
       auto bs = dynamic_cast<BufferStorage*>(buffer_.get());
-      memcpyH2S(bs->addr(), other->ptr(), count_);
+      memcpyH2S(bs->addr(), other->ptr(), count_, stream);
     } break;
     default:
       assert(false);
   }
 }
 
-void PBuffer::copy_from_cuda(std::shared_ptr<PBuffer> other) {
+void PBuffer::copy_from_cuda(std::shared_ptr<PBuffer> other,
+                             std::shared_ptr<Stream> stream) {
   assert(other->device() == Device::CUDA);
   assert(count_ == other->count());
   switch (device_) {
     case DeviceType::CPU:
-      memcpyD2H(ptr(), other->ptr(), count_);
+      memcpyD2H(ptr(), other->ptr(), count_, stream);
       break;
     case DeviceType::CUDA:
-      memcpyD2D(ptr(), other->ptr(), count_);
+      memcpyD2D(ptr(), other->ptr(), count_, stream);
       break;
     case DeviceType::STORAGE: {
       auto bs = dynamic_cast<BufferStorage*>(other->buffer().get());
-      auto buf_cpu = std::make_shared<BufferCPU>(count_, true);  // pinned
-      spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes",
-                   count_);
-      memcpyD2H(buf_cpu->ptr(), ptr(), count_);
-      memcpyH2S(bs->addr(), buf_cpu->ptr(), count_);
+      memcpyD2S(bs->addr(), ptr(), count_, stream);
     } break;
     default:
       assert(false);
   }
 }
-void PBuffer::copy_from_storage(std::shared_ptr<PBuffer> other) {
+void PBuffer::copy_from_storage(std::shared_ptr<PBuffer> other,
+                                std::shared_ptr<Stream> stream) {
   assert(other->device() == Device::STORAGE);
   assert(count_ == other->count());
   switch (device_) {
     case DeviceType::CPU: {
       auto bs = dynamic_cast<BufferStorage*>(other->buffer().get());
-      memcpyS2H(ptr(), bs->addr(), count_);
+      memcpyS2H(ptr(), bs->addr(), count_, stream);
     } break;
     case DeviceType::CUDA: {
       auto bs = dynamic_cast<BufferStorage*>(other->buffer().get());
-      auto buf_cpu = std::make_shared<BufferCPU>(count_, true);  // pinned
-      spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes",
-                   count_);
-      memcpyS2H(buf_cpu->ptr(), bs->addr(), count_);
-      memcpyH2D(ptr(), buf_cpu->ptr(), count_);
+      memcpyS2D(ptr(), bs->addr(), count_, stream);
     } break;
     case DeviceType::STORAGE: {
       auto bs_src = dynamic_cast<BufferStorage*>(other->buffer().get());
       auto bs_dst = dynamic_cast<BufferStorage*>(buffer_.get());
-      auto buf_cpu = std::make_shared<BufferCPU>(count_, true);  // pinned
-      spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes",
-                   count_);
-      memcpyS2H(buf_cpu->ptr(), bs_src->addr(), count_);
-      memcpyH2S(bs_dst->addr(), buf_cpu->ptr(), count_);
+      memcpyS2S(bs_dst->addr(), bs_src->addr(), count_, stream);
     } break;
     default:
       assert(false);
