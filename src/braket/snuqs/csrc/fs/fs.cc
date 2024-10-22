@@ -168,14 +168,9 @@ void FS::read(fs_addr_t addr, void* buf, size_t count, size_t offset,
           std::min((size_t)SSIZE_MAX,
                    std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
                             (size_t)(nbytes - nbytes_read)));
-      printf(
-          "READ fd: %d, device_offset: %lu, nbytes_read: %lu, bytes_to_read: "
-          "%lu\n",
-          fd, device_offset, nbytes_read, bytes_to_read);
-
 #pragma omp task
       {
-        printf("Reading fd: %d, device_offset: %lu, bytes_to_write: %lu\n", fd,
+        printf("Reading fd: %d, device_offset: %lu, bytes_to_read: %lu\n", fd,
                device_offset, bytes_to_read);
         size_t current = 0;
         while (current < bytes_to_read) {
@@ -210,11 +205,6 @@ void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
           std::min((size_t)SSIZE_MAX,
                    std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
                             (size_t)(nbytes - nbytes_written)));
-      printf(
-          "WRITE fd: %d, device_offset: %lu, nbytes_written: %lu, "
-          "bytes_to_write: "
-          "%lu\n",
-          fd, device_offset, nbytes_written, bytes_to_write);
 #pragma omp task
       {
         printf("Writing fd: %d, device_offset: %lu, bytes_to_write: %lu\n", fd,
