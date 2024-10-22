@@ -201,6 +201,7 @@ class StateVectorSimulation(Simulation):
         Note:
             Mutating this array will mutate the state of the simulation.
         """
+        print("state_vector()")
         return np.array(self._state_vector.cpu(), copy=False)
 
     @property

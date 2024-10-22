@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <cassert>
+#include <complex>
 
 #define SECTOR_SIZE (512)
 #define ALIGNMENT (512)
@@ -17,7 +18,10 @@ std::string fs_addr_t::formatted_string() const {
 }
 
 FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
-    : count_(count), blk_count_(blk_count), path_(path) {
+    : row_size_(blk_count * path.size()),
+      blk_count_(blk_count),
+      count_((count + row_size_ - 1) / row_size_ * row_size_),
+      path_(path) {
   assert(blk_count % SECTOR_SIZE == 0);
 
   for (auto& p : path_) {
@@ -28,8 +32,9 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
 
   void* addr = nullptr;
   size_t offset = 0;
-  size_t num_blks = count / blk_count;
+  size_t num_blks = count_ / row_size_;
   size_t mapped_blks = 0;
+  ptr_ = nullptr;
   while (mapped_blks < num_blks) {
     for (auto fd : fds_) {
       addr =
@@ -41,7 +46,7 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
   }
   ptr_ = addr;
 
-  free_list_.push_back({0, count, ptr_});
+  free_list_.push_back({0, count_, ptr_});
 }
 
 FS::~FS() {

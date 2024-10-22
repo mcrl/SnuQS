@@ -27,8 +27,9 @@ class FS {
   std::pair<int, size_t> get_offset(size_t pos) const;
 
  private:
-  size_t count_;
+  size_t row_size_;
   size_t blk_count_;
+  size_t count_;
   std::vector<std::string> path_;
   std::vector<size_t> fds_;
   std::vector<fs_addr_t> free_list_;

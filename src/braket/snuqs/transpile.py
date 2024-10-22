@@ -402,6 +402,7 @@ def compute_max_qubit_count(qubit_count: int, prefetch: PrefetchType):
     max_count = int(math.log(free / 16, 2))
     if prefetch != PrefetchType.NONE:
         max_count -= 1
+    max_count -= 1
     return min(qubit_count, max_count)
 
 def compute_max_qubit_count_cuda(qubit_count: int, prefetch: PrefetchType):
