@@ -148,7 +148,7 @@ void FS::dump() const {
   }
 }
 
-void FS::read(fs_addr_t addr, void* buf, size_t count,
+void FS::read(fs_addr_t addr, void* buf, size_t count, size_t offset,
               std::shared_ptr<Stream> stream) {
   CUDA_CHECK(cudaStreamSynchronize(
       reinterpret_cast<cudaStream_t>(stream == nullptr ? 0 : stream->get())));
@@ -161,18 +161,25 @@ void FS::read(fs_addr_t addr, void* buf, size_t count,
 #pragma omp single
   {
     while (nbytes_read < nbytes) {
-      auto off_info = get_offset(nbytes_read);
+      auto off_info = get_offset(offset + nbytes_read);
       int fd = off_info.first;
-      size_t offset = off_info.second;
+      size_t device_offset = off_info.second;
       size_t bytes_to_read =
           std::min((size_t)SSIZE_MAX,
-                   std::min((size_t)(blk_count_ - (offset % blk_count_)),
+                   std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
                             (size_t)(nbytes - nbytes_read)));
+      printf(
+          "READ fd: %d, device_offset: %lu, nbytes_read: %lu, bytes_to_read: "
+          "%lu\n",
+          fd, device_offset, nbytes_read, bytes_to_read);
+
 #pragma omp task
       {
+        printf("Reading fd: %d, device_offset: %lu, bytes_to_write: %lu\n", fd,
+               device_offset, bytes_to_read);
         size_t current = 0;
         while (current < bytes_to_read) {
-          ssize_t ret = pread(fd, buf, bytes_to_read, offset);
+          ssize_t ret = pread(fd, buf, bytes_to_read, device_offset);
           assert(ret != -1);
           current += ret;
         }
@@ -183,7 +190,7 @@ void FS::read(fs_addr_t addr, void* buf, size_t count,
   }
 }
 
-void FS::write(fs_addr_t addr, void* buf, size_t count,
+void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
   CUDA_CHECK(cudaStreamSynchronize(
       reinterpret_cast<cudaStream_t>(stream == nullptr ? 0 : stream->get())));
@@ -196,18 +203,25 @@ void FS::write(fs_addr_t addr, void* buf, size_t count,
 #pragma omp single
   {
     while (nbytes_written < nbytes) {
-      auto off_info = get_offset(nbytes_written);
+      auto off_info = get_offset(offset + nbytes_written);
       int fd = off_info.first;
-      size_t offset = off_info.second;
+      size_t device_offset = off_info.second;
       size_t bytes_to_write =
           std::min((size_t)SSIZE_MAX,
-                   std::min((size_t)(blk_count_ - (offset % blk_count_)),
+                   std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
                             (size_t)(nbytes - nbytes_written)));
+      printf(
+          "WRITE fd: %d, device_offset: %lu, nbytes_written: %lu, "
+          "bytes_to_write: "
+          "%lu\n",
+          fd, device_offset, nbytes_written, bytes_to_write);
 #pragma omp task
       {
+        printf("Writing fd: %d, device_offset: %lu, bytes_to_write: %lu\n", fd,
+               device_offset, bytes_to_write);
         size_t current = 0;
         while (current < bytes_to_write) {
-          ssize_t ret = pwrite(fd, buf, bytes_to_write, offset);
+          ssize_t ret = pwrite(fd, buf, bytes_to_write, device_offset);
           assert(ret != -1);
           current += ret;
         }
@@ -220,6 +234,7 @@ void FS::write(fs_addr_t addr, void* buf, size_t count,
 
 std::pair<int, size_t> FS::get_offset(size_t pos) const {
   size_t num_devices = fds_.size();
+  printf("num_devices: %d, pos: %lu\n", fds_.size(), pos);
   size_t row_size = blk_count_ * num_devices;
   size_t device = (pos / blk_count_) % num_devices;
   size_t offset = (pos / row_size) * blk_count_;

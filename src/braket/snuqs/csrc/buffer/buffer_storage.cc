@@ -36,12 +36,12 @@ fs_addr_t BufferStorage::addr() { return fs_addr_; }
 
 std::shared_ptr<Buffer> BufferStorage::cpu(std::shared_ptr<Stream> stream) {
   auto buf = std::make_shared<BufferCPU>(count_);
-  memcpyS2H(buf->ptr(), fs_addr_, count_, stream);
+  memcpyS2H(buf->ptr(), fs_addr_, count_, 0, stream);
   return buf;
 }
 std::shared_ptr<Buffer> BufferStorage::cuda(std::shared_ptr<Stream> stream) {
   auto buf_cuda = std::make_shared<BufferCUDA>(count_);
-  memcpyS2D(buf_cuda->ptr(), fs_addr_, count_, stream);
+  memcpyS2D(buf_cuda->ptr(), fs_addr_, count_, 0, stream);
   return buf_cuda;
 }
 std::shared_ptr<Buffer> BufferStorage::storage(std::shared_ptr<Stream> stream) {

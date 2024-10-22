@@ -104,7 +104,7 @@ void PBuffer::copy_from_cpu(std::shared_ptr<PBuffer> other,
       break;
     case DeviceType::STORAGE: {
       auto bs = dynamic_cast<BufferStorage*>(buffer_.get());
-      memcpyH2S(bs->addr(), other->ptr(), count_, stream);
+      memcpyH2S(bs->addr(), other->ptr(), count_, offset_, stream);
     } break;
     default:
       assert(false);
@@ -124,7 +124,7 @@ void PBuffer::copy_from_cuda(std::shared_ptr<PBuffer> other,
       break;
     case DeviceType::STORAGE: {
       auto bs = dynamic_cast<BufferStorage*>(other->buffer().get());
-      memcpyD2S(bs->addr(), ptr(), count_, stream);
+      memcpyD2S(bs->addr(), ptr(), count_, offset_, stream);
     } break;
     default:
       assert(false);
@@ -137,16 +137,17 @@ void PBuffer::copy_from_storage(std::shared_ptr<PBuffer> other,
   switch (device_) {
     case DeviceType::CPU: {
       auto bs = dynamic_cast<BufferStorage*>(other->buffer().get());
-      memcpyS2H(ptr(), bs->addr(), count_, stream);
+      memcpyS2H(ptr(), bs->addr(), count_, offset_, stream);
     } break;
     case DeviceType::CUDA: {
       auto bs = dynamic_cast<BufferStorage*>(other->buffer().get());
-      memcpyS2D(ptr(), bs->addr(), count_, stream);
+      memcpyS2D(ptr(), bs->addr(), count_, offset_, stream);
     } break;
     case DeviceType::STORAGE: {
       auto bs_src = dynamic_cast<BufferStorage*>(other->buffer().get());
       auto bs_dst = dynamic_cast<BufferStorage*>(buffer_.get());
-      memcpyS2S(bs_dst->addr(), bs_src->addr(), count_, stream);
+      memcpyS2S(bs_dst->addr(), bs_src->addr(), count_, offset_,
+                other->offset(), stream);
     } break;
     default:
       assert(false);

@@ -22,16 +22,15 @@ void memcpyD2H(void *dst, void *src, size_t count,
                std::shared_ptr<Stream> stream);
 void memcpyD2D(void *dst, void *src, size_t count,
                std::shared_ptr<Stream> stream);
-void memcpyS2H(void *dst, fs_addr_t src, size_t count,
+void memcpyS2H(void *dst, fs_addr_t src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream);
-void memcpyH2S(fs_addr_t dst, void *src, size_t count,
+void memcpyH2S(fs_addr_t dst, void *src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream);
-void memcpyD2S(fs_addr_t dst, void *src, size_t count,
+void memcpyD2S(fs_addr_t dst, void *src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream);
-void memcpyS2D(void *dst, fs_addr_t src, size_t count,
+void memcpyS2D(void *dst, fs_addr_t src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream);
-void memcpyS2S(fs_addr_t dst, fs_addr_t src, size_t count,
-               std::shared_ptr<Stream> stream);
-
+void memcpyS2S(fs_addr_t dst, fs_addr_t src, size_t count, size_t offset_dst,
+               size_t offset_src, std::shared_ptr<Stream> stream);
 
 #endif  //_RUNTIME_H_

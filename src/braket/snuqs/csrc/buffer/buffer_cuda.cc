@@ -37,6 +37,6 @@ std::shared_ptr<Buffer> BufferCUDA::cuda(std::shared_ptr<Stream> stream) {
 
 std::shared_ptr<Buffer> BufferCUDA::storage(std::shared_ptr<Stream> stream) {
   auto buf_storage = std::make_shared<BufferStorage>(count_);
-  memcpyD2S(buf_storage->addr(), ptr_, count_, stream);
+  memcpyD2S(buf_storage->addr(), ptr_, count_, 0, stream);
   return buf_storage;
 }

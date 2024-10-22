@@ -69,40 +69,40 @@ void memcpyD2D(void *dst, void *src, size_t count,
                                  stream == nullptr ? nullptr : stream->get())));
 }
 
-void memcpyS2H(void *dst, fs_addr_t src, size_t count,
+void memcpyS2H(void *dst, fs_addr_t src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
-  spdlog::info("memcpyS2H({}, {}, {})", dst, src.start, count);
+  spdlog::info("memcpyS2H({}, {}, {}, {})", dst, src.start, count, offset);
   std::shared_ptr<FS> fs = get_fs();
-  fs->read(src, dst, count, stream);
+  fs->read(src, dst, count, offset, stream);
 }
 
-void memcpyH2S(fs_addr_t dst, void *src, size_t count,
+void memcpyH2S(fs_addr_t dst, void *src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
-  spdlog::info("memcpyH2S({}, {}, {})", dst.start, src, count);
+  spdlog::info("memcpyH2S({}, {}, {}, {})", dst.start, src, count, offset);
   std::shared_ptr<FS> fs = get_fs();
-  fs->write(dst, src, count, stream);
+  fs->write(dst, src, count, offset, stream);
 }
 
-void memcpyD2S(fs_addr_t dst, void *src, size_t count,
+void memcpyD2S(fs_addr_t dst, void *src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
   auto buf_cpu = std::make_shared<BufferCPU>(count, true);  // pinned
   spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
   memcpyD2H(buf_cpu->ptr(), src, count, stream);
-  memcpyH2S(dst, buf_cpu->ptr(), count, stream);
+  memcpyH2S(dst, buf_cpu->ptr(), count, offset, stream);
 }
 
-void memcpyS2D(void *dst, fs_addr_t src, size_t count,
+void memcpyS2D(void *dst, fs_addr_t src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
   auto buf_cpu = std::make_shared<BufferCPU>(count, true);  // pinned
   spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
-  memcpyS2H(buf_cpu->ptr(), src, count, stream);
+  memcpyS2H(buf_cpu->ptr(), src, count, offset, stream);
   memcpyH2D(dst, buf_cpu->ptr(), count, stream);
 }
 
-void memcpyS2S(fs_addr_t dst, fs_addr_t src, size_t count,
-               std::shared_ptr<Stream> stream) {
+void memcpyS2S(fs_addr_t dst, fs_addr_t src, size_t count, size_t offset_dst,
+               size_t offset_src, std::shared_ptr<Stream> stream) {
   auto buf_cpu = std::make_shared<BufferCPU>(count, true);  // pinned
   spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
-  memcpyS2H(buf_cpu->ptr(), src, count, stream);
-  memcpyH2S(dst, buf_cpu->ptr(), count, stream);
+  memcpyS2H(buf_cpu->ptr(), src, count, offset_src, stream);
+  memcpyH2S(dst, buf_cpu->ptr(), count, offset_dst, stream);
 }
