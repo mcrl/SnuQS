@@ -10,6 +10,7 @@ install_requires = [
     'pyyaml==6.0.1',
     'cmake==3.29.0',
     'ninja==1.11.1.1',
+    'tqdm==4.66.5',
     'amazon-braket-sdk==1.87.1',
     'amazon-braket-schemas==1.22.1',
 #    'qiskit==1.2.4',

@@ -9,7 +9,9 @@
 #include <unistd.h>
 
 #include <cassert>
-#include <complex>
+
+#include <cuda_runtime.h>
+#include "utils_cuda.h"
 
 #define SECTOR_SIZE (512)
 #define ALIGNMENT (512)
@@ -148,6 +150,8 @@ void FS::dump() const {
 
 void FS::read(fs_addr_t addr, void* buf, size_t count,
               std::shared_ptr<Stream> stream) {
+  CUDA_CHECK(cudaStreamSynchronize(stream->get()));
+
   size_t nbytes = count;
   size_t nbytes_read = 0;
 
@@ -180,6 +184,8 @@ void FS::read(fs_addr_t addr, void* buf, size_t count,
 
 void FS::write(fs_addr_t addr, void* buf, size_t count,
                std::shared_ptr<Stream> stream) {
+  CUDA_CHECK(cudaStreamSynchronize(stream->get()));
+
   size_t nbytes = count;
   size_t nbytes_written = 0;
 
