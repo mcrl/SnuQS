@@ -4,13 +4,10 @@
 
 #include <complex>
 
-#include "buffer/buffer.h"
-#include "buffer/buffer_cpu.h"
-#include "buffer/buffer_cuda.h"
-#include "buffer/buffer_storage.h"
 #include "core/cuda/runtime.h"
 #include "core/runtime.h"
 #include "device_types.h"
+#include "event/event.h"
 #include "fs/fs.h"
 #include "functionals/functionals.h"
 #include "operation/gate_operations.h"
@@ -127,8 +124,19 @@ PYBIND11_MODULE(_C, m) {
   py::class_<Stream, std::shared_ptr<Stream>>(m_stream, "Stream")
       .def(py::init<void *>())
       .def("get", &Stream::get)
+      .def("synchronize", &Stream::synchronize)
+      .def("wait_event", &Stream::wait_event)
       .def("create", &Stream::create)
       .def("create_nonblocking", &Stream::create_nonblocking);
+
+  // Event
+  auto m_event = m.def_submodule("event");
+  py::class_<Event, std::shared_ptr<Event>>(m_event, "Event")
+      .def(py::init<void *>())
+      .def("get", &Event::get)
+      .def("record", &Event::record)
+      .def("synchronize", &Event::synchronize)
+      .def("create", &Event::create);
 
   // Functionals
   auto m_functionals = m.def_submodule("functionals");
