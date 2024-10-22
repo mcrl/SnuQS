@@ -29,7 +29,10 @@ conda activate <name>
 ```
 
 ### AWS
-TBD
+```
+... = AwsDevice()
+...
+```
 
 ## Installation
 ```
