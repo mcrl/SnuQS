@@ -1,18 +1,18 @@
 import numpy as np
-from braket.snuqs.operation import GateOperation
 from abc import ABC, abstractmethod
-from typing import Optional, List
 
-from braket.snuqs._C import StateVector
-from braket.snuqs._C.functionals import apply as apply_C, initialize_basis_z as initialize_basis_z_C
-from braket.snuqs.device import DeviceType
-from braket.snuqs.offload import OffloadType
+from braket.snuqs._C.result_types import StateVector
+from braket.snuqs.subcircuit import Subcircuit
+from braket.snuqs._C.functionals import apply
+from braket.snuqs._C.functionals import initialize_basis_z, initialize_zero
+from braket.snuqs._C import DeviceType
+from braket.snuqs.types import AcceleratorType, OffloadType
 
 
 class Simulation(ABC):
     """
     This class tracks the evolution of a quantum system with `qubit_count` qubits.
-    The state of system the evolves by application of `GateOperation`s using the `evolve()` method.
+    The state of system the evolves by application of `Subcircuit`s using the `evolve()` method.
     """
 
     def __init__(self, qubit_count: int, shots: int):
@@ -61,12 +61,12 @@ class Simulation(ABC):
         raise NotImplementedError("probabilities has not been implemented.")
 
     @abstractmethod
-    def evolve(self, operations: list[GateOperation], use_cuda: bool = False) -> None:
+    def evolve(self, subcircuit: Subcircuit) -> None:
         """Evolves the state of the simulation under the action of
         the specified gate operations.
 
         Args:
-            operations (list[GateOperation]): Gate operations to apply for
+            subcircuit (Subcircuit): Gate operations to apply for
                 evolving the state of the simulation.
 
         Note:
@@ -76,7 +76,7 @@ class Simulation(ABC):
 
 
 class StateVectorSimulation(Simulation):
-    def __init__(self, qubit_count: int, shots: int):
+    def __init__(self, qubit_count: int, shots: int, subcircuit: Subcircuit):
         r"""
         Args:
             qubit_count (int): The number of qubits being simulated.
@@ -87,9 +87,101 @@ class StateVectorSimulation(Simulation):
         """
 
         super().__init__(qubit_count=qubit_count, shots=shots)
-        self._state_vector = StateVector(qubit_count)
-        self._state_vector.cpu()
-        initialize_basis_z_C(self._state_vector)
+        self._initialize_memory_objects(subcircuit)
+
+    def _initialize_memory_objects(self, subcircuit: Subcircuit):
+        match subcircuit.offload:
+            case OffloadType.NONE:
+                self._initialize_memory_objects_no_offload(subcircuit)
+            case OffloadType.CPU:
+                self._initialize_memory_objects_cpu_offload(subcircuit)
+            case OffloadType.STORAGE:
+                self._initialize_memory_objects_storage_offload(subcircuit)
+            case _:
+                raise TypeError(f"Unknown type {subcircuit.offload}")
+
+    def _initialize_memory_objects_no_offload(self, subcircuit: Subcircuit):
+        match subcircuit.accelerator:
+            case AcceleratorType.CPU:
+                self._state_vector = StateVector(subcircuit.qubit_count)
+                initialize_basis_z(self._state_vector)
+
+            case AcceleratorType.CUDA:
+                self._state_vector = StateVector(
+                    DeviceType.CUDA, subcircuit.qubit_count)
+                initialize_basis_z(self._state_vector)
+
+            case AcceleratorType.HYBRID:
+                self._state_vector = StateVector(subcircuit.qubit_count)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                state_vector_slice = self._state_vector.slice(
+                    subcircuit.max_qubit_count_cuda, 0)
+                initialize_basis_z(state_vector_slice)
+
+            case _:
+                raise TypeError(f"Unknown type {subcircuit.accelerator}")
+
+    def _initialize_memory_objects_cpu_offload(self, subcircuit: Subcircuit):
+        match subcircuit.accelerator:
+            case AcceleratorType.CPU:
+                self._state_vector = StateVector(subcircuit.qubit_count)
+                initialize_basis_z(self._state_vector)
+
+            case AcceleratorType.CUDA:
+                self._state_vector = StateVector(subcircuit.qubit_count)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+
+                state_vector_slice = self._state_vector.slice(
+                    subcircuit.max_qubit_count_cuda, 0)
+                initialize_basis_z(state_vector_slice)
+
+            case AcceleratorType.HYBRID:
+                self._state_vector = StateVector(subcircuit.qubit_count)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+
+                state_vector_slice = self._state_vector.slice(
+                    self._max_qubit_count_cuda, 0)
+                initialize_basis_z(state_vector_slice)
+
+            case _:
+                raise TypeError(f"Unknown type {subcircuit.accelerator}")
+
+    def _initialize_memory_objects_storage_offload(self, subcircuit: Subcircuit):
+        match subcircuit.accelerator:
+            case AcceleratorType.CPU:
+                self._state_vector = StateVector(
+                    DeviceType.STORAGE, subcircuit.qubit_count)
+                self._state_vector_cpu = StateVector(
+                    subcircuit.max_qubit_count)
+                initialize_basis_z(self._state_vector_cpu)
+
+            case AcceleratorType.CUDA:
+                self._state_vector = StateVector(
+                    DeviceType.STORAGE, subcircuit.qubit_count)
+                self._state_vector_cpu = StateVector(
+                    subcircuit.max_qubit_count_cuda)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                state_vector_slice = self._state_vector_cpu.slice(
+                    subcircuit.max_qubit_count_cuda, 0)
+                initialize_basis_z(state_vector_slice)
+
+            case AcceleratorType.HYBRID:
+                self._state_vector = StateVector(
+                    DeviceType.STORAGE, subcircuit.qubit_count)
+                self._state_vector_cpu = StateVector(
+                    subcircuit.max_qubit_count_cuda)
+                self._state_vector_cuda = StateVector(
+                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                state_vector_slice = self._state_vector_cpu.slice(
+                    subcircuit.max_qubit_count_cuda, 0)
+                initialize_basis_z(state_vector_slice)
+
+            case _:
+                raise TypeError(f"Unknown type {subcircuit.accelerator}")
 
     @property
     def state_vector(self) -> np.ndarray:
@@ -99,7 +191,7 @@ class StateVectorSimulation(Simulation):
         Note:
             Mutating this array will mutate the state of the simulation.
         """
-        return np.array(self._state_vector, copy=False)
+        return np.array(self._state_vector.cpu(), copy=False)
 
     @property
     def probabilities(self) -> np.ndarray:
@@ -112,71 +204,199 @@ class StateVectorSimulation(Simulation):
     def retrieve_samples(self) -> list[int]:
         return np.random.choice(len(self.state_vector), p=self.probabilities, size=self._shots)
 
-    def evolve(self,
-               operations: list[GateOperation],
-               *,
-               device: Optional[DeviceType] = None,
-               offload: Optional[OffloadType] = None,
-               path: Optional[List[str]] = None) -> None:
+    def evolve(self, subcircuit: Subcircuit) -> None:
+        offload = subcircuit.offload
 
-        if device is None:
-            device = DeviceType.CPU
-        if offload is None:
-            offload = OffloadType.NONE
+        match offload:
+            case OffloadType.NONE:
+                self._evolve_no_offload(subcircuit)
+            case OffloadType.CPU:
+                self._evolve_cpu_offload(subcircuit)
+            case OffloadType.STORAGE:
+                self._evolve_storage_offload(subcircuit)
+            case _:
+                raise TypeError(f"Unknown type {offload}")
 
-        if device == DeviceType.CPU and offload == OffloadType.NONE:
-            return self._evolve_cpu(operations)
-        elif device == DeviceType.CPU and offload == OffloadType.CPU:
-            return self._evolve_cpu_offload_cpu(operations)
-        elif device == DeviceType.CPU and offload == OffloadType.STORAGE:
-            return self._evolve_cpu_offload_storage(operations, path)
-        elif device == DeviceType.CUDA and offload == OffloadType.NONE:
-            return self._evolve_cuda(operations)
-        elif device == DeviceType.CUDA and offload == OffloadType.CPU:
-            return self._evolve_cuda_offload_cpu(operations)
-        elif device == DeviceType.CUDA and offload == OffloadType.STORAGE:
-            return self._evolve_cuda_offload_storage(operations, path)
+    def _evolve_no_offload(self, subcircuit: Subcircuit) -> None:
+        accelerator = subcircuit.accelerator
+        match accelerator:
+            case AcceleratorType.CPU:
+                self._evolve_no_offload_cpu(subcircuit)
+            case AcceleratorType.CUDA:
+                self._evolve_no_offload_cuda(subcircuit)
+            case AcceleratorType.HYBRID:
+                self._evolve_no_offload_hybrid(subcircuit)
+            case _:
+                raise TypeError(f"Unknown type {accelerator}")
 
-    def _evolve_cpu(self, operations: list[GateOperation]) -> None:
+    def _evolve_cpu_offload(self, subcircuit: Subcircuit) -> None:
+        accelerator = subcircuit.accelerator
+        match accelerator:
+            case AcceleratorType.CPU:
+                self._evolve_cpu_offload_cpu(subcircuit)
+            case AcceleratorType.CUDA:
+                self._evolve_cpu_offload_cuda(subcircuit)
+            case AcceleratorType.HYBRID:
+                self._evolve_cpu_offload_hybrid(subcircuit)
+            case _:
+                raise TypeError(f"Unknown type {accelerator}")
+
+    def _evolve_storage_offload(self, subcircuit: Subcircuit) -> None:
+        accelerator = subcircuit.accelerator
+        match accelerator:
+            case AcceleratorType.CPU:
+                self._evolve_storage_offload_cpu(subcircuit)
+            case AcceleratorType.CUDA:
+                self._evolve_storage_offload_cuda(subcircuit)
+            case AcceleratorType.HYBRID:
+                self._evolve_storage_offload_hybrid(subcircuit)
+            case _:
+                raise TypeError(f"Unknown type {accelerator}")
+
+    #
+    # No offload
+    #
+    def _evolve_no_offload_cpu(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
+        operations = subcircuit.operations
+        for op in operations:
+            apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
-        for operation in operations:
-            targets = operation.targets
-            apply_C(state_vector, operation, targets, False)
-
-    def _evolve_cpu_offload_cpu(self, operations: list[GateOperation]) -> None:
-        return self._evolve_cpu(operations)
-
-    def _evolve_cpu_offload_storage(self, operations: list[GateOperation],
-                                    path: Optional[List[str]] = None) -> None:
-        raise NotImplementedError("Not Implemented")
-
-    def _evolve_cuda(self, operations: list[GateOperation]) -> None:
+    def _evolve_no_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
+        operations = subcircuit.operations
+        for op in operations:
+            apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
-        state_vector.cuda()
-
-        for operation in operations:
-            targets = operation.targets
-            apply_C(state_vector, operation, targets, True)
-
-        state_vector.cpu()
-
-    def _evolve_cuda_offload_cpu(self, operations: list[GateOperation]) -> None:
+    def _evolve_no_offload_hybrid(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
+        state_vector_cuda = self._state_vector_cuda
 
-        state_vector.cuda()
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    state_vector_slice = state_vector.slice(
+                        subcircuit.max_qubit_count_cuda, i)
+                    if s != 0 or i == 0:
+                        state_vector_cuda.copy(state_vector_slice)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cuda, op,
+                                  subcircuit.qubit_count, op.targets)
+                        state_vector_slice.copy(state_vector_cuda)
+                    else:
+                        initialize_zero(state_vector_slice)
+            else:
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
-        for operation in operations:
-            targets = operation.targets
-            apply_C(state_vector, operation, targets, True)
+    #
+    # CPU offload
+    #
+    def _evolve_cpu_offload_cpu(self, subcircuit: Subcircuit) -> None:
+        """CPU offload with CPU simulation is equivalent to CPU simulation"""
+        return self._evolve_cpu(subcircuit)
 
-        state_vector.cpu()
+    def _evolve_cpu_offload_cuda(self, subcircuit: Subcircuit) -> None:
+        state_vector = self._state_vector
+        state_vector_cuda = self._state_vector_cuda
 
-    def _evolve_cuda_offload_storage(self,
-                                     operations: list[GateOperation],
-                                     path: Optional[List[str]] = None) -> None:
-        raise NotImplementedError("Not Implemented")
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    state_vector_slice = state_vector.slice(
+                        subcircuit.max_qubit_count_cuda, i)
+                    if s != 0 or i == 0:
+                        state_vector_cuda.copy(state_vector_slice)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cuda, op,
+                                  subcircuit.qubit_count, op.targets)
+                        state_vector_slice.copy(state_vector_cuda)
+                    else:
+                        initialize_zero(state_vector_slice)
+            else:
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
 
-    def _transpile(self, operations: list[GateOperation]):
-        pass
+    def _evolve_cpu_offload_hybrid(self, subcircuit: Subcircuit) -> None:
+        """CPU offload with Hybrid simulation is equivalent to Hybrid simulation"""
+        return self._evolve_no_offload_hybrid(subcircuit)
+
+    #
+    # Storage offload
+    #
+    def _evolve_storage_offload_cpu(self, subcircuit: Subcircuit) -> None:
+        state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
+
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    state_vector_slice = state_vector.slice(
+                        subcircuit.max_qubit_count, i)
+                    if s != 0 or i == 0:
+                        state_vector_cpu.copy(state_vector_slice)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cpu, op,
+                                  subcircuit.qubit_count, op.targets)
+                        state_vector_slice.copy(state_vector_cpu)
+                    else:
+                        initialize_zero(state_vector_slice)
+            else:
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
+
+    def _evolve_storage_offload_cuda(self, subcircuit: Subcircuit) -> None:
+        state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
+        state_vector_cuda = self._state_vector_cuda
+
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    state_vector_slice = state_vector.slice(
+                        subcircuit.max_qubit_count, i)
+                    if s != 0 or i == 0:
+                        state_vector_cpu.copy(state_vector_slice)
+                        state_vector_cuda.copy(state_vector_cpu)
+                        for op in sliced_subcircuit:
+                            apply(state_vector_cuda, op,
+                                  subcircuit.qubit_count, op.targets)
+                        state_vector_cpu.copy(state_vector_cuda)
+                    else:
+                        initialize_zero(state_vector_cpu)
+
+                    state_vector_slice.copy(state_vector_cpu)
+            else:
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
+
+    def _evolve_storage_offload_hybrid(self, subcircuit: Subcircuit) -> None:
+        state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
+        state_vector_cuda = self._state_vector_cuda
+
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    state_vector_slice = state_vector.slice(
+                        subcircuit.max_qubit_count, i)
+                    if s != 0 or i == 0:
+                        state_vector_cpu.copy(state_vector_slice)
+                        if isinstance(sliced_subcircuit[0], list):
+                            for j, re_sliced_subcircuit in enumerate(sliced_subcircuit):
+                                state_vector_cpu_slice = state_vector_cpu.slice(
+                                    subcircuit.max_qubit_count_cuda, j)
+                                state_vector_cuda.copy(state_vector_cpu_slice)
+                                for op in re_sliced_subcircuit:
+                                    apply(state_vector_cuda, op,
+                                          subcircuit.qubit_count, op.targets)
+                                state_vector_cpu_slice.copy(state_vector_cuda)
+                        else:
+                            for op in sliced_subcircuit:
+                                apply(state_vector_cpu, op,
+                                      subcircuit.qubit_count, op.targets)
+                    else:
+                        initialize_zero(state_vector_cpu)
+            else:
+                for op in partitioned_subcircuit:
+                    apply(state_vector, op, subcircuit.qubit_count, op.targets)

@@ -1,4 +1,4 @@
-from braket.snuqs.operation import GateOperation
+from braket.snuqs._C.operation import GateOperation
 
 import numpy as np
 import braket.ir.jaqcd as braket_instruction
@@ -8,7 +8,7 @@ from braket.snuqs.operation_helpers import (
     check_unitary,
     ir_matrix_to_ndarray,
 )
-from braket.snuqs._C.gate_operations import (
+from braket.snuqs._C.operation.gate_operations import (
     Identity,
     Hadamard, PauliX, PauliY, PauliZ,
     CX, CY, CZ, S, Si, T, Ti, V, Vi,

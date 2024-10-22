@@ -16,3 +16,6 @@
 [submodule "benchmark/QASMBench"]
 	path = benchmark/QASMBench
 	url = https://github.com/pnnl/QASMBench
+[submodule "3rd-party/libaio"]
+	path = 3rd-party/libaio
+	url = https://pagure.io/libaio

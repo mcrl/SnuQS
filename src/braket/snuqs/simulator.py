@@ -16,13 +16,15 @@ from typing import Union, List, Optional, Any
 from braket.snuqs.operation_helpers import (
     from_braket_instruction,
 )
+from braket.snuqs._C.core import attach_fs, is_attached_fs
 from braket.snuqs.operation import Operation
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
+from braket.snuqs.subcircuit import Subcircuit
+from braket.snuqs.transpile import transpile
 from braket.snuqs.openqasm.circuit import Circuit as OpenQASMCircuit
 from braket.snuqs.openqasm.interpreter import Interpreter
 from braket.snuqs.openqasm.program_context import AbstractProgramContext, ProgramContext
-from braket.snuqs.device import DeviceType
-from braket.snuqs.offload import OffloadType
+from braket.snuqs.types import AcceleratorType, PrefetchType, OffloadType
 from braket.ir.jaqcd import Program as JaqcdProgram
 from braket.ir.jaqcd.shared_models import MultiTarget, OptionalMultiTarget
 from braket.ir.jaqcd.program_v1 import Results
@@ -36,22 +38,41 @@ from braket.snuqs.result_types import (
 
 class BaseSimulator(ABC):
     @staticmethod
-    def _validate_device_type(device: str):
-        supported_devices = {
-            'cpu': DeviceType.CPU,
-            'cuda': DeviceType.CUDA,
-            'hybrid': DeviceType.HYBRID,
+    def _validate_simulation_type(accelerator: Optional[str]):
+        supported_accelerators = {
+            'cpu': AcceleratorType.CPU,
+            'cuda': AcceleratorType.CUDA,
+            'hybrid': AcceleratorType.HYBRID,
         }
-        if device is None:
-            return DeviceType.CPU
+        if accelerator is None:
+            return AcceleratorType.CPU
 
-        if device not in supported_devices:
-            raise TypeError(f"Device {device} is not supported")
+        if accelerator not in supported_accelerators:
+            raise TypeError(f"Accelerator {accelerator} is not supported")
 
-        return supported_devices[device]
+        return supported_accelerators[accelerator]
 
     @staticmethod
-    def _validate_offload_type(offload: Optional[str], path: Optional[List[str]]):
+    def _validate_prefetch_type(prefetch: Optional[str]):
+        supported_prefetches = {
+            'none': PrefetchType.NONE,
+            'cuda': PrefetchType.CUDA,
+            'storage': PrefetchType.STORAGE,
+        }
+        if prefetch is None:
+            return PrefetchType.NONE
+
+        if prefetch not in supported_prefetches:
+            raise TypeError(f"Prefetch {prefetch} is not supported")
+
+        return supported_prefetches[prefetch]
+
+    @staticmethod
+    def _validate_offload_type(offload: Optional[str],
+                               path: Optional[List[str]],
+                               count: Optional[int],
+                               block_count: Optional[int],
+                               ):
         supported_offloads = {
             'none': OffloadType.NONE,
             'cpu': OffloadType.CPU,
@@ -62,7 +83,17 @@ class BaseSimulator(ABC):
 
         if offload not in supported_offloads:
             raise TypeError(f"Offload {offload} is not supported")
-        return supported_offloads[offload]
+
+        offload_type = supported_offloads[offload]
+        if offload_type == OffloadType.STORAGE:
+            if path is None:
+                raise ValueError("path must be given for storage offloading")
+
+            if block_count > count:
+                raise ValueError(
+                    f"block_count is larger than count: {block_count} > {count}")
+
+        return offload_type
 
     def create_program_context(self) -> AbstractProgramContext:
         return ProgramContext()
@@ -323,11 +354,17 @@ class BaseSimulator(ABC):
                      qubit_count: Any = None,
                      shots: int = 0,
                      *,
-                     device: Optional[str] = None,
+                     accelerator: Optional[str] = None,
+                     prefetch: Optional[str] = None,
                      offload: Optional[str] = None,
-                     path: Optional[List[str]] = None) -> GateModelTaskResult:
-        device = BaseSimulator._validate_device_type(device)
-        offload = BaseSimulator._validate_offload_type(offload, path)
+                     path: Optional[List[str]] = None,
+                     count: Optional[int] = None,
+                     block_count: Optional[int] = None,
+                     ) -> GateModelTaskResult:
+        accelerator = BaseSimulator._validate_simulation_type(accelerator)
+        prefetch = BaseSimulator._validate_prefetch_type(prefetch)
+        offload = BaseSimulator._validate_offload_type(
+            offload, path, count, block_count)
 
         circuit = self.parse_program(ir).circuit
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(circuit)
@@ -338,13 +375,23 @@ class BaseSimulator(ABC):
         )
 
         operations = circuit.instructions
+        if shots:
+            for instruction in circuit.basis_rotation_instructions:
+                operations.append(instruction)
 
+        if offload == OffloadType.STORAGE and not is_attached_fs():
+            attach_fs(count, block_count, path)
+
+        subcircuit = transpile(
+            qubit_count,
+            operations,
+            accelerator,
+            prefetch,
+            offload,
+        )
         simulation = self.initialize_simulation(
-            qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations,
-                          device=device,
-                          offload=offload,
-                          path=path)
+            qubit_count=qubit_count, shots=shots, subcircuit=subcircuit)
+        simulation.evolve(subcircuit)
 
         results = circuit.results
         if not shots:
@@ -354,11 +401,6 @@ class BaseSimulator(ABC):
                 result_types,
                 simulation,
             )
-        else:
-            simulation.evolve(
-                circuit.basis_rotation_instructions, device=device,
-                offload=offload,
-                path=path)
 
         return self._create_results_obj(
             results, ir, simulation, measured_qubits, mapped_measured_qubits
@@ -368,11 +410,17 @@ class BaseSimulator(ABC):
                   qubit_count: Any = None,
                   shots: int = 0,
                   *,
-                  device: Optional[str] = None,
+                  accelerator: Optional[str] = None,
+                  prefetch: Optional[str] = None,
                   offload: Optional[str] = None,
-                  path: Optional[List[str]] = None) -> GateModelTaskResult:
-        device = BaseSimulator._validate_device_type(device)
-        offload = BaseSimulator._validate_offload_type(offload, path)
+                  path: Optional[List[str]] = None,
+                  count: Optional[int] = None,
+                  block_count: Optional[int] = None,
+                  ) -> GateModelTaskResult:
+        accelerator = BaseSimulator._validate_simulation_type(accelerator)
+        prefetch = BaseSimulator._validate_prefetch_type(prefetch)
+        offload = BaseSimulator._validate_offload_type(
+            offload, path, count, block_count)
 
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(ir)
         qubit_count = len(qubit_map)
@@ -380,15 +428,24 @@ class BaseSimulator(ABC):
         operations = [
             from_braket_instruction(instr) for instr in ir.instructions
         ]
+
         if shots > 0 and ir.basis_rotation_instructions:
             for instruction in ir.basis_rotation_instructions:
                 operations.append(from_braket_instruction(instruction))
 
+        if offload == OffloadType.STORAGE and not is_attached_fs():
+            attach_fs(count, block_count, path)
+
+        subcircuit = transpile(
+            qubit_count,
+            operations,
+            accelerator,
+            prefetch,
+            offload,
+        )
         simulation = self.initialize_simulation(
-            qubit_count=qubit_count, shots=shots)
-        simulation.evolve(operations, device=device,
-                          offload=offload,
-                          path=path)
+            qubit_count=qubit_count, shots=shots, subcircuit=subcircuit)
+        simulation.evolve(subcircuit)
 
         results = []
         if not shots and ir.results:
@@ -417,8 +474,8 @@ class BaseSimulator(ABC):
 class StateVectorSimulator(BaseSimulator):
     DEVICE_ID = "snuqs"
 
-    def __init__(self, *args, **kwargs):
-        self.max_qubits = 40
+    def __init__(self):
+        self.max_qubits = 42
 
     def _service(self):
         return {
@@ -587,8 +644,11 @@ class StateVectorSimulator(BaseSimulator):
             }
         )
 
-    def initialize_simulation(self, **kwargs) -> StateVectorSimulation:
+    def initialize_simulation(self,
+                              *,
+                              qubit_count: int,
+                              shots: int,
+                              subcircuit: Subcircuit,
+                              ) -> StateVectorSimulation:
         """Initializes simulation with keyword arguments"""
-        qubit_count = kwargs.get("qubit_count")
-        shots = kwargs.get("shots")
-        return StateVectorSimulation(qubit_count, shots)
+        return StateVectorSimulation(qubit_count, shots, subcircuit)
