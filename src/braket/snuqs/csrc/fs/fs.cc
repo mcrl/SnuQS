@@ -234,7 +234,6 @@ void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
 
 std::pair<int, size_t> FS::get_offset(size_t pos) const {
   size_t num_devices = fds_.size();
-  printf("num_devices: %d, pos: %lu\n", fds_.size(), pos);
   size_t row_size = blk_count_ * num_devices;
   size_t device = (pos / blk_count_) % num_devices;
   size_t offset = (pos / row_size) * blk_count_;
