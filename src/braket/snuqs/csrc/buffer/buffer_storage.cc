@@ -20,6 +20,7 @@ BufferStorage::BufferStorage(size_t count) : count_(count) {
   assert(count >= blk_count);
   assert(count % blk_count == 0);
   assert(is_attached_fs());
+  spdlog::info("BufferStorage({})", count);
   fs_ = get_fs();
   fs_addr_ = fs_->alloc(count);
 }

@@ -376,6 +376,7 @@ class StateVectorSimulation(Simulation):
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    print(f"Slice #{i}/{len(partitioned_subcircuit)}")
                     state_vector_slices = [
                         state_vector.slice(
                             subcircuit.slice_qubit_count,
@@ -387,6 +388,7 @@ class StateVectorSimulation(Simulation):
                             state_vector_slice_cpu.copy(state_vector_slice)
 
                         for op in sliced_subcircuit:
+                            print(op, flush=True)
                             apply(state_vector_cpu, op,
                                   subcircuit.qubit_count, op.targets)
 
@@ -398,6 +400,7 @@ class StateVectorSimulation(Simulation):
                         state_vector_slice.copy(state_vector_slice_cpu)
             else:
                 for op in partitioned_subcircuit:
+                    print(op, flush=True)
                     assert (isinstance(op, Swap))
                     slice_map = {
                         slice_map[j]: slice_map[self._swap_index(

@@ -33,7 +33,7 @@ StateVector::~StateVector() {}
 void *StateVector::ptr() { return buffer_->ptr(); }
 
 std::shared_ptr<StateVector> StateVector::cpu(std::shared_ptr<Stream> stream) {
-  if (device_ == DeviceType::CPU) return shared_from_this();
+  if (device_ == DeviceType::CPU || device_ == DeviceType::STORAGE) return shared_from_this();
   return std::make_shared<StateVector>(DeviceType::CPU, num_qubits_,
                                        buffer_->cpu(stream));
 }
