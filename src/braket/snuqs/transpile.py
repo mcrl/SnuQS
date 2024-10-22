@@ -149,7 +149,8 @@ def select_permutation(idx: int,
 
 def build_permutation_gates(new_perm: list[int],
                             qubit_count: int,
-                            local_qubit_count: int) -> list[GateOperation]:
+                            local_qubit_count: int,
+                            slice_qubit_count: int) -> list[GateOperation]:
     perm_gates = []
     perm_map = {i: i for i in range(qubit_count)}
     new_perm_map = {q: i for i, q, in enumerate(new_perm)}
@@ -199,7 +200,11 @@ def rearrange_targets(operations: list[GateOperation], new_perm: list[int]):
         op.targets = [new_perm_inverse[t] for t in op.targets]
     return operations
 
-def localize_operations(operations: list[GateOperation], qubit_count: int, local_qubit_count: int):
+def localize_operations(operations: list[GateOperation],
+                        qubit_count: int,
+                        local_qubit_count: int,
+                        slice_qubit_count: int,
+                        ):
     cleanup_operations = []
     slice_qubit_count = qubit_count - local_qubit_count
 
@@ -214,7 +219,7 @@ def localize_operations(operations: list[GateOperation], qubit_count: int, local
             new_perm = select_permutation(
                 i, operations, qubit_count, local_qubit_count)
             perm_gates = build_permutation_gates(
-                new_perm, qubit_count, local_qubit_count)
+                new_perm, qubit_count, local_qubit_count, slice_qubit_count)
             localized_operations += perm_gates
             cleanup_operations = list(
                 reversed(perm_gates)) + cleanup_operations
@@ -298,7 +303,8 @@ def transpile_cpu_offload_cpu(subcircuit: Subcircuit):
 def transpile_cpu_offload_cuda(subcircuit: Subcircuit):
     subcircuit.operations = localize_operations(subcircuit.operations,
                                                 subcircuit.qubit_count,
-                                                subcircuit.max_qubit_count_cuda)
+                                                subcircuit.max_qubit_count_cuda,
+                                                subcircuit.slice_qubit_count)
     subcircuit.operations = optimize_operations(subcircuit.operations)
     subcircuit.operations = partition_operations(subcircuit.operations,
                                                  subcircuit.qubit_count,
@@ -344,7 +350,8 @@ def transpile_storage_offload(subcircuit: Subcircuit):
 def transpile_storage_offload_cpu(subcircuit: Subcircuit):
     subcircuit.operations = localize_operations(subcircuit.operations,
                                                 subcircuit.qubit_count,
-                                                subcircuit.max_qubit_count)
+                                                subcircuit.max_qubit_count,
+                                                subcircuit.slice_qubit_count)
     subcircuit.operations = optimize_operations(subcircuit.operations)
     subcircuit.operations = partition_operations(subcircuit.operations,
                                                  subcircuit.qubit_count,
@@ -354,7 +361,8 @@ def transpile_storage_offload_cpu(subcircuit: Subcircuit):
 def transpile_storage_offload_cuda(subcircuit: Subcircuit):
     subcircuit.operations = localize_operations(subcircuit.operations,
                                                 subcircuit.qubit_count,
-                                                subcircuit.max_qubit_count_cuda)
+                                                subcircuit.max_qubit_count_cuda,
+                                                subcircuit.slice_qubit_count)
     subcircuit.operations = optimize_operations(subcircuit.operations)
     subcircuit.operations = partition_operations(subcircuit.operations,
                                                  subcircuit.qubit_count,
@@ -364,7 +372,8 @@ def transpile_storage_offload_cuda(subcircuit: Subcircuit):
 def transpile_storage_offload_hybrid(subcircuit: Subcircuit):
     subcircuit.operations = localize_operations(subcircuit.operations,
                                                 subcircuit.qubit_count,
-                                                subcircuit.max_qubit_count)
+                                                subcircuit.max_qubit_count,
+                                                subcircuit.slice_qubit_count)
     subcircuit.operations = optimize_operations(subcircuit.operations)
     subcircuit.operations = partition_operations(subcircuit.operations,
                                                  subcircuit.qubit_count,
@@ -409,11 +418,13 @@ def transpile(
         accelerator: AcceleratorType,
         prefetch: PrefetchType,
         offload: OffloadType) -> Subcircuit:
+    max_qubit_count = compute_max_qubit_count(qubit_count, prefetch)
+    max_qubit_count_cuda = compute_max_qubit_count_cuda(qubit_count, prefetch)
     subcircuit = Subcircuit(
         qubit_count=qubit_count,
-        max_qubit_count=compute_max_qubit_count(qubit_count, prefetch),
-        max_qubit_count_cuda=compute_max_qubit_count_cuda(
-            qubit_count, prefetch),
+        max_qubit_count=max_qubit_count,
+        max_qubit_count_cuda=max_qubit_count_cuda,
+        slice_qubit_count=max_qubit_count_cuda-1,
         accelerator=accelerator,
         prefetch=prefetch,
         offload=offload,

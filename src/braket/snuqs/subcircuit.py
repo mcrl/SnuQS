@@ -10,6 +10,7 @@ class Subcircuit:
     qubit_count: int
     max_qubit_count: int
     max_qubit_count_cuda: int
+    slice_qubit_count: int
     accelerator: AcceleratorType
     prefetch: PrefetchType
     offload: OffloadType

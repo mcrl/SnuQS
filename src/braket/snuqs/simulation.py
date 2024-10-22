@@ -5,8 +5,10 @@ from braket.snuqs._C.result_types import StateVector
 from braket.snuqs.subcircuit import Subcircuit
 from braket.snuqs._C.functionals import apply
 from braket.snuqs._C.functionals import initialize_basis_z, initialize_zero
+from braket.snuqs._C.core.cuda import device_synchronize
 from braket.snuqs._C import DeviceType
 from braket.snuqs.types import AcceleratorType, OffloadType
+from braket.snuqs._C.operation.gate_operations import Swap
 
 
 class Simulation(ABC):
@@ -89,6 +91,14 @@ class StateVectorSimulation(Simulation):
         super().__init__(qubit_count=qubit_count, shots=shots)
         self._initialize_memory_objects(subcircuit)
 
+    def _swap_index(self, index: int, target0: int, target1: int):
+        v0 = (index & (1 << target0)) >> target0
+        v1 = (index & (1 << target1)) >> target1
+        v = v0 ^ v1
+        index = index ^ (v << target0)
+        index = index ^ (v << target1)
+        return index
+
     def _initialize_memory_objects(self, subcircuit: Subcircuit):
         match subcircuit.offload:
             case OffloadType.NONE:
@@ -112,7 +122,7 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(self._state_vector)
 
             case AcceleratorType.HYBRID:
-                self._state_vector = StateVector(subcircuit.qubit_count)
+                self._state_vector = StateVector(subcircuit.qubit_count, True)
                 self._state_vector_cuda = StateVector(
                     DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
                 state_vector_slice = self._state_vector.slice(
@@ -129,7 +139,7 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(self._state_vector)
 
             case AcceleratorType.CUDA:
-                self._state_vector = StateVector(subcircuit.qubit_count)
+                self._state_vector = StateVector(subcircuit.qubit_count, True)
                 self._state_vector_cuda = StateVector(
                     DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
 
@@ -138,12 +148,12 @@ class StateVectorSimulation(Simulation):
                 initialize_basis_z(state_vector_slice)
 
             case AcceleratorType.HYBRID:
-                self._state_vector = StateVector(subcircuit.qubit_count)
+                self._state_vector = StateVector(subcircuit.qubit_count, True)
                 self._state_vector_cuda = StateVector(
                     DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
 
                 state_vector_slice = self._state_vector.slice(
-                    self._max_qubit_count_cuda, 0)
+                    subcircuit.max_qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case _:
@@ -294,28 +304,53 @@ class StateVectorSimulation(Simulation):
     #
     def _evolve_cpu_offload_cpu(self, subcircuit: Subcircuit) -> None:
         """CPU offload with CPU simulation is equivalent to CPU simulation"""
-        return self._evolve_cpu(subcircuit)
+        return self._evolve_no_offload_cpu(subcircuit)
 
     def _evolve_cpu_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
 
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        slice_map = {
+            i: i for i in range(2**permutable_qubit_count)
+        }
+        state_vector_slices_cuda = [
+            state_vector_cuda.slice(subcircuit.slice_qubit_count, j)
+            for j in range(2**(subcircuit.max_qubit_count_cuda - subcircuit.slice_qubit_count))
+        ]
+        num_slices = 2**(subcircuit.max_qubit_count_cuda -
+                         subcircuit.slice_qubit_count)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
-                    state_vector_slice = state_vector.slice(
-                        subcircuit.max_qubit_count_cuda, i)
+                    state_vector_slices = [
+                        state_vector.slice(
+                            subcircuit.slice_qubit_count,
+                            slice_map[num_slices*i+j]) for j in range(num_slices)
+                    ]
+
                     if s != 0 or i == 0:
-                        state_vector_cuda.copy(state_vector_slice)
+                        for state_vector_slice, state_vector_slice_cuda in zip(state_vector_slices, state_vector_slices_cuda):
+                            state_vector_slice_cuda.copy(state_vector_slice)
+
                         for op in sliced_subcircuit:
                             apply(state_vector_cuda, op,
                                   subcircuit.qubit_count, op.targets)
-                        state_vector_slice.copy(state_vector_cuda)
+
+                        for state_vector_slice, state_vector_slice_cuda in zip(state_vector_slices, state_vector_slices_cuda):
+                            state_vector_slice.copy(state_vector_slice_cuda)
                     else:
-                        initialize_zero(state_vector_slice)
+                        for state_vector_slice in state_vector_slices:
+                            initialize_zero(state_vector_slice)
             else:
                 for op in partitioned_subcircuit:
-                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
+                    assert (isinstance(op, Swap))
+                    slice_map = {
+                        slice_map[j]: slice_map[self._swap_index(
+                            slice_map[j], op.targets[0], op.targets[1])]
+                        for j in range(2**permutable_qubit_count)
+                    }
+        device_synchronize()
 
     def _evolve_cpu_offload_hybrid(self, subcircuit: Subcircuit) -> None:
         """CPU offload with Hybrid simulation is equivalent to Hybrid simulation"""
@@ -328,49 +363,162 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
 
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        slice_map = {
+            i: i for i in range(2**permutable_qubit_count)
+        }
+        state_vector_slices_cpu = [
+            state_vector_cpu.slice(subcircuit.slice_qubit_count, j)
+            for j in range(2**(subcircuit.max_qubit_count - subcircuit.slice_qubit_count))
+        ]
+        num_slices = 2**(subcircuit.max_qubit_count -
+                         subcircuit.slice_qubit_count)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
-                    state_vector_slice = state_vector.slice(
-                        subcircuit.max_qubit_count, i)
+                    state_vector_slices = [
+                        state_vector.slice(
+                            subcircuit.slice_qubit_count,
+                            slice_map[num_slices*i+j]) for j in range(num_slices)
+                    ]
+
                     if s != 0 or i == 0:
-                        state_vector_cpu.copy(state_vector_slice)
+                        for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
+                            state_vector_slice_cpu.copy(state_vector_slice)
+
                         for op in sliced_subcircuit:
                             apply(state_vector_cpu, op,
                                   subcircuit.qubit_count, op.targets)
-                        state_vector_slice.copy(state_vector_cpu)
+
                     else:
-                        initialize_zero(state_vector_slice)
+                        for state_vector_slice in state_vector_slices:
+                            initialize_zero(state_vector_slice)
+
+                    for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
+                        state_vector_slice.copy(state_vector_slice_cpu)
             else:
                 for op in partitioned_subcircuit:
-                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
+                    assert (isinstance(op, Swap))
+                    slice_map = {
+                        slice_map[j]: slice_map[self._swap_index(
+                            slice_map[j], op.targets[0], op.targets[1])]
+                        for j in range(2**permutable_qubit_count)
+                    }
+        device_synchronize()
 
     def _evolve_storage_offload_cuda(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
         state_vector_cuda = self._state_vector_cuda
 
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        slice_map = {
+            i: i for i in range(2**permutable_qubit_count)
+        }
+        state_vector_slices_cpu = [
+            state_vector_cpu.slice(subcircuit.slice_qubit_count, j)
+            for j in range(2**(subcircuit.max_qubit_count_cuda - subcircuit.slice_qubit_count))
+        ]
+        state_vector_slices_cuda = [
+            state_vector_cuda.slice(subcircuit.slice_qubit_count, j)
+            for j in range(2**(subcircuit.max_qubit_count_cuda - subcircuit.slice_qubit_count))
+        ]
+        num_slices = 2**(subcircuit.max_qubit_count_cuda -
+                         subcircuit.slice_qubit_count)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
-                    state_vector_slice = state_vector.slice(
-                        subcircuit.max_qubit_count, i)
+                    state_vector_slices = [
+                        state_vector.slice(
+                            subcircuit.slice_qubit_count,
+                            slice_map[num_slices*i+j]) for j in range(num_slices)
+                    ]
+
                     if s != 0 or i == 0:
-                        state_vector_cpu.copy(state_vector_slice)
-                        state_vector_cuda.copy(state_vector_cpu)
+                        for state_vector_slice, state_vector_slice_cpu, state_vector_slice_cuda in zip(state_vector_slices, state_vector_slices_cpu, state_vector_slices_cuda):
+                            state_vector_slice_cpu.copy(state_vector_slice)
+                            state_vector_slice_cuda.copy(
+                                state_vector_slice_cpu)
+
                         for op in sliced_subcircuit:
                             apply(state_vector_cuda, op,
                                   subcircuit.qubit_count, op.targets)
-                        state_vector_cpu.copy(state_vector_cuda)
+
+                        for state_vector_slice_cpu, state_vector_slice_cuda in zip(state_vector_slices_cpu, state_vector_slices_cuda):
+                            state_vector_slice_cpu.copy(
+                                state_vector_slice_cuda)
                     else:
                         initialize_zero(state_vector_cpu)
 
-                    state_vector_slice.copy(state_vector_cpu)
+                    for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
+                        state_vector_slice.copy(state_vector_slice_cpu)
             else:
                 for op in partitioned_subcircuit:
-                    apply(state_vector, op, subcircuit.qubit_count, op.targets)
+                    assert (isinstance(op, Swap))
+                    slice_map = {
+                        slice_map[j]: slice_map[self._swap_index(
+                            slice_map[j], op.targets[0], op.targets[1])]
+                        for j in range(2**permutable_qubit_count)
+                    }
+        device_synchronize()
 
     def _evolve_storage_offload_hybrid(self, subcircuit: Subcircuit) -> None:
+        state_vector = self._state_vector
+        state_vector_cpu = self._state_vector_cpu
+        state_vector_cuda = self._state_vector_cuda
+
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        slice_map = {
+            i: i for i in range(2**permutable_qubit_count)
+        }
+        state_vector_slices_cpu = [
+            state_vector_cpu.slice(subcircuit.slice_qubit_count, j)
+            for j in range(2**(subcircuit.max_qubit_count - subcircuit.slice_qubit_count))
+        ]
+        num_slices = 2**(subcircuit.max_qubit_count -
+                         subcircuit.slice_qubit_count)
+        for s, partitioned_subcircuit in enumerate(subcircuit.operations):
+            if isinstance(partitioned_subcircuit[0], list):
+                for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
+                    state_vector_slices = [
+                        state_vector.slice(
+                            subcircuit.slice_qubit_count,
+                            slice_map[num_slices*i+j]) for j in range(num_slices)
+                    ]
+
+                    if s != 0 or i == 0:
+                        for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
+                            state_vector_slice_cpu.copy(state_vector_slice)
+
+                        if isinstance(sliced_subcircuit[0], list):
+                            for j, re_sliced_subcircuit in enumerate(sliced_subcircuit):
+                                state_vector_cpu_slice = state_vector_cpu.slice(
+                                    subcircuit.max_qubit_count_cuda, j)
+                                state_vector_cuda.copy(state_vector_cpu_slice)
+                                for op in re_sliced_subcircuit:
+                                    apply(state_vector_cuda, op,
+                                          subcircuit.qubit_count, op.targets)
+                                state_vector_cpu_slice.copy(state_vector_cuda)
+                        else:
+                            for op in sliced_subcircuit:
+                                apply(state_vector_cpu, op,
+                                      subcircuit.qubit_count, op.targets)
+                    else:
+                        for state_vector_slice in state_vector_slices:
+                            initialize_zero(state_vector_slice)
+
+                    for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
+                        state_vector_slice.copy(state_vector_slice_cpu)
+            else:
+                for op in partitioned_subcircuit:
+                    assert (isinstance(op, Swap))
+                    slice_map = {
+                        slice_map[j]: slice_map[self._swap_index(
+                            slice_map[j], op.targets[0], op.targets[1])]
+                        for j in range(2**permutable_qubit_count)
+                    }
+        device_synchronize()
+
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
         state_vector_cuda = self._state_vector_cuda

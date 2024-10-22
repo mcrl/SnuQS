@@ -141,7 +141,8 @@ void FS::dump() const {
   }
 }
 
-void FS::read(fs_addr_t addr, void* buf, size_t count) {
+void FS::read(fs_addr_t addr, void* buf, size_t count,
+              std::shared_ptr<Stream> stream) {
   size_t nbytes = count;
   size_t nbytes_read = 0;
 
@@ -172,7 +173,8 @@ void FS::read(fs_addr_t addr, void* buf, size_t count) {
   }
 }
 
-void FS::write(fs_addr_t addr, void* buf, size_t count) {
+void FS::write(fs_addr_t addr, void* buf, size_t count,
+               std::shared_ptr<Stream> stream) {
   size_t nbytes = count;
   size_t nbytes_written = 0;
 

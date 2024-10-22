@@ -50,29 +50,35 @@ void memcpyH2H(void *dst, void *src, size_t count,
 
 void memcpyH2D(void *dst, void *src, size_t count,
                std::shared_ptr<Stream> stream) {
-  CUDA_CHECK(cudaMemcpy(dst, src, count, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpyAsync(dst, src, count, cudaMemcpyHostToDevice,
+                             reinterpret_cast<cudaStream_t>(
+                                 stream == nullptr ? nullptr : stream->get())));
 }
 
 void memcpyD2H(void *dst, void *src, size_t count,
                std::shared_ptr<Stream> stream) {
-  CUDA_CHECK(cudaMemcpy(dst, src, count, cudaMemcpyDeviceToHost));
+  CUDA_CHECK(cudaMemcpyAsync(dst, src, count, cudaMemcpyDeviceToHost,
+                             reinterpret_cast<cudaStream_t>(
+                                 stream == nullptr ? nullptr : stream->get())));
 }
 
 void memcpyD2D(void *dst, void *src, size_t count,
                std::shared_ptr<Stream> stream) {
-  CUDA_CHECK(cudaMemcpy(dst, src, count, cudaMemcpyDeviceToDevice));
+  CUDA_CHECK(cudaMemcpyAsync(dst, src, count, cudaMemcpyDeviceToDevice,
+                             reinterpret_cast<cudaStream_t>(
+                                 stream == nullptr ? nullptr : stream->get())));
 }
 
 void memcpyS2H(void *dst, fs_addr_t src, size_t count,
                std::shared_ptr<Stream> stream) {
   std::shared_ptr<FS> fs = get_fs();
-  fs->read(src, dst, count);
+  fs->read(src, dst, count, stream);
 }
 
 void memcpyH2S(fs_addr_t dst, void *src, size_t count,
                std::shared_ptr<Stream> stream) {
   std::shared_ptr<FS> fs = get_fs();
-  fs->write(dst, src, count);
+  fs->write(dst, src, count, stream);
 }
 
 void memcpyD2S(fs_addr_t dst, void *src, size_t count,

@@ -10,6 +10,7 @@ class Stream {
   void* get();
 
   static std::shared_ptr<Stream> create();
+  static std::shared_ptr<Stream> create_nonblocking();
 
  private:
   void* stream_;

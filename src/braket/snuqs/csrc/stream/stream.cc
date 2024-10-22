@@ -16,3 +16,9 @@ std::shared_ptr<Stream> Stream::create() {
   CUDA_CHECK(cudaStreamCreate(&stream));
   return std::make_shared<Stream>(reinterpret_cast<void*>(stream));
 }
+
+std::shared_ptr<Stream> Stream::create_nonblocking() {
+  cudaStream_t stream;
+  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
+  return std::make_shared<Stream>(reinterpret_cast<void*>(stream));
+}

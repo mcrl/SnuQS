@@ -172,7 +172,7 @@ bool GateOperation::anti_diagonal() const {
   }
   return true;
 }
-bool GateOperation::sliceable() const { return diagonal(); }
+bool GateOperation::sliceable() const { return false; }
 std::string GateOperation::name() const {
   return gate_operation_type_to_string(type_);
 }

@@ -127,7 +127,8 @@ PYBIND11_MODULE(_C, m) {
   py::class_<Stream, std::shared_ptr<Stream>>(m_stream, "Stream")
       .def(py::init<void *>())
       .def("get", &Stream::get)
-      .def("create", &Stream::create);
+      .def("create", &Stream::create)
+      .def("create_nonblocking", &Stream::create_nonblocking);
 
   // Functionals
   auto m_functionals = m.def_submodule("functionals");
@@ -155,6 +156,7 @@ PYBIND11_MODULE(_C, m) {
             sv.dim(), sv.shape(), {sizeof(std::complex<double>)});
       })
       .def(py::init<size_t>())
+      .def(py::init<size_t, bool>())
       .def(py::init<DeviceType, size_t>())
       .def("cpu", &StateVector::cpu, py::kw_only(), py::arg("stream") = nullptr)
       .def("cuda", &StateVector::cuda, py::kw_only(),
@@ -162,7 +164,8 @@ PYBIND11_MODULE(_C, m) {
       .def("copy", &StateVector::copy, py::arg("other"), py::kw_only(),
            py::arg("stream") = nullptr)
       .def("slice", &StateVector::slice)
-      .def("__repr__", &StateVector::formatted_string);
+      .def("__repr__", &StateVector::formatted_string)
+      .def("num_elems", &StateVector::num_elems);
 
   // Device
   py::enum_<DeviceType>(m, "DeviceType")
