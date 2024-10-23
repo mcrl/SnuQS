@@ -135,10 +135,12 @@ class BraketTest(unittest.TestCase):
         print("\t\t=> Done")
 
         print("\tRunning braket")
-        task_braket = self.run_snuqs(circ, accelerator='cpu')
+        task_braket = self.run_braket(circ)
         result_braket = task_braket.result().values
         print("\t\t=> Done")
 
+        print(result_snuqs)
+        print(result_braket)
         self.assertTrue(np.allclose(
             result_snuqs,
             result_braket,
@@ -146,40 +148,60 @@ class BraketTest(unittest.TestCase):
 
 #    def test_1_braket_snuqs_cpu(self):
 #        print("Testing Braket-SnuQS CPU")
-#        self.run_benchmark(15, 1000, accelerator='cpu')
+#        self.run_benchmark(15, 2000, accelerator='cpu')
 #
 #    def test_2_braket_snuqs_cuda(self):
 #        print("Testing Braket-SnuQS CUDA")
-#        self.run_benchmark(15, 1000, accelerator='cuda')
+#        self.run_benchmark(15, 2000, accelerator='cuda')
 #
 #    def test_3_braket_snuqs_hybrid(self):
 #        print("Testing Braket-SnuQS Hybrid")
-#        self.run_benchmark(31, 100, accelerator='hybrid')
+#        self.run_benchmark(15, 2000,
+#                           qubit_count_cpu=15,
+#                           qubit_count_cuda=14,
+#                           qubit_count_slice=13,
+#                           accelerator='hybrid')
 #
 #    def test_4_braket_snuqs_cpu_offload_cpu(self):
 #        print("Testing Braket-SnuQS CPU-Offload CPU")
-#        self.run_benchmark(31, 100, accelerator='cpu', offload='cpu')
+#        self.run_benchmark(15, 2000,
+#                           qubit_count_cpu=15,
+#                           qubit_count_cuda=14,
+#                           qubit_count_slice=13,
+#                           accelerator='cpu',
+#                           offload='cpu')
 #
 #    def test_5_braket_snuqs_cpu_offload_cuda(self):
 #        print("Testing Braket-SnuQS CPU-Offload CUDA")
-#        self.run_benchmark(31, 100, accelerator='cuda', offload='cpu')
+#        self.run_benchmark(15, 2000,
+#                           qubit_count_cpu=15,
+#                           qubit_count_cuda=14,
+#                           qubit_count_slice=13,
+#                           accelerator='cuda',
+#                           offload='cpu')
 #
 #    def test_6_braket_snuqs_cpu_offload_hybrid(self):
 #        print("Testing Braket-SnuQS CPU-Offload Hybrid")
-#        self.run_benchmark(31, 100, accelerator='hybrid', offload='cpu')
+#        self.run_benchmark(15, 1000,
+#                           qubit_count_cpu=15,
+#                           qubit_count_cuda=14,
+#                           qubit_count_slice=13,
+#                           accelerator='hybrid',
+#                           offload='cpu')
 #
     def test_7_braket_snuqs_storage_offload_cpu(self):
         print("Testing Braket-SnuQS Stroage-Offload Hybrid")
-        self.run_benchmark(25, 0,
-                           qubit_count_cpu=24,
-                           qubit_count_cuda=24,
-                           qubit_count_slice=23,
-                           accelerator='cpu',
-                           offload='storage',
-                           path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
-                                 '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
-                           block_count=2**21
-                           )
+        for _ in range(100):
+            self.run_benchmark(16, 0,
+                               qubit_count_cpu=15,
+                               qubit_count_cuda=14,
+                               qubit_count_slice=13,
+                               accelerator='cpu',
+                               offload='storage',
+                               path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
+                                     '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
+                               block_count=2**12
+                               )
 
 #    def test_7_braket_snuqs_storage_offload_cuda(self):
 #        print("Testing Braket-SnuQS Stroage-Offload Hybrid")

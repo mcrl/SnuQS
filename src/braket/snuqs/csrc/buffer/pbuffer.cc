@@ -40,7 +40,8 @@ PBuffer::PBuffer(DeviceType device, size_t count,
                  std::shared_ptr<Buffer> buffer, size_t offset)
     : device_(device), count_(count), buffer_(buffer), offset_(offset) {
   assert(count_ <= buffer_->count());
-  //spdlog::info("Pbuffer(device: {}, count: {}, offset: {})", (int)device, count, offset);
+  // spdlog::info("Pbuffer(device: {}, count: {}, offset: {})", (int)device,
+  // count, offset);
 }
 DeviceType PBuffer::device() const { return device_; }
 size_t PBuffer::count() const { return count_; }
@@ -49,6 +50,12 @@ void* PBuffer::ptr() {
 }
 std::shared_ptr<Buffer> PBuffer::buffer() { return buffer_; }
 size_t PBuffer::offset() const { return offset_; }
+void PBuffer::sync() {
+  if (device_ == DeviceType::STORAGE) {
+    auto bs = dynamic_cast<BufferStorage*>(buffer_.get());
+    bs->sync();
+  }
+}
 
 std::shared_ptr<PBuffer> PBuffer::cpu(std::shared_ptr<Stream> stream) {
   if (device_ == DeviceType::CPU) return shared_from_this();

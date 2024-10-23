@@ -27,14 +27,20 @@ BufferStorage::BufferStorage(size_t count) : count_(count) {
 BufferStorage::~BufferStorage() { fs_->free(fs_addr_); }
 
 void* BufferStorage::ptr() {
+  int ret = msync(fs_addr_.ptr, fs_addr_.end - fs_addr_.start, MS_SYNC);
   return fs_addr_.ptr;
 }
+
 size_t BufferStorage::count() const { return count_; }
 
 std::string BufferStorage::formatted_string() const {
   return "BufferStorage<" + std::to_string(count_) + ">";
 }
 fs_addr_t BufferStorage::addr() { return fs_addr_; }
+void BufferStorage::sync() {
+  int ret = msync(fs_addr_.ptr, fs_addr_.end - fs_addr_.start, MS_SYNC);
+  assert(ret == 0);
+}
 
 std::shared_ptr<Buffer> BufferStorage::cpu(std::shared_ptr<Stream> stream) {
   auto buf = std::make_shared<BufferCPU>(count_);

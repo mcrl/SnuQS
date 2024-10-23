@@ -64,6 +64,7 @@ std::shared_ptr<StateVector> StateVector::slice(size_t num_sliced_qubits,
   return std::make_shared<StateVector>(device_, num_sliced_qubits, buffer);
 }
 
+void StateVector::sync() { buffer_->sync(); }
 void *StateVector::data() { return buffer_->ptr(); }
 size_t StateVector::dim() const { return 1; }
 size_t StateVector::num_elems() const { return (1ul << num_qubits_); }

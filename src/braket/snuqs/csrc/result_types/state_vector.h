@@ -24,6 +24,7 @@ class StateVector : public std::enable_shared_from_this<StateVector> {
   std::shared_ptr<StateVector> storage(std::shared_ptr<Stream> stream);
   void copy(StateVector &other, std::shared_ptr<Stream> stream);
   std::shared_ptr<StateVector> slice(size_t num_sliced_qubits, size_t index);
+  void sync();
 
   void *data();
   size_t dim() const;

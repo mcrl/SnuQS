@@ -19,6 +19,7 @@ class PBuffer : public std::enable_shared_from_this<PBuffer> {
   void* ptr();
   std::shared_ptr<Buffer> buffer();
   size_t offset() const;
+  void sync();
 
   void copy(std::shared_ptr<PBuffer> other, std::shared_ptr<Stream> stream);
   void copy_from_cpu(std::shared_ptr<PBuffer> other,

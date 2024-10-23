@@ -173,7 +173,8 @@ PYBIND11_MODULE(_C, m) {
            py::arg("stream") = nullptr)
       .def("slice", &StateVector::slice)
       .def("__repr__", &StateVector::formatted_string)
-      .def("num_elems", &StateVector::num_elems);
+      .def("num_elems", &StateVector::num_elems)
+      .def("sync", &StateVector::sync);
 
   // Device
   py::enum_<DeviceType>(m, "DeviceType")

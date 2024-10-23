@@ -53,10 +53,6 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
     mapped_blks++;
   }
 
-  for (size_t i = 0; i < count / sizeof(unsigned int); ++i) {
-    reinterpret_cast<unsigned int*>(ptr_)[i] = 0xdeadbeaf;
-  }
-
   free_list_.push_back({0, count_, ptr_});
 }
 
@@ -183,16 +179,17 @@ void FS::read(fs_addr_t addr, void* buf, size_t count, size_t offset,
           size_t bytes_per_request =
               std::min((size_t)IO_MAX, bytes_to_read - current);
           ssize_t ret = pread(fd, reinterpret_cast<char*>(buf) + current,
-                              bytes_to_read, device_offset);
+                              bytes_to_read, device_offset + current);
           assert(ret != -1);
           current += ret;
         }
-//        spdlog::info(
-//            "Reading fd: {}, device_offset: {}, bytes_to_read: {}, elem_a: "
-//            "{}+{}i",
-//            fd, device_offset, bytes_to_read,
-//            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
-//            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
+        //        spdlog::info(
+        //            "Reading fd: {}, device_offset: {}, bytes_to_read: {},
+        //            elem_a: "
+        //            "{}+{}i",
+        //            fd, device_offset, bytes_to_read,
+        //            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
+        //            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
       }
       nbytes_read += bytes_to_read;
       buf = reinterpret_cast<char*>(buf) + bytes_to_read;
@@ -221,18 +218,19 @@ void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
                    (size_t)(nbytes - nbytes_written));
 #pragma omp task
       {
-//        spdlog::info(
-//            "Writing fd: {}, device_offset: {}, bytes_to_write: {}, elem_a: "
-//            "{}+{}i",
-//            fd, device_offset, bytes_to_write,
-//            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
-//            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
+        //        spdlog::info(
+        //            "Writing fd: {}, device_offset: {}, bytes_to_write: {},
+        //            elem_a: "
+        //            "{}+{}i",
+        //            fd, device_offset, bytes_to_write,
+        //            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
+        //            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
         size_t current = 0;
         while (current < bytes_to_write) {
           size_t bytes_per_request =
               std::min((size_t)IO_MAX, bytes_to_write - current);
           ssize_t ret = pwrite(fd, reinterpret_cast<char*>(buf) + current,
-                               bytes_per_request, device_offset);
+                               bytes_per_request, device_offset + current);
           assert(ret != -1);
           current += ret;
         }

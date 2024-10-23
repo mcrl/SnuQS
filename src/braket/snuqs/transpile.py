@@ -231,6 +231,8 @@ def localize_operations(operations: list[GateOperation],
     return localized_operations
 
 def optimize_operations(operations: list[GateOperation]):
+    return operations
+
     changed = True
     while changed:
         optimized_operations = []
@@ -251,16 +253,16 @@ def optimize_operations(operations: list[GateOperation]):
 def partition_operations(operations: list[GateOperation],
                          qubit_count: int,
                          local_qubit_count: int):
-    qubit_count_slice = qubit_count - local_qubit_count
+    min_local_qubit = qubit_count - local_qubit_count
     partitioned_operations = []
     current_operations = []
     op = operations[0]
     accumulating_local = (len(op.targets) == 0 or min(
-        op.targets) >= qubit_count_slice)
+        op.targets) >= min_local_qubit)
     for i in range(len(operations)):
         op = operations[i]
         is_local_gate = (len(op.targets) == 0 or min(
-            op.targets) >= qubit_count_slice)
+            op.targets) >= min_local_qubit)
         if accumulating_local == is_local_gate:
             current_operations.append(op)
         else:
@@ -276,9 +278,9 @@ def partition_operations(operations: list[GateOperation],
     sliced_operations = []
     for ops in partitioned_operations:
         is_local_gate = (len(ops[0].targets) == 0 or min(
-            ops[0].targets) >= qubit_count_slice)
+            ops[0].targets) >= min_local_qubit)
         if is_local_gate:
-            sliced_operations.append([ops] * (2 ** qubit_count_slice))
+            sliced_operations.append([ops] * (2 ** min_local_qubit))
         else:
             sliced_operations.append(ops)
 
