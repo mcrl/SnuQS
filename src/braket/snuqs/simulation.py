@@ -124,9 +124,9 @@ class StateVectorSimulation(Simulation):
             case AcceleratorType.HYBRID:
                 self._state_vector = StateVector(subcircuit.qubit_count, True)
                 self._state_vector_cuda = StateVector(
-                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                    DeviceType.CUDA, subcircuit.qubit_count_cuda)
                 state_vector_slice = self._state_vector.slice(
-                    subcircuit.max_qubit_count_cuda, 0)
+                    subcircuit.qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case _:
@@ -141,19 +141,19 @@ class StateVectorSimulation(Simulation):
             case AcceleratorType.CUDA:
                 self._state_vector = StateVector(subcircuit.qubit_count, True)
                 self._state_vector_cuda = StateVector(
-                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                    DeviceType.CUDA, subcircuit.qubit_count_cuda)
 
                 state_vector_slice = self._state_vector.slice(
-                    subcircuit.max_qubit_count_cuda, 0)
+                    subcircuit.qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case AcceleratorType.HYBRID:
                 self._state_vector = StateVector(subcircuit.qubit_count, True)
                 self._state_vector_cuda = StateVector(
-                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                    DeviceType.CUDA, subcircuit.qubit_count_cuda)
 
                 state_vector_slice = self._state_vector.slice(
-                    subcircuit.max_qubit_count_cuda, 0)
+                    subcircuit.qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case _:
@@ -165,29 +165,29 @@ class StateVectorSimulation(Simulation):
                 self._state_vector = StateVector(
                     DeviceType.STORAGE, subcircuit.qubit_count)
                 self._state_vector_cpu = StateVector(
-                    subcircuit.max_qubit_count)
+                    subcircuit.qubit_count_cpu)
                 initialize_basis_z(self._state_vector_cpu)
 
             case AcceleratorType.CUDA:
                 self._state_vector = StateVector(
                     DeviceType.STORAGE, subcircuit.qubit_count)
                 self._state_vector_cpu = StateVector(
-                    subcircuit.max_qubit_count_cuda)
+                    subcircuit.qubit_count_cuda)
                 self._state_vector_cuda = StateVector(
-                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                    DeviceType.CUDA, subcircuit.qubit_count_cuda)
                 state_vector_slice = self._state_vector_cpu.slice(
-                    subcircuit.max_qubit_count_cuda, 0)
+                    subcircuit.qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case AcceleratorType.HYBRID:
                 self._state_vector = StateVector(
                     DeviceType.STORAGE, subcircuit.qubit_count)
                 self._state_vector_cpu = StateVector(
-                    subcircuit.max_qubit_count_cuda)
+                    subcircuit.qubit_count_cuda)
                 self._state_vector_cuda = StateVector(
-                    DeviceType.CUDA, subcircuit.max_qubit_count_cuda)
+                    DeviceType.CUDA, subcircuit.qubit_count_cuda)
                 state_vector_slice = self._state_vector_cpu.slice(
-                    subcircuit.max_qubit_count_cuda, 0)
+                    subcircuit.qubit_count_cuda, 0)
                 initialize_basis_z(state_vector_slice)
 
             case _:
@@ -287,7 +287,7 @@ class StateVectorSimulation(Simulation):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
-                        subcircuit.max_qubit_count_cuda, i)
+                        subcircuit.qubit_count_cuda, i)
                     if s != 0 or i == 0:
                         state_vector_cuda.copy(state_vector_slice)
                         for op in sliced_subcircuit:
@@ -311,22 +311,22 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
         state_vector_cuda = self._state_vector_cuda
 
-        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.qubit_count_slice
         slice_map = {
             i: i for i in range(2**permutable_qubit_count)
         }
         state_vector_slices_cuda = [
-            state_vector_cuda.slice(subcircuit.slice_qubit_count, j)
-            for j in range(2**(subcircuit.max_qubit_count_cuda - subcircuit.slice_qubit_count))
+            state_vector_cuda.slice(subcircuit.qubit_count_slice, j)
+            for j in range(2**(subcircuit.qubit_count_cuda - subcircuit.qubit_count_slice))
         ]
-        num_slices = 2**(subcircuit.max_qubit_count_cuda -
-                         subcircuit.slice_qubit_count)
+        num_slices = 2**(subcircuit.qubit_count_cuda -
+                         subcircuit.qubit_count_slice)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slices = [
                         state_vector.slice(
-                            subcircuit.slice_qubit_count,
+                            subcircuit.qubit_count_slice,
                             slice_map[num_slices*i+j]) for j in range(num_slices)
                     ]
 
@@ -364,23 +364,23 @@ class StateVectorSimulation(Simulation):
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
 
-        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.qubit_count_slice
         slice_map = {
             i: i for i in range(2**permutable_qubit_count)
         }
         state_vector_slices_cpu = [
-            state_vector_cpu.slice(subcircuit.slice_qubit_count, j)
-            for j in range(2**(subcircuit.max_qubit_count - subcircuit.slice_qubit_count))
+            state_vector_cpu.slice(subcircuit.qubit_count_slice, j)
+            for j in range(2**(subcircuit.qubit_count_cpu - subcircuit.qubit_count_slice))
         ]
-        num_slices = 2**(subcircuit.max_qubit_count -
-                         subcircuit.slice_qubit_count)
+        num_slices = 2**(subcircuit.qubit_count_cpu -
+                         subcircuit.qubit_count_slice)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     print(f"Slice #{i}/{len(partitioned_subcircuit)}")
                     state_vector_slices = [
                         state_vector.slice(
-                            subcircuit.slice_qubit_count,
+                            subcircuit.qubit_count_slice,
                             slice_map[num_slices*i+j]) for j in range(num_slices)
                     ]
 
@@ -415,26 +415,26 @@ class StateVectorSimulation(Simulation):
         state_vector_cpu = self._state_vector_cpu
         state_vector_cuda = self._state_vector_cuda
 
-        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.qubit_count_slice
         slice_map = {
             i: i for i in range(2**permutable_qubit_count)
         }
         state_vector_slices_cpu = [
-            state_vector_cpu.slice(subcircuit.slice_qubit_count, j)
-            for j in range(2**(subcircuit.max_qubit_count_cuda - subcircuit.slice_qubit_count))
+            state_vector_cpu.slice(subcircuit.qubit_count_slice, j)
+            for j in range(2**(subcircuit.qubit_count_cuda - subcircuit.qubit_count_slice))
         ]
         state_vector_slices_cuda = [
-            state_vector_cuda.slice(subcircuit.slice_qubit_count, j)
-            for j in range(2**(subcircuit.max_qubit_count_cuda - subcircuit.slice_qubit_count))
+            state_vector_cuda.slice(subcircuit.qubit_count_slice, j)
+            for j in range(2**(subcircuit.qubit_count_cuda - subcircuit.qubit_count_slice))
         ]
-        num_slices = 2**(subcircuit.max_qubit_count_cuda -
-                         subcircuit.slice_qubit_count)
+        num_slices = 2**(subcircuit.qubit_count_cuda -
+                         subcircuit.qubit_count_slice)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slices = [
                         state_vector.slice(
-                            subcircuit.slice_qubit_count,
+                            subcircuit.qubit_count_slice,
                             slice_map[num_slices*i+j]) for j in range(num_slices)
                     ]
 
@@ -471,22 +471,22 @@ class StateVectorSimulation(Simulation):
         state_vector_cpu = self._state_vector_cpu
         state_vector_cuda = self._state_vector_cuda
 
-        permutable_qubit_count = subcircuit.qubit_count - subcircuit.slice_qubit_count
+        permutable_qubit_count = subcircuit.qubit_count - subcircuit.qubit_count_slice
         slice_map = {
             i: i for i in range(2**permutable_qubit_count)
         }
         state_vector_slices_cpu = [
-            state_vector_cpu.slice(subcircuit.slice_qubit_count, j)
-            for j in range(2**(subcircuit.max_qubit_count - subcircuit.slice_qubit_count))
+            state_vector_cpu.slice(subcircuit.qubit_count_slice, j)
+            for j in range(2**(subcircuit.qubit_count_cpu - subcircuit.qubit_count_slice))
         ]
-        num_slices = 2**(subcircuit.max_qubit_count -
-                         subcircuit.slice_qubit_count)
+        num_slices = 2**(subcircuit.qubit_count_cpu -
+                         subcircuit.qubit_count_slice)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slices = [
                         state_vector.slice(
-                            subcircuit.slice_qubit_count,
+                            subcircuit.qubit_count_slice,
                             slice_map[num_slices*i+j]) for j in range(num_slices)
                     ]
 
@@ -497,7 +497,7 @@ class StateVectorSimulation(Simulation):
                         if isinstance(sliced_subcircuit[0], list):
                             for j, re_sliced_subcircuit in enumerate(sliced_subcircuit):
                                 state_vector_cpu_slice = state_vector_cpu.slice(
-                                    subcircuit.max_qubit_count_cuda, j)
+                                    subcircuit.qubit_count_cuda, j)
                                 state_vector_cuda.copy(state_vector_cpu_slice)
                                 for op in re_sliced_subcircuit:
                                     apply(state_vector_cuda, op,
@@ -531,13 +531,13 @@ class StateVectorSimulation(Simulation):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
                     state_vector_slice = state_vector.slice(
-                        subcircuit.max_qubit_count, i)
+                        subcircuit.qubit_count_cpu, i)
                     if s != 0 or i == 0:
                         state_vector_cpu.copy(state_vector_slice)
                         if isinstance(sliced_subcircuit[0], list):
                             for j, re_sliced_subcircuit in enumerate(sliced_subcircuit):
                                 state_vector_cpu_slice = state_vector_cpu.slice(
-                                    subcircuit.max_qubit_count_cuda, j)
+                                    subcircuit.qubit_count_cuda, j)
                                 state_vector_cuda.copy(state_vector_cpu_slice)
                                 for op in re_sliced_subcircuit:
                                     apply(state_vector_cuda, op,

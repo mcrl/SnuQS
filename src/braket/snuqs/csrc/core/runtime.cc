@@ -16,7 +16,7 @@
 #include "utils_cuda.h"
 
 static std::shared_ptr<FS> fs_ = nullptr;
-void attach_fs(size_t count, size_t blk_count,
+void initialize_fs(size_t count, size_t blk_count,
                const std::vector<std::string> &path) {
   assert(fs_ == nullptr);
   spdlog::info("Attaching FS, count: {}, blk_count: {}", count, blk_count);
@@ -25,12 +25,7 @@ void attach_fs(size_t count, size_t blk_count,
   }
   fs_ = std::make_shared<FS>(count, blk_count, path);
 }
-bool is_attached_fs() { return fs_ != nullptr; }
-void detach_fs() {
-  assert(fs_ != nullptr);
-  spdlog::info("Detaching FS");
-  fs_ = nullptr;
-}
+bool is_initialized_fs() { return fs_ != nullptr; }
 std::shared_ptr<FS> get_fs() { return fs_; }
 
 std::pair<size_t, size_t> mem_info() {

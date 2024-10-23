@@ -7,10 +7,9 @@
 #include "fs/fs.h"
 #include "stream/stream.h"
 
-void attach_fs(size_t count, size_t blk_count,
+void initialize_fs(size_t count, size_t blk_count,
                const std::vector<std::string> &path);
-bool is_attached_fs();
-void detach_fs();
+bool is_initialized_fs();
 std::shared_ptr<FS> get_fs();
 std::pair<size_t, size_t> mem_info();
 

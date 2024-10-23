@@ -196,9 +196,8 @@ PYBIND11_MODULE(_C, m) {
   auto m_core = m.def_submodule("core");
   m_core.def("mem_info", &mem_info)
       .def("mem_info", &mem_info)
-      .def("attach_fs", &attach_fs)
-      .def("detach_fs", &detach_fs)
-      .def("is_attached_fs", &is_attached_fs)
+      .def("initialize_fs", &initialize_fs)
+      .def("is_initialized_fs", &is_initialized_fs)
       .def("get_fs", &get_fs);
 
   auto m_core_cuda = m_core.def_submodule("cuda");

@@ -170,8 +170,8 @@ void FS::read(fs_addr_t addr, void* buf, size_t count, size_t offset,
                             (size_t)(nbytes - nbytes_read)));
 #pragma omp task
       {
-        printf("Reading fd: %d, device_offset: %lu, bytes_to_read: %lu\n", fd,
-               device_offset, bytes_to_read);
+        spdlog::info("Reading fd: {}, device_offset: {}, bytes_to_read: {}", fd,
+                     device_offset, bytes_to_read);
         size_t current = 0;
         while (current < bytes_to_read) {
           ssize_t ret = pread(fd, buf, bytes_to_read, device_offset);
@@ -207,8 +207,8 @@ void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
                             (size_t)(nbytes - nbytes_written)));
 #pragma omp task
       {
-        printf("Writing fd: %d, device_offset: %lu, bytes_to_write: %lu\n", fd,
-               device_offset, bytes_to_write);
+        spdlog::info("Writing fd: {}, device_offset: {}, bytes_to_write: {}",
+                     fd, device_offset, bytes_to_write);
         size_t current = 0;
         while (current < bytes_to_write) {
           ssize_t ret = pwrite(fd, buf, bytes_to_write, device_offset);

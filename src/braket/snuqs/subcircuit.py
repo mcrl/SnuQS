@@ -8,9 +8,9 @@ from typing import Union
 @dataclass
 class Subcircuit:
     qubit_count: int
-    max_qubit_count: int
-    max_qubit_count_cuda: int
-    slice_qubit_count: int
+    qubit_count_cpu: int
+    qubit_count_cuda: int
+    qubit_count_slice: int
     accelerator: AcceleratorType
     prefetch: PrefetchType
     offload: OffloadType

@@ -3,6 +3,7 @@ from braket.device_schema.simulators import (
     GateModelSimulatorDeviceParameters,
 )
 
+import math
 import numpy as np
 import uuid
 from abc import ABC, abstractmethod
@@ -16,7 +17,9 @@ from typing import Union, List, Optional, Any
 from braket.snuqs.operation_helpers import (
     from_braket_instruction,
 )
-from braket.snuqs._C.core import attach_fs, is_attached_fs
+from braket.snuqs._C.core import initialize_fs, is_initialized_fs
+from braket.snuqs._C.core import mem_info
+from braket.snuqs._C.core.cuda import mem_info as mem_info_cuda
 from braket.snuqs.operation import Operation
 from braket.snuqs.simulation import Simulation, StateVectorSimulation
 from braket.snuqs.subcircuit import Subcircuit
@@ -37,6 +40,42 @@ from braket.snuqs.result_types import (
 
 
 class BaseSimulator(ABC):
+    @staticmethod
+    def _validate_qubit_counts(qubit_count: int,
+                               qubit_count_cpu: Optional[int],
+                               qubit_count_cuda: Optional[int],
+                               qubit_count_slice: Optional[int],
+                               prefetch: PrefetchType):
+        if qubit_count_cpu is None:
+            free, _ = mem_info()
+            qubit_count_cpu = int(math.log(free / 16, 2))
+            if prefetch != PrefetchType.NONE:
+                qubit_count_cpu -= 1
+            qubit_count_cpu = min(qubit_count, qubit_count_cpu)
+
+        if qubit_count_cuda is None:
+            free_cuda, _ = mem_info_cuda()
+            qubit_count_cuda = int(math.log(free / 16, 2))
+            if prefetch != PrefetchType.NONE:
+                qubit_count_cuda -= 1
+            qubit_count_cuda = min(qubit_count, qubit_count_cuda)
+
+        if qubit_count_slice is None:
+            qubit_count_slice = qubit_count_cpu - 1
+
+        if qubit_count_cuda < qubit_count_slice:
+            raise ValueError(
+                f"qubit_count_cuda {qubit_count_cuda} must be larger than or equal to qubit_count_slice {qubit_count_slice}")
+        if qubit_count_cpu < qubit_count_cuda:
+            raise ValueError(
+                f"qubit_count_cpu {qubit_count_cpu} must be larger than or equal to qubit_count_cuda {qubit_count_cuda}")
+
+        if qubit_count < qubit_count_cpu:
+            raise ValueError(
+                f"qubit_count {qubit_count} must be larger than or equal to qubit_count_cpu {qubit_count_cpu}")
+
+        return qubit_count_cpu, qubit_count_cuda, qubit_count_slice
+
     @staticmethod
     def _validate_simulation_type(accelerator: Optional[str]):
         supported_accelerators = {
@@ -70,7 +109,6 @@ class BaseSimulator(ABC):
     @staticmethod
     def _validate_offload_type(offload: Optional[str],
                                path: Optional[List[str]],
-                               count: Optional[int],
                                block_count: Optional[int],
                                ):
         supported_offloads = {
@@ -88,10 +126,6 @@ class BaseSimulator(ABC):
         if offload_type == OffloadType.STORAGE:
             if path is None:
                 raise ValueError("path must be given for storage offloading")
-
-            if block_count > count:
-                raise ValueError(
-                    f"block_count is larger than count: {block_count} > {count}")
 
         return offload_type
 
@@ -351,21 +385,18 @@ class BaseSimulator(ABC):
         return [from_braket_result_type(result) for result in results]
 
     def run_openqasm(self, ir: OpenQASMProgram,
-                     qubit_count: Any = None,
-                     shots: int = 0,
                      *,
+                     shots: int = 0,
+                     qubit_count: Optional[int] = None,
+                     qubit_count_cpu: Optional[int] = None,
+                     qubit_count_cuda: Optional[int] = None,
+                     qubit_count_slice: Optional[int] = None,
                      accelerator: Optional[str] = None,
                      prefetch: Optional[str] = None,
                      offload: Optional[str] = None,
                      path: Optional[List[str]] = None,
-                     count: Optional[int] = None,
                      block_count: Optional[int] = None,
                      ) -> GateModelTaskResult:
-        accelerator = BaseSimulator._validate_simulation_type(accelerator)
-        prefetch = BaseSimulator._validate_prefetch_type(prefetch)
-        offload = BaseSimulator._validate_offload_type(
-            offload, path, count, block_count)
-
         circuit = self.parse_program(ir).circuit
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(circuit)
         qubit_count = circuit.num_qubits
@@ -374,20 +405,30 @@ class BaseSimulator(ABC):
             [qubit_map[q] for q in measured_qubits] if measured_qubits else None
         )
 
+        qubit_count_cpu, qubit_count_cuda, qubit_count_slice = BaseSimulator._validate_qubit_counts(
+            qubit_count, qubit_count_cpu, qubit_count_cuda, qubit_count_slice, prefetch)
+        accelerator = BaseSimulator._validate_simulation_type(accelerator)
+        prefetch = BaseSimulator._validate_prefetch_type(prefetch)
+        offload = BaseSimulator._validate_offload_type(
+            offload, path, block_count)
+
         operations = circuit.instructions
         if shots:
             for instruction in circuit.basis_rotation_instructions:
                 operations.append(instruction)
 
-        if offload == OffloadType.STORAGE and not is_attached_fs():
-            attach_fs(count, block_count, path)
+        if offload == OffloadType.STORAGE and not is_initialized_fs():
+            initialize_fs((2**qubit_count) * 16, block_count, path)
 
         subcircuit = transpile(
             qubit_count,
-            operations,
+            qubit_count_cpu,
+            qubit_count_cuda,
+            qubit_count_slice,
             accelerator,
             prefetch,
             offload,
+            operations,
         )
         simulation = self.initialize_simulation(
             qubit_count=qubit_count, shots=shots, subcircuit=subcircuit)
@@ -407,23 +448,27 @@ class BaseSimulator(ABC):
         )
 
     def run_jaqcd(self, ir: JaqcdProgram,
-                  qubit_count: Any = None,
-                  shots: int = 0,
                   *,
+                  shots: int = 0,
+                  qubit_count_cpu: Optional[int] = None,
+                  qubit_count_cuda: Optional[int] = None,
+                  qubit_count_slice: Optional[int] = None,
                   accelerator: Optional[str] = None,
                   prefetch: Optional[str] = None,
                   offload: Optional[str] = None,
                   path: Optional[List[str]] = None,
-                  count: Optional[int] = None,
                   block_count: Optional[int] = None,
                   ) -> GateModelTaskResult:
-        accelerator = BaseSimulator._validate_simulation_type(accelerator)
-        prefetch = BaseSimulator._validate_prefetch_type(prefetch)
-        offload = BaseSimulator._validate_offload_type(
-            offload, path, count, block_count)
 
         qubit_map = BaseSimulator._map_circuit_to_contiguous_qubits(ir)
         qubit_count = len(qubit_map)
+
+        qubit_count_cpu, qubit_count_cuda, qubit_count_slice = BaseSimulator._validate_qubit_counts(
+            qubit_count, qubit_count_cpu, qubit_count_cuda, qubit_count_slice, prefetch)
+        accelerator = BaseSimulator._validate_simulation_type(accelerator)
+        prefetch = BaseSimulator._validate_prefetch_type(prefetch)
+        offload = BaseSimulator._validate_offload_type(
+            offload, path, block_count)
 
         operations = [
             from_braket_instruction(instr) for instr in ir.instructions
@@ -433,15 +478,18 @@ class BaseSimulator(ABC):
             for instruction in ir.basis_rotation_instructions:
                 operations.append(from_braket_instruction(instruction))
 
-        if offload == OffloadType.STORAGE and not is_attached_fs():
-            attach_fs(count, block_count, path)
+        if offload == OffloadType.STORAGE and not is_initialized_fs():
+            initialize_fs((2**qubit_count) * 16, block_count, path)
 
         subcircuit = transpile(
             qubit_count,
-            operations,
+            qubit_count_cpu,
+            qubit_count_cuda,
+            qubit_count_slice,
             accelerator,
             prefetch,
             offload,
+            operations,
         )
         simulation = self.initialize_simulation(
             qubit_count=qubit_count, shots=shots, subcircuit=subcircuit)

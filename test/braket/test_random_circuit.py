@@ -170,10 +170,9 @@ class BraketTest(unittest.TestCase):
 #
     def test_7_braket_snuqs_storage_offload_cpu(self):
         print("Testing Braket-SnuQS Stroage-Offload Hybrid")
-        self.run_benchmark(34, 5, accelerator='cpu', offload='storage',
+        self.run_benchmark(33, 5, accelerator='cpu', offload='storage',
                            path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
                                  '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
-                           count=2**38,
                            block_count=2**34
                            )
 
