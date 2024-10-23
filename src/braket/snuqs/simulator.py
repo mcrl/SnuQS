@@ -55,7 +55,7 @@ class BaseSimulator(ABC):
 
         if qubit_count_cuda is None:
             free_cuda, _ = mem_info_cuda()
-            qubit_count_cuda = int(math.log(free / 16, 2))
+            qubit_count_cuda = int(math.log(free_cuda / 16, 2))
             if prefetch != PrefetchType.NONE:
                 qubit_count_cuda -= 1
             qubit_count_cuda = min(qubit_count, qubit_count_cuda)

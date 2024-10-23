@@ -201,7 +201,6 @@ class StateVectorSimulation(Simulation):
         Note:
             Mutating this array will mutate the state of the simulation.
         """
-        print("state_vector()")
         return np.array(self._state_vector.cpu(), copy=False)
 
     @property
@@ -213,6 +212,19 @@ class StateVectorSimulation(Simulation):
         return np.abs(self.state_vector) ** 2
 
     def retrieve_samples(self) -> list[int]:
+#        half = 2**(self._qubit_count-1)
+#        quarter = 2**(self._qubit_count-2)
+#        print("1.", self.state_vector[0])
+#        print("2.", self.state_vector[quarter-1])
+#        print("3.", self.state_vector[quarter])
+#        print("4.", self.state_vector[quarter+1])
+#        print("5.", self.state_vector[half-1])
+#        print("6.", self.state_vector[half])
+#        print("7.", self.state_vector[half+1])
+#        print("8.", self.state_vector[half+quarter-1])
+#        print("9.", self.state_vector[half+quarter])
+#        print("10.", self.state_vector[half+quarter+1])
+#        print("11.", self.state_vector[2*half-1])
         return np.random.choice(len(self.state_vector), p=self.probabilities, size=self._shots)
 
     def evolve(self, subcircuit: Subcircuit) -> None:
@@ -368,34 +380,37 @@ class StateVectorSimulation(Simulation):
         slice_map = {
             i: i for i in range(2**permutable_qubit_count)
         }
+
         state_vector_slices_cpu = [
             state_vector_cpu.slice(subcircuit.qubit_count_slice, j)
             for j in range(2**(subcircuit.qubit_count_cpu - subcircuit.qubit_count_slice))
         ]
-        num_slices = 2**(subcircuit.qubit_count_cpu -
-                         subcircuit.qubit_count_slice)
+
+        num_slices_per_cpu = 2**(subcircuit.qubit_count_cpu -
+                                 subcircuit.qubit_count_slice)
         for s, partitioned_subcircuit in enumerate(subcircuit.operations):
             if isinstance(partitioned_subcircuit[0], list):
                 for i, sliced_subcircuit in enumerate(partitioned_subcircuit):
-                    print(f"Slice #{i}/{len(partitioned_subcircuit)}")
+                    print(
+                        f"Slice #{s}: {i+1}/{len(partitioned_subcircuit)}", flush=True)
                     state_vector_slices = [
                         state_vector.slice(
                             subcircuit.qubit_count_slice,
-                            slice_map[num_slices*i+j]) for j in range(num_slices)
+                            slice_map[num_slices_per_cpu*i+j]) for j in range(num_slices_per_cpu)
                     ]
 
-                    if s != 0 or i == 0:
+                    if s != 0:
                         for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
                             state_vector_slice_cpu.copy(state_vector_slice)
 
+                    if s != 0 or i == 0:
                         for op in sliced_subcircuit:
                             print(op, flush=True)
                             apply(state_vector_cpu, op,
                                   subcircuit.qubit_count, op.targets)
 
                     else:
-                        for state_vector_slice in state_vector_slices:
-                            initialize_zero(state_vector_slice)
+                        initialize_zero(state_vector_cpu)
 
                     for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
                         state_vector_slice.copy(state_vector_slice_cpu)

@@ -26,7 +26,9 @@ BufferStorage::BufferStorage(size_t count) : count_(count) {
 }
 BufferStorage::~BufferStorage() { fs_->free(fs_addr_); }
 
-void* BufferStorage::ptr() { return fs_addr_.ptr; }
+void* BufferStorage::ptr() {
+  return fs_addr_.ptr;
+}
 size_t BufferStorage::count() const { return count_; }
 
 std::string BufferStorage::formatted_string() const {

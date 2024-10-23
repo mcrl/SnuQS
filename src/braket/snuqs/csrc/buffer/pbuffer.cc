@@ -40,8 +40,7 @@ PBuffer::PBuffer(DeviceType device, size_t count,
                  std::shared_ptr<Buffer> buffer, size_t offset)
     : device_(device), count_(count), buffer_(buffer), offset_(offset) {
   assert(count_ <= buffer_->count());
-  spdlog::info("Pbuffer(device: {}, count: {}, offset: {})", (int)device, count,
-               offset);
+  //spdlog::info("Pbuffer(device: {}, count: {}, offset: {})", (int)device, count, offset);
 }
 DeviceType PBuffer::device() const { return device_; }
 size_t PBuffer::count() const { return count_; }

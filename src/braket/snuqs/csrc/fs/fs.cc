@@ -10,11 +10,13 @@
 #include <unistd.h>
 
 #include <cassert>
+#include <complex>
 
 #include "utils_cuda.h"
 
 #define SECTOR_SIZE (512)
 #define ALIGNMENT (512)
+#define IO_MAX (0x7ffff000)
 std::string fs_addr_t::formatted_string() const {
   return "fs_addr_t<" + std::to_string(start) + "-" + std::to_string(end) + ">";
 }
@@ -27,7 +29,7 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
   assert(blk_count % SECTOR_SIZE == 0);
 
   for (auto& p : path_) {
-    int fd = open(p.c_str(), O_RDWR | O_DIRECT);
+    int fd = open(p.c_str(), O_RDWR | O_DIRECT | O_SYNC);
     assert(fd != -1);
     fds_.push_back(fd);
   }
@@ -36,17 +38,24 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
   size_t offset = 0;
   size_t num_blks = count_ / row_size_;
   size_t mapped_blks = 0;
-  ptr_ = nullptr;
+
+  ptr_ = mmap(nullptr, count, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  munmap(ptr_, count_);
+  addr = ptr_;
   while (mapped_blks < num_blks) {
     for (auto fd : fds_) {
-      addr =
-          mmap(addr, blk_count, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
+      addr = mmap(addr, blk_count, PROT_READ | PROT_WRITE,
+                  MAP_SHARED | MAP_FIXED, fd, offset);
       assert(addr != MAP_FAILED);
+      addr = reinterpret_cast<void*>(reinterpret_cast<char*>(addr) + blk_count);
     }
     offset += blk_count;
     mapped_blks++;
   }
-  ptr_ = addr;
+
+  for (size_t i = 0; i < count / sizeof(unsigned int); ++i) {
+    reinterpret_cast<unsigned int*>(ptr_)[i] = 0xdeadbeaf;
+  }
 
   free_list_.push_back({0, count_, ptr_});
 }
@@ -156,31 +165,37 @@ void FS::read(fs_addr_t addr, void* buf, size_t count, size_t offset,
   size_t nbytes = count;
   size_t nbytes_read = 0;
 
-  char* buffer = reinterpret_cast<char*>(buf);
+  size_t base_addr = addr.start + offset;
 #pragma omp parallel num_threads(fds_.size())
 #pragma omp single
   {
     while (nbytes_read < nbytes) {
-      auto off_info = get_offset(offset + nbytes_read);
+      auto off_info = get_offset(base_addr + nbytes_read);
       int fd = off_info.first;
       size_t device_offset = off_info.second;
       size_t bytes_to_read =
-          std::min((size_t)SSIZE_MAX,
-                   std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
-                            (size_t)(nbytes - nbytes_read)));
+          std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
+                   (size_t)(nbytes - nbytes_read));
 #pragma omp task
       {
-        spdlog::info("Reading fd: {}, device_offset: {}, bytes_to_read: {}", fd,
-                     device_offset, bytes_to_read);
         size_t current = 0;
         while (current < bytes_to_read) {
-          ssize_t ret = pread(fd, buf, bytes_to_read, device_offset);
+          size_t bytes_per_request =
+              std::min((size_t)IO_MAX, bytes_to_read - current);
+          ssize_t ret = pread(fd, reinterpret_cast<char*>(buf) + current,
+                              bytes_to_read, device_offset);
           assert(ret != -1);
           current += ret;
         }
+//        spdlog::info(
+//            "Reading fd: {}, device_offset: {}, bytes_to_read: {}, elem_a: "
+//            "{}+{}i",
+//            fd, device_offset, bytes_to_read,
+//            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
+//            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
       }
       nbytes_read += bytes_to_read;
-      buffer += bytes_to_read;
+      buf = reinterpret_cast<char*>(buf) + bytes_to_read;
     }
   }
 }
@@ -193,31 +208,37 @@ void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
   size_t nbytes = count;
   size_t nbytes_written = 0;
 
-  char* buffer = reinterpret_cast<char*>(buf);
+  size_t base_addr = addr.start + offset;
 #pragma omp parallel num_threads(fds_.size())
 #pragma omp single
   {
     while (nbytes_written < nbytes) {
-      auto off_info = get_offset(offset + nbytes_written);
+      auto off_info = get_offset(base_addr + nbytes_written);
       int fd = off_info.first;
       size_t device_offset = off_info.second;
       size_t bytes_to_write =
-          std::min((size_t)SSIZE_MAX,
-                   std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
-                            (size_t)(nbytes - nbytes_written)));
+          std::min((size_t)(blk_count_ - (device_offset % blk_count_)),
+                   (size_t)(nbytes - nbytes_written));
 #pragma omp task
       {
-        spdlog::info("Writing fd: {}, device_offset: {}, bytes_to_write: {}",
-                     fd, device_offset, bytes_to_write);
+//        spdlog::info(
+//            "Writing fd: {}, device_offset: {}, bytes_to_write: {}, elem_a: "
+//            "{}+{}i",
+//            fd, device_offset, bytes_to_write,
+//            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
+//            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
         size_t current = 0;
         while (current < bytes_to_write) {
-          ssize_t ret = pwrite(fd, buf, bytes_to_write, device_offset);
+          size_t bytes_per_request =
+              std::min((size_t)IO_MAX, bytes_to_write - current);
+          ssize_t ret = pwrite(fd, reinterpret_cast<char*>(buf) + current,
+                               bytes_per_request, device_offset);
           assert(ret != -1);
           current += ret;
         }
       }
       nbytes_written += bytes_to_write;
-      buffer += bytes_to_write;
+      buf = reinterpret_cast<char*>(buf) + bytes_to_write;
     }
   }
 }
@@ -227,5 +248,5 @@ std::pair<int, size_t> FS::get_offset(size_t pos) const {
   size_t row_size = blk_count_ * num_devices;
   size_t device = (pos / blk_count_) % num_devices;
   size_t offset = (pos / row_size) * blk_count_;
-  return {device, offset};
+  return {fds_[device], offset};
 }

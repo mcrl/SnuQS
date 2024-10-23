@@ -17,7 +17,7 @@
 
 static std::shared_ptr<FS> fs_ = nullptr;
 void initialize_fs(size_t count, size_t blk_count,
-               const std::vector<std::string> &path) {
+                   const std::vector<std::string> &path) {
   assert(fs_ == nullptr);
   spdlog::info("Attaching FS, count: {}, blk_count: {}", count, blk_count);
   for (auto &p : path) {
@@ -81,7 +81,7 @@ void memcpyH2S(fs_addr_t dst, void *src, size_t count, size_t offset,
 void memcpyD2S(fs_addr_t dst, void *src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
   auto buf_cpu = std::make_shared<BufferCPU>(count, true);  // pinned
-  spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
+  // spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
   memcpyD2H(buf_cpu->ptr(), src, count, stream);
   memcpyH2S(dst, buf_cpu->ptr(), count, offset, stream);
 }
@@ -89,7 +89,7 @@ void memcpyD2S(fs_addr_t dst, void *src, size_t count, size_t offset,
 void memcpyS2D(void *dst, fs_addr_t src, size_t count, size_t offset,
                std::shared_ptr<Stream> stream) {
   auto buf_cpu = std::make_shared<BufferCPU>(count, true);  // pinned
-  spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
+  // spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
   memcpyS2H(buf_cpu->ptr(), src, count, offset, stream);
   memcpyH2D(dst, buf_cpu->ptr(), count, stream);
 }
@@ -97,7 +97,7 @@ void memcpyS2D(void *dst, fs_addr_t src, size_t count, size_t offset,
 void memcpyS2S(fs_addr_t dst, fs_addr_t src, size_t count, size_t offset_dst,
                size_t offset_src, std::shared_ptr<Stream> stream) {
   auto buf_cpu = std::make_shared<BufferCPU>(count, true);  // pinned
-  spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
+  // spdlog::info("Allocating auxiliary pinned CPU buffer of {} bytes", count);
   memcpyS2H(buf_cpu->ptr(), src, count, offset_src, stream);
   memcpyH2S(dst, buf_cpu->ptr(), count, offset_dst, stream);
 }
