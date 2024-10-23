@@ -25,6 +25,7 @@ class FS {
              std::shared_ptr<Stream> stream);
   void dump() const;
   std::pair<int, size_t> get_offset(size_t pos) const;
+  size_t blk_count() const;
 
  private:
   size_t row_size_;

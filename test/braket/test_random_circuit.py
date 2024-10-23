@@ -5,6 +5,7 @@ from braket.devices import LocalSimulator
 from braket.circuits import Circuit
 from braket.circuits.gate import Gate
 from braket.circuits.instruction import Instruction
+import time
 
 class RandomInstruction:
     def __init__(self, nqubits):
@@ -139,11 +140,11 @@ class BraketTest(unittest.TestCase):
         result_braket = task_braket.result().values
         print("\t\t=> Done")
 
-        print(result_snuqs[0][2:])
-        print(result_braket[0][2:])
+        print(result_snuqs)
+        print(result_braket)
         self.assertTrue(np.allclose(
-            result_snuqs[0][2:],
-            result_braket[0][2:],
+            result_snuqs,
+            result_braket,
         ))
 
 #    def test_1_braket_snuqs_cpu(self):
@@ -190,7 +191,7 @@ class BraketTest(unittest.TestCase):
 #                           offload='cpu')
 #
     def test_7_braket_snuqs_storage_offload_cpu(self):
-        print("Testing Braket-SnuQS Stroage-Offload Hybrid")
+        print("Testing Braket-SnuQS Stroage-Offload CPU")
         for _ in range(100):
             self.run_benchmark(16, 0,
                                qubit_count_cpu=15,

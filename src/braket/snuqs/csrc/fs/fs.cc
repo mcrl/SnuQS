@@ -34,25 +34,24 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
     fds_.push_back(fd);
   }
 
-  void* addr = nullptr;
   size_t offset = 0;
   size_t num_blks = count_ / row_size_;
   size_t mapped_blks = 0;
-
-  ptr_ = mmap(nullptr, count, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-  munmap(ptr_, count_);
-  addr = ptr_;
+  ptr_ = sbrk(count_);
+  void* addr = ptr_;
+  // munmap(ptr_, count_);
   while (mapped_blks < num_blks) {
     for (auto fd : fds_) {
       addr = mmap(addr, blk_count, PROT_READ | PROT_WRITE,
-                  MAP_SHARED | MAP_FIXED, fd, offset);
+                  MAP_SHARED | MAP_FIXED | MAP_LOCKED, fd, offset);
       assert(addr != MAP_FAILED);
       addr = reinterpret_cast<void*>(reinterpret_cast<char*>(addr) + blk_count);
     }
     offset += blk_count;
     mapped_blks++;
   }
-  for (size_t i = 0; i < count / sizeof(unsigned int); ++i) {
+
+  for (size_t i = 0; i < count_ / sizeof(unsigned int); ++i) {
     reinterpret_cast<unsigned int*>(ptr_)[i] = 0;
   }
 
@@ -251,3 +250,5 @@ std::pair<int, size_t> FS::get_offset(size_t pos) const {
   size_t offset = (pos / row_size) * blk_count_;
   return {fds_[device], offset};
 }
+
+size_t FS::blk_count() const { return blk_count_; }
