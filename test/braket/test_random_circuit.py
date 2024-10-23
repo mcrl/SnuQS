@@ -190,9 +190,22 @@ class BraketTest(unittest.TestCase):
 #                           accelerator='hybrid',
 #                           offload='cpu')
 #
-    def test_7_braket_snuqs_storage_offload_cpu(self):
-        print("Testing Braket-SnuQS Stroage-Offload CPU")
-        for _ in range(100):
+#    def test_7_braket_snuqs_storage_offload_cpu(self):
+#        print("Testing Braket-SnuQS Stroage-Offload CPU")
+#        for _ in range(100):
+#            self.run_benchmark(16, 0,
+#                               qubit_count_cpu=15,
+#                               qubit_count_cuda=14,
+#                               qubit_count_slice=13,
+#                               accelerator='cpu',
+#                               offload='storage',
+#                               path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
+#                                     '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
+#                               block_count=2**12
+#                               )
+
+    def test_7_braket_snuqs_storage_offload_cuda(self):
+        print("Testing Braket-SnuQS Stroage-Offload CUDA")
             self.run_benchmark(16, 0,
                                qubit_count_cpu=15,
                                qubit_count_cuda=14,
@@ -204,15 +217,6 @@ class BraketTest(unittest.TestCase):
                                block_count=2**12
                                )
 
-#    def test_7_braket_snuqs_storage_offload_cuda(self):
-#        print("Testing Braket-SnuQS Stroage-Offload Hybrid")
-#        self.run_benchmark(35, 5, accelerator='cuda', offload='storage',
-#                           path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
-#                                 '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
-#                           count=2**38,
-#                           block_count=2**34
-#                           )
-#
 #    def test_7_braket_snuqs_storage_offload_hybrid(self):
 #        print("Testing Braket-SnuQS Stroage-Offload Hybrid")
 #        self.run_benchmark(35, 5, accelerator='hybrid', offload='storage',
