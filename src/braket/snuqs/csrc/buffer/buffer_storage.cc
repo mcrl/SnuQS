@@ -38,7 +38,9 @@ std::string BufferStorage::formatted_string() const {
 }
 fs_addr_t BufferStorage::addr() { return fs_addr_; }
 void BufferStorage::sync() {
-  int ret = msync(fs_addr_.ptr, fs_addr_.end - fs_addr_.start, MS_SYNC);
+  int ret = msync(fs_addr_.ptr, fs_addr_.end - fs_addr_.start,
+                  MS_SYNC | MS_INVALIDATE);
+  spdlog::info("ret: {}");
   assert(ret == 0);
 }
 

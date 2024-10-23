@@ -201,6 +201,7 @@ class StateVectorSimulation(Simulation):
         Note:
             Mutating this array will mutate the state of the simulation.
         """
+        print("state_vector()")
         self._state_vector.sync()
         return np.array(self._state_vector.cpu(), copy=False)
 
@@ -367,6 +368,7 @@ class StateVectorSimulation(Simulation):
     def _evolve_storage_offload_cpu(self, subcircuit: Subcircuit) -> None:
         state_vector = self._state_vector
         state_vector_cpu = self._state_vector_cpu
+        print(subcircuit)
 
         permutable_qubit_count = subcircuit.qubit_count - subcircuit.qubit_count_slice
         slice_map = {

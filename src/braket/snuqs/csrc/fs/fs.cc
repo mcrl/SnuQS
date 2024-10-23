@@ -52,6 +52,9 @@ FS::FS(size_t count, size_t blk_count, const std::vector<std::string>& path)
     offset += blk_count;
     mapped_blks++;
   }
+  for (size_t i = 0; i < count / sizeof(unsigned int); ++i) {
+    reinterpret_cast<unsigned int*>(ptr_)[i] = 0;
+  }
 
   free_list_.push_back({0, count_, ptr_});
 }

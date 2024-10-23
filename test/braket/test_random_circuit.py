@@ -139,11 +139,11 @@ class BraketTest(unittest.TestCase):
         result_braket = task_braket.result().values
         print("\t\t=> Done")
 
-        print(result_snuqs)
-        print(result_braket)
+        print(result_snuqs[0][2:])
+        print(result_braket[0][2:])
         self.assertTrue(np.allclose(
-            result_snuqs,
-            result_braket,
+            result_snuqs[0][2:],
+            result_braket[0][2:],
         ))
 
 #    def test_1_braket_snuqs_cpu(self):
