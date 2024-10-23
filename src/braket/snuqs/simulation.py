@@ -398,8 +398,7 @@ class StateVectorSimulation(Simulation):
                                   subcircuit.qubit_count, op.targets)
 
                     else:
-                        for state_vector_slice_cpu in state_vector_slices_cpu:
-                            initialize_zero(state_vector_slice_cpu)
+                        initialize_zero(state_vector_cpu)
 
                     for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
                         state_vector_slice.copy(state_vector_slice_cpu)
@@ -441,22 +440,26 @@ class StateVectorSimulation(Simulation):
                     ]
 
                     if s != 0:
-                        for state_vector_slice, state_vector_slice_cpu, state_vector_slice_cuda in zip(state_vector_slices, state_vector_slices_cpu, state_vector_slices_cuda):
+                        for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
                             state_vector_slice_cpu.copy(state_vector_slice)
+
+                    if s != 0 or i == 0:
+                        for state_vector_slice_cpu, state_vector_slice_cuda in zip(state_vector_slices_cpu, state_vector_slices_cuda):
                             state_vector_slice_cuda.copy(
                                 state_vector_slice_cpu)
 
-                    if s != 0 or i == 0:
                         for op in sliced_subcircuit:
-                            apply(state_vector_cpu, op,
+                            apply(state_vector_cuda, op,
                                   subcircuit.qubit_count, op.targets)
 
+                        for state_vector_slice_cpu, state_vector_slice_cuda in zip(state_vector_slices_cpu, state_vector_slices_cuda):
+                            state_vector_slice_cpu.copy(
+                                state_vector_slice_cuda)
                     else:
-                        for state_vector_slice_cpu in state_vector_slices_cpu:
-                            initialize_zero(state_vector_slice_cpu)
+                        initialize_zero(state_vector_cpu)
 
-                    for state_vector_slice, state_vector_slice_cpu, state_vector_slice_cuda in zip(state_vector_slices, state_vector_slices_cpu, state_vector_slices_cuda):
-                        state_vector_slice_cpu.copy(state_vector_slice_cuda)
+                    device_synchronize()
+                    for state_vector_slice, state_vector_slice_cpu in zip(state_vector_slices, state_vector_slices_cpu):
                         state_vector_slice.copy(state_vector_slice_cpu)
             else:
                 for op in partitioned_subcircuit:
@@ -466,7 +469,6 @@ class StateVectorSimulation(Simulation):
                             slice_map[j], op.targets[0], op.targets[1], permutable_qubit_count)]
                         for j in range(2**permutable_qubit_count)
                     }
-
         device_synchronize()
 
     def _evolve_storage_offload_hybrid(self, subcircuit: Subcircuit) -> None:

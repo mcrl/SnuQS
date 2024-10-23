@@ -192,30 +192,29 @@ class BraketTest(unittest.TestCase):
 #
 #    def test_7_braket_snuqs_storage_offload_cpu(self):
 #        print("Testing Braket-SnuQS Stroage-Offload CPU")
-#        for _ in range(100):
-#            self.run_benchmark(16, 0,
-#                               qubit_count_cpu=15,
-#                               qubit_count_cuda=14,
-#                               qubit_count_slice=13,
-#                               accelerator='cpu',
-#                               offload='storage',
-#                               path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
-#                                     '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
-#                               block_count=2**12
-#                               )
-
-    def test_7_braket_snuqs_storage_offload_cuda(self):
+#        self.run_benchmark(16, 0,
+#                           qubit_count_cpu=15,
+#                           qubit_count_cuda=14,
+#                           qubit_count_slice=13,
+#                           accelerator='cpu',
+#                           offload='storage',
+#                           path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
+#                                 '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
+#                           block_count=2**12
+#                           )
+#
+    def test_8_braket_snuqs_storage_offload_cuda(self):
         print("Testing Braket-SnuQS Stroage-Offload CUDA")
-            self.run_benchmark(16, 0,
-                               qubit_count_cpu=15,
-                               qubit_count_cuda=14,
-                               qubit_count_slice=13,
-                               accelerator='cpu',
-                               offload='storage',
-                               path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
-                                     '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
-                               block_count=2**12
-                               )
+        self.run_benchmark(16, 0,
+                           qubit_count_cpu=15,
+                           qubit_count_cuda=14,
+                           qubit_count_slice=13,
+                           accelerator='cuda',
+                           offload='storage',
+                           path=['/dev/nvme0n1p1', '/dev/nvme1n1p1', '/dev/nvme2n1p1', '/dev/nvme3n1p1',
+                                 '/dev/nvme4n1p1', '/dev/nvme5n1p1', '/dev/nvme6n1p1', '/dev/nvme7n1p1'],
+                           block_count=2**12
+                           )
 
 #    def test_7_braket_snuqs_storage_offload_hybrid(self):
 #        print("Testing Braket-SnuQS Stroage-Offload Hybrid")

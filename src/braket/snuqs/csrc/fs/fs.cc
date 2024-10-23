@@ -185,13 +185,12 @@ void FS::read(fs_addr_t addr, void* buf, size_t count, size_t offset,
           assert(ret != -1);
           current += ret;
         }
-        //        spdlog::info(
-        //            "Reading fd: {}, device_offset: {}, bytes_to_read: {},
-        //            elem_a: "
-        //            "{}+{}i",
-        //            fd, device_offset, bytes_to_read,
-        //            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
-        //            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
+        spdlog::info(
+            "Reading fd: {}, device_offset: {}, bytes_to_read: {}, elem_a: "
+            "{}+{}i",
+            fd, device_offset, bytes_to_read,
+            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
+            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
       }
       nbytes_read += bytes_to_read;
       buf = reinterpret_cast<char*>(buf) + bytes_to_read;
@@ -220,13 +219,12 @@ void FS::write(fs_addr_t addr, void* buf, size_t count, size_t offset,
                    (size_t)(nbytes - nbytes_written));
 #pragma omp task
       {
-        //        spdlog::info(
-        //            "Writing fd: {}, device_offset: {}, bytes_to_write: {},
-        //            elem_a: "
-        //            "{}+{}i",
-        //            fd, device_offset, bytes_to_write,
-        //            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
-        //            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
+        spdlog::info(
+            "Writing fd: {}, device_offset: {}, bytes_to_write: {}, elem_a: "
+            "{}+{}i",
+            fd, device_offset, bytes_to_write,
+            reinterpret_cast<std::complex<double>*>(buf)[0].real(),
+            reinterpret_cast<std::complex<double>*>(buf)[0].imag());
         size_t current = 0;
         while (current < bytes_to_write) {
           size_t bytes_per_request =
