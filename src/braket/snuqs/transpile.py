@@ -257,6 +257,7 @@ def partition_operations(operations: list[GateOperation],
     partitioned_operations = []
     current_operations = []
     op = operations[0]
+    print(op)
     accumulating_local = (len(op.targets) == 0 or min(
         op.targets) >= min_local_qubit)
     for i in range(len(operations)):
